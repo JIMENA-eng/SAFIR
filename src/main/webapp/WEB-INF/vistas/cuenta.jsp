@@ -42,6 +42,11 @@
     String roles = esc(rolesRaw);
     String idMostrar = esc(idUsuario);
     String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
+    String avatarRuta = (sesion != null && sesion.getAttribute("avatarRuta") != null)
+            ? String.valueOf(sesion.getAttribute("avatarRuta")) : null;
+    String avatarHtml = (avatarRuta == null) ? inicial
+            : "<img src=\"" + contexto + "/media/" + esc(avatarRuta)
+              + "\" alt=\"\" style=\"width:100%;height:100%;border-radius:50%;object-fit:cover\">";
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -658,7 +663,7 @@
     <button class="theme-toggle" id="themeBtn" type="button" aria-pressed="false">Modo noche</button>
     <div class="menu-wrap">
       <button class="btn small user" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-        <span class="avatar" aria-hidden="true"><%= inicial %></span><b><%= nombreUsuario %></b>
+        <span class="avatar" aria-hidden="true"><%= avatarHtml %></span><b><%= nombreUsuario %></b>
         <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
       </button>
       <div class="menu" id="userMenu" role="menu" aria-label="Menú de usuario" hidden>
@@ -693,7 +698,7 @@
       <div class="account-grid">
         <article class="card profile">
           <div class="profile-top">
-            <div class="big-avatar" aria-hidden="true"><%= inicial %></div>
+            <div class="big-avatar" aria-hidden="true"><%= avatarHtml %></div>
             <div>
               <h2><%= nombreUsuario %></h2>
               <p class="muted">Cuenta de SAFIR</p>

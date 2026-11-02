@@ -33,6 +33,12 @@
     inicial = inicial
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             .replace("\"", "&quot;").replace("'", "&#39;");
+        String avatarRuta = (sesion != null && sesion.getAttribute("avatarRuta") != null)
+            ? String.valueOf(sesion.getAttribute("avatarRuta")) : null;
+    String avatarHtml = (avatarRuta == null) ? inicial
+            : "<img src=\"" + contexto + "/media/"
+              + avatarRuta.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
+              + "\" alt=\"\" style=\"width:100%;height:100%;border-radius:50%;object-fit:cover\">";
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -664,7 +670,7 @@
     <a class="icon-btn" href="<%= contexto %>/notificaciones" aria-label="Notificaciones" title="Notificaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></a>
     <div class="menu-wrap">
       <button class="btn small user" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-        <span class="avatar" aria-hidden="true"><%= inicial %></span><b><%= nombreUsuario %></b>
+        <span class="avatar" aria-hidden="true"><%= avatarHtml %></span><b><%= nombreUsuario %></b>
         <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
       </button>
       <div class="menu" id="userMenu" role="menu" aria-label="Menú de usuario" hidden>

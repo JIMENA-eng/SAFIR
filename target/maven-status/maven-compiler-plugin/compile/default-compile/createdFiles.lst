@@ -3,6 +3,7 @@ com\safir\dao\ObraEdicionDAO.class
 com\safir\dao\GestionCapituloDAO.class
 com\safir\controlador\CerrarSesionServlet.class
 com\safir\modelo\Comentario.class
+com\safir\util\ImagenUtil.class
 com\safir\dao\ComentarioDAO.class
 com\safir\modelo\Usuario.class
 com\safir\controlador\NotificacionServlet.class
@@ -11,6 +12,7 @@ com\safir\controlador\ObraEdicionServlet.class
 com\safir\controlador\RegistroServlet.class
 com\safir\config\ConexionBD.class
 com\safir\dao\NotificacionDAO.class
+com\safir\controlador\MediaServlet.class
 com\safir\controlador\LecturaServlet.class
 com\safir\controlador\ObraServlet.class
 com\safir\seguridad\PasswordUtil.class
