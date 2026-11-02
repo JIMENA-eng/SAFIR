@@ -17,6 +17,7 @@ import java.io.IOException;
     "/perfil/*",
     "/lectura/*",
     "/biblioteca/*",
+    "/billetera/*",
     "/moderacion/*"
 })
 public class AutenticacionFilter implements Filter {

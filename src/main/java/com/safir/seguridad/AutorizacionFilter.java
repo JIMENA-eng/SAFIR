@@ -18,6 +18,7 @@ import java.util.Collection;
     "/perfil/*",
     "/lectura/*",
     "/biblioteca/*",
+    "/billetera/*",
     "/moderacion/*"
 })
 public class AutorizacionFilter implements Filter {
@@ -63,6 +64,7 @@ public class AutorizacionFilter implements Filter {
 
         } else if (uri.equals("/perfil") || uri.startsWith("/perfil/")
                 || uri.equals("/lectura") || uri.startsWith("/lectura/")
+                || uri.equals("/billetera") || uri.startsWith("/billetera/")
                 || uri.equals("/biblioteca") || uri.startsWith("/biblioteca/")) {
             autorizado = tieneAlgunRol(rolesSesion);
         }
