@@ -8,6 +8,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.safir.dao.BilleteraDAO;
+import com.safir.dao.EconomiaAutorDAO;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -16,6 +19,8 @@ import java.sql.SQLException;
 public class ObraServlet extends HttpServlet {
 
     private final ObraDAO obraDAO = new ObraDAO();
+    private final BilleteraDAO billeteraDAO = new BilleteraDAO();
+    private final EconomiaAutorDAO economiaDAO = new EconomiaAutorDAO();
 
     @Override
     protected void doGet(
@@ -59,6 +64,24 @@ public class ObraServlet extends HttpServlet {
                         "La obra no existe o no está publicada."
                 );
                 return;
+            }
+            HttpSession sesion = request.getSession(false);
+
+            if (sesion != null && sesion.getAttribute("usuarioId") != null) {
+                long usuarioId = ((Number) sesion.getAttribute("usuarioId")).longValue();
+
+                request.setAttribute("autorId", economiaDAO.obtenerAutorDeObra(id));
+                request.setAttribute("saldo", billeteraDAO.obtenerSaldo(usuarioId));
+                request.setAttribute("autorRecibePct", 100 - economiaDAO.comisionRegaloPct());
+
+                // Mensajes de una operación anterior (se muestran una sola vez).
+                for (String clave : new String[] {"flashOk", "flashError"}) {
+                    Object v = sesion.getAttribute(clave);
+                    if (v != null) {
+                        request.setAttribute(clave, v);
+                        sesion.removeAttribute(clave);
+                    }
+                }
             }
 
             request.setAttribute("obra", obra);

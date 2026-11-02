@@ -10,6 +10,12 @@
 <body>
 
 <h1><c:out value="${obra.titulo}"/></h1>
+<c:if test="${not empty flashOk}">
+    <p style="color:green"><c:out value="${flashOk}"/></p>
+</c:if>
+<c:if test="${not empty flashError}">
+    <p style="color:red"><c:out value="${flashError}"/></p>
+</c:if>
 
 <p>Autor: <c:out value="${obra.autor}"/></p>
 <p>Género: <c:out value="${obra.genero}"/></p>
@@ -47,6 +53,33 @@
 
             <button type="submit">Agregar a mi biblioteca</button>
         </form>
+        <c:if test="${sessionScope.usuarioId != autorId}">
+        <h2>Apoyar al autor</h2>
+        <p>
+            Tu saldo: <strong><c:out value="${saldo}"/></strong> monedas.
+            El autor recibe el <c:out value="${autorRecibePct}"/>% de tu regalo.
+        </p>
+
+        <c:choose>
+            <c:when test="${saldo > 0}">
+                <form method="post" action="${pageContext.request.contextPath}/regalo">
+                    <input type="hidden" name="obraId" value="${obra.id}">
+
+                    <label>Monedas a regalar</label>
+                    <input type="number" name="monedas" min="1" max="${saldo}" required><br>
+
+                    <label>Mensaje (opcional)</label>
+                    <input type="text" name="mensaje" maxlength="300"><br>
+
+                    <button type="submit">Enviar regalo</button>
+                </form>
+            </c:when>
+            <c:otherwise>
+                <p>No tienes monedas para regalar.
+                    <a href="${pageContext.request.contextPath}/billetera">Ir a mi billetera</a></p>
+            </c:otherwise>
+        </c:choose>
+    </c:if>
     </c:when>
 
     <c:otherwise>
