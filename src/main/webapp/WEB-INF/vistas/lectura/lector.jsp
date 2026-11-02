@@ -76,6 +76,7 @@
                     <a href="${pageContext.request.contextPath}/lectura?obraId=${obraId}&capituloId=${cap.id}">
                         <c:out value="${cap.numero}"/>.
                         <c:out value="${cap.titulo}"/>
+                        <c:if test="${bloqueados.contains(cap.id)}"> 🔒</c:if>
                     </a>
                 </c:otherwise>
             </c:choose>

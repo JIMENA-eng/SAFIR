@@ -194,6 +194,7 @@ public class ObraEdicionServlet extends HttpServlet {
         descripcion = descripcion == null ? "" : descripcion.trim();
         clasificacion = clasificacion == null
                 ? "" : clasificacion.trim();
+        boolean bloqueo = request.getParameter("bloqueoActivo") != null;
 
         String error = null;
         int generoId = -1;
@@ -239,6 +240,7 @@ public class ObraEdicionServlet extends HttpServlet {
                 request.setAttribute("generoFormulario", generoTexto);
                 request.setAttribute("clasificacionFormulario",
                         clasificacion);
+                request.setAttribute("bloqueoFormulario", bloqueo);
 
                 if (edicion) {
                     Map<String, Object> obra =
@@ -271,9 +273,11 @@ public class ObraEdicionServlet extends HttpServlet {
                         "La obra no existe o no te pertenece.");
                     return;
                 }
+                dao.actualizarBloqueo(obraId, usuarioId, bloqueo);
             } else {
-                dao.crear(usuarioId, titulo, descripcion,
+                long nuevaId = dao.crear(usuarioId, titulo, descripcion,
                         generoId, clasificacion);
+                dao.actualizarBloqueo(nuevaId, usuarioId, bloqueo);
             }
 
             response.sendRedirect(

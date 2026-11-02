@@ -10,6 +10,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+
+
+
 
 public class CapituloDAO {
 
@@ -282,5 +290,75 @@ public class CapituloDAO {
         }
 
         return c;
+    }
+    public boolean puedeLeer(long usuarioId, long capituloId) throws SQLException {
+        String sql = "SELECT puede_leer_capitulo(?, ?)";
+
+        try (Connection cn = ConexionBD.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            ps.setLong(2, capituloId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean(1);
+            }
+        }
+    }
+
+    /** Claves: precio, descuento, pagar (precio ya con descuento) y saldo. */
+    public Map<String, Object> detalleDesbloqueo(long usuarioId, long capituloId)
+            throws SQLException {
+        String sql = "SELECT precio_capitulo_efectivo(?) AS precio, "
+                + "descuento_vigente(?) AS descuento, "
+                + "COALESCE((SELECT saldo_monedas FROM billetera "
+                + "WHERE usuario_id = ?), 0) AS saldo";
+
+        try (Connection cn = ConexionBD.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setLong(1, capituloId);
+            ps.setLong(2, usuarioId);
+            ps.setLong(3, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                int precio = rs.getInt("precio");
+                int descuento = rs.getInt("descuento");
+                Map<String, Object> d = new HashMap<>();
+                d.put("precio", precio);
+                d.put("descuento", descuento);
+                d.put("pagar", (int) Math.ceil(precio * (100 - descuento) / 100.0));
+                d.put("saldo", rs.getLong("saldo"));
+                return d;
+            }
+        }
+    }
+
+    /** Ids de los capítulos publicados que este usuario todavía no puede leer. */
+    public Set<Long> idsBloqueados(long usuarioId, long obraId) throws SQLException {
+        String sql = "SELECT c.id FROM capitulo c "
+                + "WHERE c.obra_id = ? AND c.estado = 'publicado' "
+                + "AND NOT puede_leer_capitulo(?, c.id)";
+
+        Set<Long> ids = new HashSet<>();
+
+        try (Connection cn = ConexionBD.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setLong(1, obraId);
+            ps.setLong(2, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) ids.add(rs.getLong(1));
+            }
+        }
+        return ids;
+    }
+
+    /** Descuenta las monedas del lector y acredita al autor (88 % / 12 %). */
+    public void comprar(long usuarioId, long capituloId) throws SQLException {
+        String sql = "SELECT comprar_capitulo(?, ?)";
+
+        try (Connection cn = ConexionBD.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            ps.setLong(2, capituloId);
+            ps.executeQuery().close();
+        }
     }
 }

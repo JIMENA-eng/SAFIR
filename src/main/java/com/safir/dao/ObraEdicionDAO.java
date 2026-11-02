@@ -41,6 +41,7 @@ public class ObraEdicionDAO {
 
         String sql = """
             SELECT id, titulo, descripcion, genero_id, clasificacion
+                       obra.put("bloqueoActivo", rs.getBoolean("bloqueo_activo"));
             FROM obra
             WHERE id = ? AND autor_id = ?
             """;
@@ -147,6 +148,18 @@ public class ObraEdicionDAO {
             }
         }
     }
+    public boolean actualizarBloqueo(long obraId, long autorId, boolean activo)
+        throws SQLException {
+    String sql = "UPDATE obra SET bloqueo_activo = ? WHERE id = ? AND autor_id = ?";
+
+    try (Connection con = ConexionBD.conectar();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setBoolean(1, activo);
+        ps.setLong(2, obraId);
+        ps.setLong(3, autorId);
+        return ps.executeUpdate() == 1;
+    }
+}
 
     /**
      * Publica la obra. Solo si es del autor, está en borrador y tiene al

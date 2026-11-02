@@ -13,6 +13,8 @@
        value="${not empty generoFormulario ? generoFormulario : (modoEdicion ? obra.generoId : '')}"/>
 <c:set var="clasificacionSel"
        value="${not empty clasificacionFormulario ? clasificacionFormulario : (modoEdicion ? obra.clasificacion : 'todo_publico')}"/>
+<c:set var="bloqueoSel"
+       value="${not empty bloqueoFormulario ? bloqueoFormulario : (modoEdicion ? obra.bloqueoActivo : false)}"/>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -103,6 +105,14 @@
         </div>
 
         <div class="acciones-formulario">
+            <div class="campo">
+                <label>
+                    <input type="checkbox" name="bloqueoActivo" ${bloqueoSel ? 'checked' : ''}>
+                    Cobrar monedas por los capítulos avanzados
+                </label>
+                <small>Desactivado: todos los capítulos son gratis. Activado: los primeros
+                    capítulos siguen libres y los siguientes se desbloquean con monedas.</small>
+            </div>
             <button type="submit">
                 <c:choose>
                     <c:when test="${modoEdicion}">Guardar cambios</c:when>

@@ -93,6 +93,21 @@ public class LecturaServlet extends HttpServlet {
                     return;
                 }
             }
+            // Capítulos de pago: si no puede leerlo, se muestra la pantalla de desbloqueo.
+            if (!capituloDAO.puedeLeer(usuarioId, capitulo.getId())) {
+                Object flash = sesion.getAttribute("flashError");
+                if (flash != null) {
+                    request.setAttribute("error", flash);
+                    sesion.removeAttribute("flashError");
+                }
+                request.setAttribute("detalle",
+                        capituloDAO.detalleDesbloqueo(usuarioId, capitulo.getId()));
+                request.setAttribute("capitulo", capitulo);
+                request.setAttribute("obraId", obraId);
+                request.getRequestDispatcher("/WEB-INF/vistas/lectura/bloqueado.jsp")
+                       .forward(request, response);
+                return;
+            }
 
             double posicionGuardada = capituloDAO.obtenerPosicion(
                     usuarioId, obraId, capitulo.getId()
@@ -120,6 +135,7 @@ public class LecturaServlet extends HttpServlet {
             request.getRequestDispatcher(
                     "/WEB-INF/vistas/lectura/lector.jsp"
             ).forward(request, response);
+            request.setAttribute("bloqueados", capituloDAO.idsBloqueados(usuarioId, obraId));
 
         } catch (NumberFormatException e) {
             response.sendError(
