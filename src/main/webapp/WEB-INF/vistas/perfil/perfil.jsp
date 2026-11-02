@@ -10,7 +10,26 @@
 <body>
 
 <h1>Mi perfil</h1>
+<c:if test="${param.ok == '1'}"><p>Imágenes actualizadas.</p></c:if>
+<c:if test="${not empty error}"><p style="color:red"><c:out value="${error}"/></p></c:if>
 
+<c:if test="${not empty portadaRuta}">
+    <img src="${pageContext.request.contextPath}/media/<c:out value='${portadaRuta}'/>"
+         alt="Portada" style="width:100%;max-height:220px;object-fit:cover">
+</c:if>
+<c:if test="${not empty avatarRuta}">
+    <img src="${pageContext.request.contextPath}/media/<c:out value='${avatarRuta}'/>"
+         alt="Foto de perfil" style="width:96px;height:96px;border-radius:50%;object-fit:cover">
+</c:if>
+
+<form method="post" action="${pageContext.request.contextPath}/perfil"
+      enctype="multipart/form-data">
+    <label>Foto de perfil</label>
+    <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp"><br>
+    <label>Portada</label>
+    <input type="file" name="portada" accept="image/png,image/jpeg,image/webp"><br>
+    <button type="submit">Guardar imágenes</button>
+</form>
 <p>
     Nombre público:
     <strong><c:out value="${sessionScope.nombreUsuario}"/></strong>

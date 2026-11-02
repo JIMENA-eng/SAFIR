@@ -15,7 +15,7 @@
     <% } %>
 
     <form action="${pageContext.request.contextPath}/auth/registro"
-          method="post">
+      method="post" enctype="multipart/form-data">
         <label>Nombre público</label><br>
         <input type="text" name="nombre" maxlength="60" required><br><br>
 
@@ -29,6 +29,12 @@
         <input type="password" name="repetir" minlength="8" required><br><br>
 
         <button type="submit">Registrarme</button>
+        <label>Foto de perfil (opcional)</label><br>
+        <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp"><br><br>
+
+        <label>Foto de portada (opcional)</label><br>
+        <input type="file" name="portada" accept="image/png,image/jpeg,image/webp"><br>
+        <small>Puedes omitirlas y agregarlas luego desde tu perfil.</small><br><br>
     </form>
 
     <p>¿Ya tienes cuenta?

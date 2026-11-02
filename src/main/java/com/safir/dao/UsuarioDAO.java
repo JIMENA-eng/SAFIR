@@ -1,4 +1,3 @@
-
 package com.safir.dao;
 
 import com.safir.config.ConexionBD;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 public class UsuarioDAO {
 
-    public boolean registrar(String correo, String nombre, String clave)
+    public long registrar(String correo, String nombre, String clave)
             throws SQLException {
 
         String sqlUsuario =
@@ -26,7 +25,8 @@ public class UsuarioDAO {
                 "SELECT ?, id FROM rol WHERE nombre = ?";
 
         String sqlPerfil =
-                "INSERT INTO perfil_usuario (usuario_id) VALUES (?)";
+                "INSERT INTO perfil_usuario (usuario_id) VALUES (?) " +
+                "ON CONFLICT (usuario_id) DO NOTHING";
 
         try (Connection conexion = ConexionBD.conectar()) {
 
@@ -81,7 +81,7 @@ public class UsuarioDAO {
 
                 // 4. Confirmar las operaciones.
                 conexion.commit();
-                return true;
+                return usuarioId;
 
             } catch (SQLException | RuntimeException e) {
                 try {
@@ -107,14 +107,15 @@ public class UsuarioDAO {
 
         String sql =
                 "SELECT u.id, u.nombre_publico, u.contrasena_hash, " +
-                "u.estado_cuenta, " +
+                "u.estado_cuenta, p.avatar_ruta, " +
                 "COALESCE(STRING_AGG(r.nombre, ', '), '') AS roles " +
                 "FROM usuario u " +
                 "LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id " +
                 "LEFT JOIN rol r ON r.id = ur.rol_id " +
+                "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
                 "WHERE LOWER(u.correo) = LOWER(?) " +
                 "GROUP BY u.id, u.nombre_publico, " +
-                "u.contrasena_hash, u.estado_cuenta";
+                "u.contrasena_hash, u.estado_cuenta, p.avatar_ruta";
 
         try (Connection conexion = ConexionBD.conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -152,6 +153,7 @@ public class UsuarioDAO {
                 usuario.put("id", usuarioId);
                 usuario.put("nombre", nombre);
                 usuario.put("roles", roles);
+                usuario.put("avatarRuta", rs.getString("avatar_ruta"));
 
                 return usuario;
             }
@@ -211,5 +213,52 @@ public class UsuarioDAO {
                 }
             }
         }
+    }
+
+    /**
+     * Actualiza foto de perfil y/o portada. Un valor null conserva el actual.
+     */
+    public void actualizarImagenes(long usuarioId, String avatarRuta,
+                                   String portadaRuta) throws SQLException {
+
+        String sql =
+                "UPDATE perfil_usuario SET " +
+                "avatar_ruta = COALESCE(?, avatar_ruta), " +
+                "portada_ruta = COALESCE(?, portada_ruta) " +
+                "WHERE usuario_id = ?";
+
+        try (Connection conexion = ConexionBD.conectar();
+             PreparedStatement ps = conexion.prepareStatement(sql)) {
+
+            ps.setString(1, avatarRuta);
+            ps.setString(2, portadaRuta);
+            ps.setLong(3, usuarioId);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Devuelve las rutas actuales: claves "avatar" y "portada" (pueden ser null). */
+    public Map<String, String> obtenerImagenes(long usuarioId)
+            throws SQLException {
+
+        String sql =
+                "SELECT avatar_ruta, portada_ruta " +
+                "FROM perfil_usuario WHERE usuario_id = ?";
+
+        Map<String, String> imagenes = new HashMap<>();
+
+        try (Connection conexion = ConexionBD.conectar();
+             PreparedStatement ps = conexion.prepareStatement(sql)) {
+
+            ps.setLong(1, usuarioId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    imagenes.put("avatar", rs.getString("avatar_ruta"));
+                    imagenes.put("portada", rs.getString("portada_ruta"));
+                }
+            }
+        }
+        return imagenes;
     }
 }

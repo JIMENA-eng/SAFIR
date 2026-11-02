@@ -92,6 +92,7 @@ public class LoginServlet extends HttpServlet {
         sesion.setAttribute("usuarioId", usuario.get("id"));
         sesion.setAttribute("nombreUsuario", usuario.get("nombre"));
         sesion.setAttribute("roles", usuario.get("roles"));
+        sesion.setAttribute("avatarRuta", usuario.get("avatarRuta"));
     }
 
     private void mostrarError(HttpServletRequest request,
