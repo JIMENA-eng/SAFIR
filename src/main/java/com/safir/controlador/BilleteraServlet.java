@@ -7,7 +7,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import com.safir.dao.CompraPaqueteDAO;
+import com.safir.util.Flash;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 public class BilleteraServlet extends HttpServlet {
 
     private final BilleteraDAO billeteraDAO = new BilleteraDAO();
+    private final CompraPaqueteDAO compraDAO = new CompraPaqueteDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -37,6 +39,8 @@ public class BilleteraServlet extends HttpServlet {
             request.setAttribute("movimientos",
                     billeteraDAO.listarMovimientos(usuarioId, 50));
             request.setAttribute("etiquetas", BilleteraDAO.ETIQUETAS);
+            request.setAttribute("paquetes", compraDAO.listarPaquetes(usuarioId));
+   Flash.aRequest(request);
         } catch (SQLException e) {
             throw new ServletException("Error al cargar la billetera.", e);
         }

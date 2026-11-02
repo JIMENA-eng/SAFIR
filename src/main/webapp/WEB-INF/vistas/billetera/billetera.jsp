@@ -23,6 +23,41 @@
 </c:if>
 
 <h2>Movimientos</h2>
+<c:if test="${not empty flashOk}">
+    <p style="color:green"><c:out value="${flashOk}"/></p>
+</c:if>
+<c:if test="${not empty flashError}">
+    <p style="color:red"><c:out value="${flashError}"/></p>
+</c:if>
+<c:if test="${param.pago == 'cancelado'}">
+    <p>Cancelaste el pago. No se te cobró nada.</p>
+</c:if>
+
+<h2>Comprar monedas</h2>
+<table border="1" cellpadding="6">
+    <thead><tr><th>Monedas</th><th>Precio</th><th></th></tr></thead>
+    <tbody>
+    <c:forEach var="p" items="${paquetes}">
+        <tr>
+            <td><c:out value="${p.monedas}"/></td>
+            <td>
+                <c:if test="${p.descuento > 0}">
+                    <s>US$ <fmt:formatNumber value="${p.precioLista}" minFractionDigits="2" maxFractionDigits="2"/></s>
+                </c:if>
+                <strong>US$ <fmt:formatNumber value="${p.precioFinal}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+            </td>
+            <td>
+                <form method="post" style="display:inline"
+                      action="${pageContext.request.contextPath}/billetera/comprar">
+                    <input type="hidden" name="paqueteId" value="${p.id}">
+                    <button type="submit" name="pasarela" value="paypal">Pagar con PayPal</button>
+                    <button type="submit" name="pasarela" value="yape">Pagar con Yape</button>
+                </form>
+            </td>
+        </tr>
+    </c:forEach>
+    </tbody>
+</table>
 
 <c:choose>
     <c:when test="${empty movimientos}">
