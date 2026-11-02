@@ -14,7 +14,7 @@
     String nombreRaw = "lector";
     String rolesRaw = "lector";
     String idUsuario = "";
-    int monedas = 5000; // bono de bienvenida por el primer registro
+    int monedas = 0; // bono de bienvenida por el primer registro
 
     if (sesion != null) {
         if (sesion.getAttribute("nombreUsuario") != null) {
@@ -31,7 +31,7 @@
         if (sesion.getAttribute("usuarioId") != null) {
             idUsuario = String.valueOf(sesion.getAttribute("usuarioId"));
         }
-        Object m = sesion.getAttribute("monedas");
+        Object m = request.getAttribute("monedas");
         if (m instanceof Number) {
             monedas = ((Number) m).intValue();
         }

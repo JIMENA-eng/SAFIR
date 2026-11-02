@@ -69,6 +69,9 @@
         </a>
     </li>
     <li>
+        <a href="${pageContext.request.contextPath}/billetera">Mi billetera</a>
+    </li>
+    <li>
         <a href="${pageContext.request.contextPath}/notificaciones">
             Mis notificaciones
         </a>
