@@ -31,7 +31,7 @@ public class ObraDAO {
                 + "OR genero ILIKE ? "
                 + "OR COALESCE(array_to_string(etiquetas, ', '), '') ILIKE ?) "
                 + "AND (? = '' OR genero = ?) "
-                + "ORDER BY publicada_en DESC NULLS LAST, id DESC";
+                + "ORDER BY nivel_autor DESC, publicada_en DESC NULLS LAST, id DESC";
 
         String termino = busqueda == null ? "" : busqueda.trim();
         String filtroGenero = genero == null ? "" : genero.trim();

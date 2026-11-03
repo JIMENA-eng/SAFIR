@@ -14,6 +14,9 @@
 
 <main>
     <h1>Panel de autor</h1>
+    <p>
+        <a href="${pageContext.request.contextPath}/autor/economia">Mi economía: nivel, saldo y retiros</a>
+    </p>
 
     <p>Administra tus obras y revisa sus estadísticas.</p>
 
