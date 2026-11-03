@@ -1,4 +1,3 @@
-
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -28,13 +27,14 @@
         <label>Repetir contraseña</label><br>
         <input type="password" name="repetir" minlength="8" required><br><br>
 
-        <button type="submit">Registrarme</button>
         <label>Foto de perfil (opcional)</label><br>
         <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp"><br><br>
 
         <label>Foto de portada (opcional)</label><br>
         <input type="file" name="portada" accept="image/png,image/jpeg,image/webp"><br>
         <small>Puedes omitirlas y agregarlas luego desde tu perfil.</small><br><br>
+
+        <button type="submit">Registrarme</button>
     </form>
 
     <p>¿Ya tienes cuenta?

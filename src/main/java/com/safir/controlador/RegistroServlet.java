@@ -49,18 +49,28 @@ public class RegistroServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        // Imágenes opcionales (deben leerse antes de los parámetros).
-        Part avatar;
-        Part portada;
+        // ===== CAMBIO: solo leer las imágenes si la petición es multipart =====
+        // El modal de index.jsp envía application/x-www-form-urlencoded (sin
+        // imágenes) y registro.jsp envía multipart/form-data. Llamar a
+        // getPart() en una petición no multipart lanza
+        // InvalidContentTypeException (Error 500).
+        Part avatar = null;
+        Part portada = null;
+        String tipo = request.getContentType();
+        boolean esMultipart = tipo != null
+                && tipo.toLowerCase().startsWith("multipart/");
         try {
-            avatar = request.getPart("avatar");
-            portada = request.getPart("portada");
+            if (esMultipart) {
+                avatar = request.getPart("avatar");
+                portada = request.getPart("portada");
+            }
         } catch (IllegalStateException e) {
             mostrarError(request, response,
                     "Las imágenes superan el tamaño permitido "
                     + "(perfil 2 MB, portada 5 MB).");
             return;
         }
+        // ===== FIN DEL CAMBIO =====
 
         String correo = request.getParameter("correo");
         String nombre = request.getParameter("nombre");
