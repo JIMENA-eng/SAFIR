@@ -1,0 +1,31 @@
+# Maven
+target/
+*.war
+*.jar
+dependency-reduced-pom.xml
+
+# NetBeans
+nb-configuration.xml
+nbactions.xml
+nbproject/private/
+build/
+dist/
+
+# IntelliJ / VS Code / Eclipse
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Secretos y archivos locales (para el siguiente commit)
+.env
+*.local.properties
+
+# Archivos subidos por usuarios en pruebas
+uploads/
