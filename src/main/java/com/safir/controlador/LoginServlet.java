@@ -1,5 +1,7 @@
 package com.safir.controlador;
 
+import com.safir.dao.CuentaBloqueadaException;
+import com.safir.dao.UsuarioDAO;
 import com.safir.dao.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -59,6 +61,11 @@ public class LoginServlet extends HttpServlet {
 
         try {
             usuario = usuarioDAO.iniciarSesion(correo, clave);
+                } catch (CuentaBloqueadaException e) {
+            mostrarError(request, response,
+                    "Demasiados intentos fallidos. Tu cuenta está bloqueada; "
+                    + "inténtalo de nuevo en " + e.minutosRestantes() + " minuto(s).");
+            return;
         } catch (SQLException e) {
             log("Error al iniciar sesión", e);
             mostrarError(request, response,
