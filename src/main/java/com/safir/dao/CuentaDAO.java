@@ -131,8 +131,8 @@ public class CuentaDAO {
 
     /**
      * Elimina la cuenta: el SQL deja el saldo en cero, marca la cuenta como eliminada,
-     * cierra sesiones, elimina sus obras (trigger trg_usuario_eliminado) y registra el reembolso
-     * pendiente. Devuelve los dólares a devolver.
+     * cierra sesiones, elimina sus obras (trigger trg_usuario_eliminado), desvincula sus fotos
+     * y registra el reembolso pendiente. Devuelve los dólares a devolver.
      * metodo y datos (destino del reembolso) pueden ser null si no hay reembolso.
      */
     public BigDecimal eliminar(long usuarioId, boolean aceptaPerder,
@@ -150,6 +150,15 @@ public class CuentaDAO {
                         rs.next();
                         monto = rs.getBigDecimal(1);
                     }
+                }
+
+                // Las fotos de perfil y portada se desvinculan del perfil
+                // (los archivos los borra el servlet después de confirmar).
+                try (PreparedStatement ps = c.prepareStatement(
+                        "UPDATE perfil_usuario SET avatar_ruta = NULL, portada_ruta = NULL "
+                        + "WHERE usuario_id = ?")) {
+                    ps.setLong(1, usuarioId);
+                    ps.executeUpdate();
                 }
 
                 if (metodo != null) {

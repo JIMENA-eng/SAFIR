@@ -1,6 +1,8 @@
 package com.safir.controlador;
 
 import com.safir.dao.CuentaDAO;
+import com.safir.dao.UsuarioDAO;
+import com.safir.util.ImagenUtil;
 import com.safir.util.Flash;
 import com.safir.util.SqlErrores;
 import jakarta.servlet.ServletException;
@@ -17,12 +19,14 @@ import java.util.Map;
 /**
  * Eliminación de la cuenta del usuario con sesión activa.
  * GET  /auth/cuenta/eliminar  muestra el aviso (qué se reembolsa y qué se pierde).
- * POST /auth/cuenta/eliminar  elimina, cierra la sesión y vuelve al inicio de sesión.
+ * POST /auth/cuenta/eliminar  elimina la cuenta (obras, fotos y saldo), cierra la sesión y
+ *                             vuelve al inicio de sesión.
  */
 @WebServlet("/auth/cuenta/eliminar")
 public class EliminarCuentaServlet extends HttpServlet {
 
     private final CuentaDAO cuentaDAO = new CuentaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -121,7 +125,14 @@ public class EliminarCuentaServlet extends HttpServlet {
                 datosGuardar = datos;
             }
 
+            // Rutas de las fotos, leídas antes de que la eliminación las desvincule.
+            Map<String, String> imagenes = usuarioDAO.obtenerImagenes(usuarioId);
+
             cuentaDAO.eliminar(usuarioId, aceptaPerder, metodoGuardar, datosGuardar);
+
+            // Cuenta eliminada: se borran los archivos de foto de perfil y portada.
+            ImagenUtil.borrar(imagenes.get("avatar"));
+            ImagenUtil.borrar(imagenes.get("portada"));
 
             sesion.invalidate();
             response.sendRedirect(request.getContextPath() + "/auth/login?eliminada=1");
