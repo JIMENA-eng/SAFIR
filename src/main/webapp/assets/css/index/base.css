@@ -1,0 +1,75 @@
+/* SAFIR · index · Base: variables, tema oscuro, reset, tipografía, contenedor y botones. */
+:root {
+  --indigo: #252866;
+  --lav: #7775D6;
+  --lav-soft: #E9E7FF;
+  --warm: #FFFCF7;
+  --carbon: #292936;
+  --gold: #F2B84B;
+
+  --bg: var(--warm);
+  --surface: #ffffff;
+  --soft: var(--lav-soft);
+  --text: var(--carbon);
+  --title: var(--indigo);
+  --muted: #5b5b72;
+  --line: #E3E0F7;
+  --bar: var(--indigo);
+  --btn: var(--indigo);
+  --btn-text: #ffffff;
+  --link: var(--indigo);
+  --outline: var(--lav);
+  --panel: #ffffff;
+
+  --sans: "DM Sans", "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "Literata", "Source Serif 4", Georgia, "Times New Roman", serif;
+
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+:root[data-theme="dark"] {
+  --bg: #12142E;
+  --surface: #1D2042;
+  --soft: #181B3A;
+  --text: #D9D9E8;
+  --title: #F1F0FF;
+  --muted: #A5A6C4;
+  --line: #2C3060;
+  --bar: #1D2042;
+  --btn: #7775D6;
+  --btn-text: #12142E;
+  --link: #B9B7F5;
+  --outline: #7775D6;
+  --panel: #1D2042;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { height: auto; background: var(--bar); scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background .3s, color .3s;
+}
+h1, h2, h3 { font-family: var(--sans); color: var(--title); font-weight: 300; line-height: 1.1; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--lav); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+
+/* Botones */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 500 1rem/1 var(--sans);
+  padding: .95rem 1.6rem; border-radius: 999px; border: 1.5px solid transparent;
+  background: var(--btn); color: var(--btn-text); cursor: pointer; text-decoration: none;
+  transition: transform .15s, background .2s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.outline { background: transparent; color: var(--link); border-color: var(--outline); }
+.btn.small { padding: .65rem 1.15rem; font-size: .95rem; }
+.btn.on-bar { background: var(--lav-soft); color: var(--indigo); }

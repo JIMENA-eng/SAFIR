@@ -1,0 +1,73 @@
+/* SAFIR · index · Animaciones, escena del pueblo, entradas al hacer scroll y movimiento reducido. */
+/* ===== Animaciones e ilustraciones ===== */
+.plane .plane-float { animation: launch 1.3s cubic-bezier(.2,.8,.2,1) both, drift 7s ease-in-out 1.3s infinite; }
+@keyframes launch { from { opacity: 0; transform: translate(-55%, 45%) rotate(-14deg) scale(.7); } to { opacity: 1; transform: none; } }
+@keyframes drift { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(-1.5deg); } }
+.spark { position: absolute; width: 26px; height: 26px; animation: twinkle 3s ease-in-out infinite; }
+.spark.s1 { left: 3%; top: 6%; width: 30px; height: 30px; }
+.spark.s2 { left: 91%; top: 42%; width: 20px; height: 20px; animation-delay: 1s; }
+.spark.s3 { left: 12%; top: 52%; width: 22px; height: 22px; animation-delay: 2s; }
+@keyframes twinkle { 0%,100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* La luna rota y un punto orbita sus anillos */
+.moon svg { animation: spin 50s linear infinite; }
+.orbit { animation: spin 60s linear infinite; transform-origin: 370px 157px; transform-box: view-box; }
+
+/* Libro abierto: las páginas pasan una tras otra */
+.flip { animation: flip 6s ease-in-out infinite; animation-delay: var(--d, 0s); transform-origin: 150px 0; transform-box: view-box; }
+@keyframes flip {
+  0%, 8%  { transform: scaleX(1);  opacity: 1; }
+  34%     { transform: scaleX(-1); opacity: 1; }
+  82%     { transform: scaleX(-1); opacity: 1; }
+  92%     { transform: scaleX(-1); opacity: 0; }
+  93%     { transform: scaleX(1);  opacity: 0; }
+  100%    { transform: scaleX(1);  opacity: 1; }
+}
+
+/* Pila de libros: brinca en cadena, de abajo hacia arriba */
+.hop { animation: hop 1.8s cubic-bezier(.3,.1,.4,1) infinite; animation-delay: var(--d, 0s); }
+@keyframes hop {
+  0%, 55%, 100% { transform: translateY(0); }
+  15% { transform: translateY(var(--h, -14px)); }
+  30% { transform: translateY(0); }
+  38% { transform: translateY(calc(var(--h, -14px) * .35)); }
+  46% { transform: translateY(0); }
+}
+.stack .shadow { animation: shade 1.8s ease-in-out infinite; transform-origin: 80px 140px; transform-box: view-box; }
+@keyframes shade { 0%, 55%, 100% { transform: scaleX(1); opacity: .16; } 15% { transform: scaleX(.72); opacity: .08; } }
+
+/* Escena del pueblo */
+.scene { display: block; width: 100%; height: auto; background: #12142E; }
+.scene .win { fill: #FFFCF7; }
+.scene.play .win { animation: lightOff .9s ease forwards; animation-delay: var(--d); }
+@keyframes lightOff { to { fill: #2B2E63; } }
+.tw { animation: twinkle 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.glow { animation: glow 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes glow { 0%,100% { opacity: .65; transform: scale(1); } 50% { opacity: 1; transform: scale(1.25); } }
+.fly { animation: fly 11s linear 1.5s infinite; }
+@keyframes fly { from { transform: translate(-90px, 30px); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } to { transform: translate(680px, -40px); opacity: 0; } }
+
+/* Entradas al hacer scroll */
+.rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+.rv.in { opacity: 1; transform: none; }
+.continue .progress i { width: 0; transition: width 1.5s cubic-bezier(.2,.7,.2,1) .3s; }
+.continue.in .progress i { width: 58%; }
+.coins.in .coin { animation: coinSpin 1.4s cubic-bezier(.2,.8,.2,1); }
+@keyframes coinSpin { from { transform: rotateY(540deg) scale(.6); } to { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .plane .plane-float, .spark, .tw, .glow, .fly, .track, .coins.in .coin, .moon svg, .orbit, .flip, .hop, .stack .shadow { animation: none !important; }
+  .scene.play .win { animation: none; }
+  .fly { display: none; }
+  .rv { opacity: 1; transform: none; }
+  .continue .progress i { width: 58%; }
+  .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  .book[data-dup] { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plane-float, .chapters li { animation: none; }
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}

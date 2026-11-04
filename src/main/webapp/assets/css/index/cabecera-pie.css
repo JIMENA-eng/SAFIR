@@ -1,0 +1,23 @@
+/* SAFIR · index · Barra de navegación (cabecera), botón de tema, chip de usuario y pie de página. */
+/* Barra de navegación */
+header.bar { background: var(--bar); color: #fff; }
+header.bar .wrap { display: flex; align-items: center; gap: 2rem; min-height: 72px; }
+.brand { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: #fff; }
+.brand svg { width: 52px; height: 38px; }
+.brand span { font: 500 1.5rem/1 var(--sans); letter-spacing: .28em; }
+nav { display: flex; gap: 1.6rem; margin-right: auto; }
+nav a { color: #E9E7FF; text-decoration: none; font-size: .98rem; }
+nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 6px; }
+.theme-toggle {
+  background: transparent; color: #E9E7FF; border: 1.5px solid rgba(233,231,255,.4);
+  border-radius: 999px; padding: .5rem .95rem; font: 400 .9rem var(--sans); cursor: pointer;
+}
+.theme-toggle:hover { border-color: #fff; color: #fff; }
+
+.btn.ghost-bar { background: transparent; color: #E9E7FF; border-color: rgba(233,231,255,.5); }
+.user-chip { max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+footer { background: var(--bar); color: #C9C8EC; padding: 2rem 0 2.4rem; font-size: .92rem; border-top: 1px solid rgba(255,255,255,.1); }
+footer .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center; }
+footer .brand span { font-size: 1.15rem; }
+footer .brand svg { width: 40px; height: 30px; }

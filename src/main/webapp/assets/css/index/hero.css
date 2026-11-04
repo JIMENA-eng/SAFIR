@@ -1,0 +1,35 @@
+/* SAFIR · index · Hero de portada y escenario ilustrado (luna, avión, libro, pila). */
+/* Hero: el texto siempre va al frente; el escenario queda detrás */
+.hero { position: relative; overflow: hidden; padding: clamp(3rem, 7vw, 5.5rem) 0; }
+.hero::before { /* resplandor suave en lugar de círculos planos */
+  content: ""; position: absolute; width: 820px; height: 820px; border-radius: 50%;
+  background: radial-gradient(circle, var(--soft) 0%, var(--soft) 34%, transparent 68%);
+  top: 50%; right: -230px; transform: translateY(-50%); z-index: 0; pointer-events: none;
+}
+.hero::after { /* anillos finos que se desvanecen */
+  content: ""; position: absolute; width: 540px; height: 540px; border-radius: 50%;
+  left: -210px; bottom: -280px; z-index: 0; pointer-events: none;
+  background: repeating-radial-gradient(circle, transparent 0 34px, var(--line) 34px 35.5px);
+  -webkit-mask-image: radial-gradient(circle, #000 22%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 22%, transparent 70%);
+}
+.hero .wrap { position: relative; z-index: 1; min-height: 560px; display: flex; align-items: center; }
+.hero-copy { position: relative; z-index: 3; width: 100%; }
+.hero h1 { font-size: clamp(2.7rem, 6.4vw, 4.9rem); max-width: 10em; text-shadow: 0 0 22px var(--bg), 0 0 8px var(--bg); }
+.hero .lead { margin-top: 1.5rem; font-size: 1.2rem; max-width: 30em; color: var(--text); text-shadow: 0 0 14px var(--bg); }
+.hero .actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: .9rem; }
+.hero .note { margin-top: 1.4rem; font-size: .95rem; color: var(--muted); }
+
+/* Escenario: luna (fondo) → avión → libro abierto y pila de libros */
+.stage { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: min(560px, 52%); aspect-ratio: 1; z-index: 1; pointer-events: none; }
+.stage > * { position: absolute; }
+.stage svg { display: block; }
+.rings { inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rings .r { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.moon { left: 40%; top: 2%; width: 52%; aspect-ratio: 1; border-radius: 50%; z-index: 1; box-shadow: 0 0 70px 14px rgba(203,201,244,.5); }
+.moon svg { width: 100%; height: 100%; }
+.plane { left: 6%; top: 12%; width: 60%; z-index: 2; }
+.plane svg { width: 100%; height: auto; overflow: visible; }
+.openbook { left: 22%; top: 57%; width: 50%; z-index: 3; }
+.openbook svg, .stack svg { width: 100%; height: auto; overflow: visible; }
+.stack { left: 76%; top: 67%; width: 23%; z-index: 3; }
