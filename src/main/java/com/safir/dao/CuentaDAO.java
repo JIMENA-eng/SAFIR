@@ -38,8 +38,9 @@ public class CuentaDAO {
      * Ejecuta eliminar_cuenta() dentro de una transacción que SIEMPRE se revierte, así el
      * cálculo es exactamente el mismo que el de la eliminación real.
      *
-     * Claves: saldo, reembolsables, perdidas (long); brutoUsd, comisionUsd, montoUsd,
-     * comisionPct (BigDecimal). Lanza SQLException P0001 si no se puede eliminar
+     * Claves: saldo, reembolsables, perdidas, obras, lectores (long); brutoUsd, comisionUsd,
+     * montoUsd, comisionPct (BigDecimal). 'obras' son las obras que se eliminarán con la cuenta y
+     * 'lectores' los lectores que habían desbloqueado capítulos de ellas. Lanza SQLException P0001 si no se puede eliminar
      * (por ejemplo, tiene un retiro pendiente).
      */
     public Map<String, Object> vistaPrevia(long usuarioId) throws SQLException {
@@ -54,6 +55,24 @@ public class CuentaDAO {
                     ps.setLong(1, usuarioId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) saldo = rs.getLong(1);
+                    }
+                }
+
+                long obras = 0;
+                long lectores = 0;
+
+                try (PreparedStatement ps = c.prepareStatement(
+                        "SELECT (SELECT COUNT(*) FROM obra WHERE autor_id = ?), "
+                        + "(SELECT COUNT(DISTINCT cc.usuario_id) FROM compra_capitulo cc "
+                        + "JOIN capitulo ca ON ca.id = cc.capitulo_id "
+                        + "JOIN obra o ON o.id = ca.obra_id WHERE o.autor_id = ?)")) {
+                    ps.setLong(1, usuarioId);
+                    ps.setLong(2, usuarioId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            obras = rs.getLong(1);
+                            lectores = rs.getLong(2);
+                        }
                     }
                 }
 
@@ -96,6 +115,8 @@ public class CuentaDAO {
                 m.put("saldo", saldo);
                 m.put("reembolsables", reembolsables);
                 m.put("perdidas", saldo - reembolsables);
+                m.put("obras", obras);
+                m.put("lectores", lectores);
                 m.put("brutoUsd", bruto);
                 m.put("comisionUsd", comision);
                 m.put("montoUsd", monto);
@@ -110,7 +131,8 @@ public class CuentaDAO {
 
     /**
      * Elimina la cuenta: el SQL deja el saldo en cero, marca la cuenta como eliminada,
-     * cierra sesiones y registra el reembolso pendiente. Devuelve los dólares a devolver.
+     * cierra sesiones, elimina sus obras (trigger trg_usuario_eliminado) y registra el reembolso
+     * pendiente. Devuelve los dólares a devolver.
      * metodo y datos (destino del reembolso) pueden ser null si no hay reembolso.
      */
     public BigDecimal eliminar(long usuarioId, boolean aceptaPerder,

@@ -84,6 +84,14 @@ public class EliminarCuentaServlet extends HttpServlet {
             }
 
             Map<String, Object> prev = cuentaDAO.vistaPrevia(usuarioId);
+
+            // Sus obras se eliminan junto con la cuenta: exige confirmación expresa.
+            if ((Long) prev.get("obras") > 0 && request.getParameter("aceptaObras") == null) {
+                Flash.error(sesion, "Debes confirmar que tus obras se eliminarán.");
+                response.sendRedirect(volver);
+                return;
+            }
+
             String metodoGuardar = null;
             String datosGuardar = null;
 

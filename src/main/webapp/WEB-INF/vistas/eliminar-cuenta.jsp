@@ -24,7 +24,7 @@
     <c:otherwise>
         <p>
             Esta acción es <strong>definitiva</strong>: tu cuenta quedará eliminada,
-            tu saldo en cero y se cerrarán tus sesiones.
+            tu saldo en cero, se cerrarán tus sesiones y se eliminarán tus obras.
         </p>
 
         <h2>Tus monedas</h2>
@@ -54,7 +54,27 @@
             </p>
         </c:if>
 
+        <c:if test="${prev.obras > 0}">
+            <p style="color:#a00">
+                ⚠ Se eliminarán definitivamente tus <strong><c:out value="${prev.obras}"/></strong>
+                obra(s) con todos sus capítulos, comentarios y valoraciones.
+                <c:if test="${prev.lectores > 0}">
+                    <strong><c:out value="${prev.lectores}"/></strong> lector(es) que desbloquearon
+                    capítulos tuyos perderán el acceso a ellos.
+                </c:if>
+            </p>
+        </c:if>
+
         <form method="post" action="${pageContext.request.contextPath}/auth/cuenta/eliminar">
+
+            <c:if test="${prev.obras > 0}">
+                <p>
+                    <label>
+                        <input type="checkbox" name="aceptaObras" required>
+                        Entiendo que mis obras se eliminarán para siempre
+                    </label>
+                </p>
+            </c:if>
 
             <c:if test="${prev.perdidas > 0}">
                 <p>
