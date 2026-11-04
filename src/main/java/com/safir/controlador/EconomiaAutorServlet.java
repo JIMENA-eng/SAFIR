@@ -1,6 +1,7 @@
 package com.safir.controlador;
 
 import com.safir.dao.EconomiaAutorDAO;
+import com.safir.dao.RetiroDAO;
 import com.safir.util.Flash;
 import com.safir.util.SqlErrores;
 import jakarta.servlet.ServletException;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 /**
- * Economía del autor: nivel, saldo y (fase 6) retiros.
+ * Economía del autor: nivel, saldo e historial de retiros.
  * GET /autor/economia  muestra la página.
  * POST /autor/economia con accion=comprar_nivel sube un nivel.
  *
@@ -25,6 +26,7 @@ import java.util.Map;
 public class EconomiaAutorServlet extends HttpServlet {
 
     private final EconomiaAutorDAO economiaDAO = new EconomiaAutorDAO();
+    private final RetiroDAO retiroDAO = new RetiroDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -50,6 +52,8 @@ public class EconomiaAutorServlet extends HttpServlet {
             }
 
             request.setAttribute("eco", economia);
+            request.setAttribute("retiros", retiroDAO.listarDelAutor(autorId));
+            request.setAttribute("retiroCfg", retiroDAO.parametros());
             Flash.aRequest(request);
 
             request.getRequestDispatcher("/WEB-INF/vistas/autor/economia.jsp")

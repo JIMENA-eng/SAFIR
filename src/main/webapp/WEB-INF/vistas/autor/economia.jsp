@@ -62,6 +62,77 @@
     </li>
 </ul>
 
+<c:if test="${eco.nivel >= eco.nivelRetiro and eco.saldo >= eco.saldoRetiro}">
+    <p>
+        Puedes retirar hasta <strong><fmt:formatNumber value="${eco.saldo}" groupingUsed="true"/></strong> monedas.
+        La plataforma retiene el <c:out value="${retiroCfg.comisionPct}"/>% y cada moneda vale
+        US$ <c:out value="${retiroCfg.valorMoneda}"/>. Las monedas se descuentan de inmediato;
+        si la solicitud se rechaza, te las devolvemos completas.
+    </p>
+
+    <form method="post" action="${pageContext.request.contextPath}/autor/retiro">
+        <label>Monedas a retirar</label>
+        <input type="number" id="monedasRetiro" name="monedas" min="1" max="${eco.saldo}" required><br>
+
+        <label>Método de pago</label>
+        <select name="metodo">
+            <option value="paypal">PayPal</option>
+            <option value="yape">Yape</option>
+        </select><br>
+
+        <label>Correo de PayPal o celular de Yape</label>
+        <input type="text" name="datos" maxlength="150" required><br>
+
+        <p id="estimado"></p>
+        <button type="submit">Solicitar retiro</button>
+    </form>
+
+    <script>
+    (function () {
+        var entrada = document.getElementById('monedasRetiro');
+        var salida = document.getElementById('estimado');
+        var pct = ${retiroCfg.comisionPct};
+        var valor = ${retiroCfg.valorMoneda};
+        entrada.addEventListener('input', function () {
+            var m = parseInt(entrada.value, 10);
+            if (!m || m < 1) { salida.textContent = ''; return; }
+            var neto = m - Math.round(m * pct / 100);
+            salida.textContent = 'Recibirías ' + neto.toLocaleString('es-PE')
+                + ' monedas, aprox. US$ ' + (neto * valor).toFixed(2);
+        });
+    })();
+    </script>
+</c:if>
+
+<h3>Mis solicitudes</h3>
+<c:choose>
+    <c:when test="${empty retiros}">
+        <p>Aún no has solicitado retiros.</p>
+    </c:when>
+    <c:otherwise>
+        <table border="1" cellpadding="6">
+            <thead>
+                <tr><th>#</th><th>Fecha</th><th>Monedas</th><th>Monto (US$)</th>
+                    <th>Método</th><th>Estado</th><th>Motivo</th></tr>
+            </thead>
+            <tbody>
+            <c:forEach var="r" items="${retiros}">
+                <tr>
+                    <td><c:out value="${r.id}"/></td>
+                    <td><fmt:formatDate value="${r.creadoEn}" pattern="dd/MM/yyyy HH:mm"
+                                        timeZone="America/Lima"/></td>
+                    <td><fmt:formatNumber value="${r.monedas}" groupingUsed="true"/></td>
+                    <td><fmt:formatNumber value="${r.montoUsd}" minFractionDigits="2" maxFractionDigits="2"/></td>
+                    <td><c:out value="${r.metodo}"/></td>
+                    <td><c:out value="${r.estado}"/></td>
+                    <td><c:out value="${r.motivo}"/></td>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </c:otherwise>
+</c:choose>
+
 <p><a href="${pageContext.request.contextPath}/billetera">Ver mi billetera y movimientos</a></p>
 <p><a href="${pageContext.request.contextPath}/autor/panel">Volver al panel de autor</a></p>
 
