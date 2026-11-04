@@ -7,10 +7,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
 public class UsuarioDAO {
+
+    /** RNF-03: intentos fallidos permitidos antes de bloquear la cuenta. */
+    public static final int MAX_INTENTOS_FALLIDOS = 5;
+
+    /** RNF-03: minutos que dura el bloqueo. */
+    public static final int MINUTOS_BLOQUEO = 15;
 
     public long registrar(String correo, String nombre, String clave)
             throws SQLException {
@@ -102,12 +109,22 @@ public class UsuarioDAO {
         }
     }
 
+    /**
+     * Valida las credenciales.
+     *
+     * @return los datos del usuario, o null si el correo no existe, la cuenta
+     *         no está activa o la contraseña es incorrecta.
+     * @throws CuentaBloqueadaException si la cuenta está bloqueada; mientras
+     *         dure el bloqueo se rechaza incluso la contraseña correcta.
+     */
     public Map<String, Object> iniciarSesion(String correo, String clave)
-            throws SQLException {
+            throws SQLException, CuentaBloqueadaException {
 
         String sql =
                 "SELECT u.id, u.nombre_publico, u.contrasena_hash, " +
-                "u.estado_cuenta, p.avatar_ruta, " +
+                "u.estado_cuenta, u.bloqueado_hasta, " +
+                "(u.bloqueado_hasta IS NOT NULL AND u.bloqueado_hasta > now()) AS bloqueada, " +
+                "p.avatar_ruta, " +
                 "COALESCE(STRING_AGG(r.nombre, ', '), '') AS roles " +
                 "FROM usuario u " +
                 "LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id " +
@@ -115,7 +132,7 @@ public class UsuarioDAO {
                 "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
                 "WHERE LOWER(u.correo) = LOWER(?) " +
                 "GROUP BY u.id, u.nombre_publico, " +
-                "u.contrasena_hash, u.estado_cuenta, p.avatar_ruta";
+                "u.contrasena_hash, u.estado_cuenta, u.bloqueado_hasta, p.avatar_ruta";
 
         try (Connection conexion = ConexionBD.conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -136,17 +153,25 @@ public class UsuarioDAO {
                     return null;
                 }
 
+                long usuarioId = rs.getLong("id");
+
+                // Cuenta bloqueada: se rechaza aunque la contraseña sea correcta.
+                if (rs.getBoolean("bloqueada")) {
+                    Timestamp hasta = rs.getTimestamp("bloqueado_hasta");
+                    throw new CuentaBloqueadaException(hasta.toInstant());
+                }
+
                 // Verificar la contraseña.
                 if (hash == null || !PasswordUtil.verificar(clave, hash)) {
+                    registrarIntentoFallido(conexion, usuarioId);
                     return null;
                 }
 
-                long usuarioId = rs.getLong("id");
                 String nombre = rs.getString("nombre_publico");
                 String roles = rs.getString("roles");
 
-                // Actualizar la fecha del último acceso.
-                actualizarUltimoAcceso(conexion, usuarioId);
+                // Acceso correcto: reinicia el contador y anota el último acceso.
+                registrarAccesoCorrecto(conexion, usuarioId);
 
                 // Devolver los datos del usuario.
                 Map<String, Object> usuario = new HashMap<>();
@@ -160,12 +185,52 @@ public class UsuarioDAO {
         }
     }
 
-    private void actualizarUltimoAcceso(
+    /**
+     * Suma un intento fallido y, al llegar al máximo, bloquea la cuenta.
+     * Si un bloqueo anterior ya venció, el conteo vuelve a empezar en 1.
+     * Todo en una sola sentencia para que sea atómico ante peticiones simultáneas.
+     */
+    private void registrarIntentoFallido(
+            Connection conexion, long usuarioId) throws SQLException {
+
+        String sql = """
+            WITH nuevo AS (
+                SELECT id,
+                       CASE WHEN bloqueado_hasta IS NOT NULL
+                                 AND bloqueado_hasta <= now()
+                            THEN 1
+                            ELSE intentos_fallidos + 1
+                       END AS intentos
+                FROM usuario
+                WHERE id = ?
+            )
+            UPDATE usuario u
+            SET intentos_fallidos = nuevo.intentos,
+                bloqueado_hasta = CASE WHEN nuevo.intentos >= ?
+                                       THEN now() + make_interval(mins => ?)
+                                       ELSE NULL
+                                  END
+            FROM nuevo
+            WHERE u.id = nuevo.id
+            """;
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            ps.setInt(2, MAX_INTENTOS_FALLIDOS);
+            ps.setInt(3, MINUTOS_BLOQUEO);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Reinicia el contador de intentos y actualiza el último acceso. */
+    private void registrarAccesoCorrecto(
             Connection conexion, long usuarioId) throws SQLException {
 
         String sql =
                 "UPDATE usuario " +
-                "SET ultimo_acceso = CURRENT_TIMESTAMP " +
+                "SET ultimo_acceso = CURRENT_TIMESTAMP, " +
+                "    intentos_fallidos = 0, " +
+                "    bloqueado_hasta = NULL " +
                 "WHERE id = ?";
 
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
