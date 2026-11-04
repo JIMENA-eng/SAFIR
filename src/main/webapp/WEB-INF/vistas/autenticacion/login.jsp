@@ -18,6 +18,7 @@
 
     String error = esc((String) request.getAttribute("error"));
     boolean registrado = "1".equals(request.getParameter("registrado"));
+    boolean restablecido = "1".equals(request.getParameter("restablecido"));
     String correoPrevio = esc(request.getParameter("correo"));
 %>
 <!DOCTYPE html>
@@ -126,6 +127,9 @@
     font: 500 1.2rem var(--sans); box-shadow: inset 0 0 0 4px rgba(184,131,42,.25); flex: none; }
   .bonus b { font-weight: 600; }
   .bonus + form { margin-top: .4rem; }
+  .olvido { display: block; margin-top: .55rem; text-align: right; font-size: .9rem; font-weight: 500; color: var(--link); text-underline-offset: 3px; }
+  .aviso-ok { margin-top: 1.2rem; padding: .9rem 1rem; border-radius: 16px; font-size: .95rem; line-height: 1.5;
+              background: rgba(30,122,70,.12); border: 1px solid rgba(30,122,70,.4); color: var(--title); }
   @media (prefers-reduced-motion: reduce) { .overlay, .modal, .bg-plane svg { animation: none; } }
 </style>
 </head>
@@ -185,6 +189,10 @@
     </div>
     <% } %>
 
+    <% if (restablecido) { %>
+    <p class="aviso-ok" role="status"><b>Contraseña actualizada.</b> Ya puedes iniciar sesión con la nueva.</p>
+    <% } %>
+
     <form id="loginForm" action="<%= contexto %>/auth/login" method="post" novalidate>
       <label for="loginUser">Correo electrónico</label>
       <input id="loginUser" name="correo" type="email" maxlength="254" autocomplete="username"
@@ -195,6 +203,7 @@
         <input id="loginPass" name="clave" type="password" autocomplete="current-password" placeholder="Tu contraseña">
         <button class="pw-toggle" type="button" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
       </div>
+      <a class="olvido" href="<%= contexto %>/auth/recuperar">¿Olvidaste tu contraseña?</a>
 
       <% if (!error.isEmpty()) { %>
         <p class="form-msg err" id="loginMsg" role="alert"><%= error %></p>
