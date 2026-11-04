@@ -748,6 +748,7 @@
       <h2>Sesión</h2>
       <p class="sec-lead">Cuando termines, cierra tu sesión para proteger tu cuenta.</p>
       <p style="margin-top:1.4rem"><a class="btn" href="<%= contexto %>/auth/logout">Cerrar sesión</a></p>
+      <p style="margin-top:1rem"><a href="<%= contexto %>/auth/cuenta/eliminar">Eliminar mi cuenta</a></p>
     </div>
   </section>
 </main>

@@ -18,7 +18,11 @@
 
     String error = esc((String) request.getAttribute("error"));
     boolean registrado = "1".equals(request.getParameter("registrado"));
+    boolean eliminada = "1".equals(request.getParameter("eliminada"));
+    
     boolean restablecido = "1".equals(request.getParameter("restablecido"));
+
+   
     String correoPrevio = esc(request.getParameter("correo"));
 %>
 <!DOCTYPE html>
@@ -181,11 +185,16 @@
 
     <h2 id="loginTitle">Iniciar sesión</h2>
     <p class="m-sub">Entra para continuar tu lectura.</p>
+    <% if (eliminada) { %>
+    <div class="bonus" role="status">
+      <p><b>Tu cuenta fue eliminada.</b> Si te correspondía un reembolso, lo recibirás en el destino que indicaste.</p>
+    </div>
 
+    <% } %>
     <% if (registrado) { %>
     <div class="bonus" role="status">
       <span class="coin" aria-hidden="true">S</span>
-      <p><b>¡Registro exitoso!</b> Por ser tu primera vez en SAFIR ya estás ganando <b>5,000 monedas</b>. Inicia sesión para verlas en tu cuenta.</p>
+      <p><b>¡Registro exitoso!</b> Por ser tu primera vez en SAFIR recibiste un <b>regalo de bienvenida en monedas</b>. Inicia sesión para verlo en tu cuenta.</p>
     </div>
     <% } %>
 
