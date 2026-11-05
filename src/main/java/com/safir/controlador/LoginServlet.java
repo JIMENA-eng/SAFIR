@@ -45,20 +45,24 @@ public class LoginServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String correo = request.getParameter("correo");
+        // Correo o teléfono (se acepta "correo" por compatibilidad con vistas antiguas)
+        String identificador = request.getParameter("identificador");
+        if (identificador == null) {
+            identificador = request.getParameter("correo");
+        }
         String clave = request.getParameter("clave");
 
-        if (correo == null || clave == null
-                || correo.isBlank() || clave.isEmpty()) {
+        if (identificador == null || clave == null
+                || identificador.isBlank() || clave.isEmpty()) {
             mostrarError(request, response,
-                    "Ingresa tu correo y contraseña.");
+                    "Ingresa tu correo o teléfono y tu contraseña.");
             return;
         }
 
         Map<String, Object> usuario;
 
         try {
-            usuario = usuarioDAO.iniciarSesion(correo, clave);
+            usuario = usuarioDAO.iniciarSesion(identificador, clave);
         } catch (SQLException e) {
             log("Error al iniciar sesión", e);
             mostrarError(request, response,
@@ -68,7 +72,7 @@ public class LoginServlet extends HttpServlet {
 
         if (usuario == null) {
             mostrarError(request, response,
-                    "Correo o contraseña incorrectos, o cuenta no disponible.");
+                    "Correo/teléfono o contraseña incorrectos, o cuenta no disponible.");
             return;
         }
 

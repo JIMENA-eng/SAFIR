@@ -1,38 +1,38 @@
 package com.safir.controlador;
 
 import com.safir.dao.UsuarioDAO;
-import com.safir.util.ImagenUtil;
+import com.safir.dao.VerificacionDAO;
+import com.safir.seguridad.PasswordUtil;
+import com.safir.seguridad.ValidadorRegistro;
+import com.safir.util.EnvioCodigo;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Controlador de registro de usuarios.
+ * Paso 1 del registro.
  *
- * GET  /registro | /auth/registro  -> muestra el formulario.
- * POST /registro | /auth/registro  -> valida los datos y crea la cuenta.
- *      Acepta (opcional) las imágenes "avatar" y "portada".
+ * GET  /registro | /auth/registro -> formulario.
+ * POST /registro | /auth/registro -> valida los datos, guarda un registro
+ *      PENDIENTE y envía un código por correo o SMS. La cuenta se crea en
+ *      VerificarServlet cuando el usuario ingresa el código correcto.
  *
- * Se mantiene también /auth/registro porque las vistas JSP existentes
- * apuntan a esa ruta.
+ * Las fotos de perfil y portada ya no se piden aquí (no se pueden conservar
+ * entre el formulario y la verificación); se suben luego desde el perfil.
  */
 @WebServlet({"/registro", "/auth/registro"})
-@MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 8 * 1024 * 1024)
 public class RegistroServlet extends HttpServlet {
 
     private static final String VISTA_REGISTRO =
             "/WEB-INF/vistas/autenticacion/registro.jsp";
 
-    private static final String SQLSTATE_VIOLACION_UNICIDAD = "23505";
-
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final VerificacionDAO verificacionDAO = new VerificacionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -49,97 +49,106 @@ public class RegistroServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        // ===== CAMBIO: solo leer las imágenes si la petición es multipart =====
-        // El modal de index.jsp envía application/x-www-form-urlencoded (sin
-        // imágenes) y registro.jsp envía multipart/form-data. Llamar a
-        // getPart() en una petición no multipart lanza
-        // InvalidContentTypeException (Error 500).
-        Part avatar = null;
-        Part portada = null;
-        String tipo = request.getContentType();
-        boolean esMultipart = tipo != null
-                && tipo.toLowerCase().startsWith("multipart/");
-        try {
-            if (esMultipart) {
-                avatar = request.getPart("avatar");
-                portada = request.getPart("portada");
-            }
-        } catch (IllegalStateException e) {
-            mostrarError(request, response,
-                    "Las imágenes superan el tamaño permitido "
-                    + "(perfil 2 MB, portada 5 MB).");
-            return;
-        }
-        // ===== FIN DEL CAMBIO =====
-
-        String correo = request.getParameter("correo");
-        String nombre = request.getParameter("nombre");
+        String nombre = trim(request.getParameter("nombre"));      // sobrenombre
+        String usuario = trim(request.getParameter("usuario"));    // nombre de usuario
+        String contacto = trim(request.getParameter("contacto"));  // correo o teléfono
         String clave = request.getParameter("clave");
         String repetir = request.getParameter("repetir");
 
-        if (correo == null || nombre == null || clave == null
-                || repetir == null
-                || correo.isBlank() || nombre.isBlank()
-                || clave.length() < 8 || !clave.equals(repetir)
-                || correo.length() > 254 || nombre.length() > 60) {
-
+        if (nombre.isEmpty() || nombre.length() > 60) {
             mostrarError(request, response,
-                    "Revisa tus datos. La contraseña debe tener al menos "
-                    + "8 caracteres y ambas deben coincidir.");
+                    "Escribe tu sobrenombre (hasta 60 caracteres).");
+            return;
+        }
+        if (!ValidadorRegistro.usuarioValido(usuario)) {
+            mostrarError(request, response,
+                    "El nombre de usuario debe tener de 3 a 30 caracteres: "
+                    + "letras, números, punto o guion bajo.");
             return;
         }
 
-        // Validar las imágenes ANTES de crear la cuenta (si se enviaron).
-        try {
-            if (ImagenUtil.hayArchivo(avatar)) {
-                ImagenUtil.validar(avatar, ImagenUtil.MAX_AVATAR);
+        // Correo o teléfono: se decide por la presencia de "@".
+        String canal;
+        String destino;
+        if (ValidadorRegistro.esCorreo(contacto)) {
+            if (!ValidadorRegistro.correoValido(contacto)) {
+                mostrarError(request, response,
+                        "Escribe un correo electrónico válido.");
+                return;
             }
-            if (ImagenUtil.hayArchivo(portada)) {
-                ImagenUtil.validar(portada, ImagenUtil.MAX_PORTADA);
+            canal = "correo";
+            destino = contacto.toLowerCase();
+        } else {
+            destino = ValidadorRegistro.normalizarTelefono(contacto);
+            if (destino == null) {
+                mostrarError(request, response,
+                        "Escribe un correo o un número de teléfono válido "
+                        + "(ej. 999 888 777 o +51999888777).");
+                return;
             }
-        } catch (IllegalArgumentException e) {
-            mostrarError(request, response, e.getMessage());
+            canal = "telefono";
+        }
+
+        String errorClave = ValidadorRegistro.errorClave(clave);
+        if (errorClave != null) {
+            mostrarError(request, response, errorClave);
+            return;
+        }
+        if (!clave.equals(repetir)) {
+            mostrarError(request, response, "Las contraseñas no coinciden.");
             return;
         }
 
-        long usuarioId;
-
         try {
-            usuarioId = usuarioDAO.registrar(correo, nombre, clave);
+            if (usuarioDAO.existeContacto(canal, destino)) {
+                mostrarError(request, response, "telefono".equals(canal)
+                        ? "Ese número de teléfono ya está registrado."
+                        : "Ese correo ya está registrado.");
+                return;
+            }
+            if (usuarioDAO.existeNombreUsuario(usuario)) {
+                mostrarError(request, response,
+                        "Ese nombre de usuario ya está en uso.");
+                return;
+            }
+            if (usuarioDAO.existeNombrePublico(nombre)) {
+                mostrarError(request, response,
+                        "Ese sobrenombre ya está en uso.");
+                return;
+            }
+
+            String codigo = VerificacionDAO.generarCodigo();
+            long id = verificacionDAO.guardarPendiente(canal, destino, nombre,
+                    usuario, PasswordUtil.hash(clave), codigo);
+
+            if (id < 0) {
+                mostrarError(request, response,
+                        "Ya te enviamos un código hace un momento. "
+                        + "Espera un minuto para pedir otro.");
+                return;
+            }
+
+            if (!EnvioCodigo.enviar(canal, destino, codigo,
+                    VerificacionDAO.MINUTOS_VALIDEZ)) {
+                mostrarError(request, response,
+                        "No pudimos enviar el código. Revisa el dato e inténtalo de nuevo.");
+                return;
+            }
+
+            request.getSession(true).setAttribute("verifId", id);
+
         } catch (SQLException e) {
-            if (SQLSTATE_VIOLACION_UNICIDAD.equals(e.getSQLState())) {
-                mostrarError(request, response,
-                        "El correo o nombre público ya está registrado.");
-            } else {
-                log("Error al registrar usuario", e);
-                mostrarError(request, response,
-                        "Ocurrió un error al conectar con la base de datos.");
-            }
+            log("Error al iniciar el registro", e);
+            mostrarError(request, response,
+                    "Ocurrió un error al conectar con la base de datos.");
             return;
         }
 
-        // Guardar imágenes: un fallo aquí NO cancela el registro;
-        // el usuario podrá subirlas luego desde su perfil.
-        try {
-            String rutaAvatar = ImagenUtil.hayArchivo(avatar)
-                    ? ImagenUtil.guardar(avatar, "avatar", usuarioId,
-                            ImagenUtil.MAX_AVATAR)
-                    : null;
-            String rutaPortada = ImagenUtil.hayArchivo(portada)
-                    ? ImagenUtil.guardar(portada, "portada", usuarioId,
-                            ImagenUtil.MAX_PORTADA)
-                    : null;
+        response.sendRedirect(request.getContextPath() + "/auth/verificar");
+    }
 
-            if (rutaAvatar != null || rutaPortada != null) {
-                usuarioDAO.actualizarImagenes(
-                        usuarioId, rutaAvatar, rutaPortada);
-            }
-        } catch (IOException | SQLException e) {
-            log("Cuenta creada, pero no se guardaron las imágenes", e);
-        }
-
-        response.sendRedirect(
-                request.getContextPath() + "/auth/login?registrado=1");
+    private static String trim(String s) {
+        return s == null ? "" : s.trim();
     }
 
     private void mostrarError(HttpServletRequest request,

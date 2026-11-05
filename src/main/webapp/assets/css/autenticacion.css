@@ -106,3 +106,27 @@ input[type="file"]::file-selector-button {
   background: var(--soft); color: var(--title); font: 500 .88rem var(--sans); cursor: pointer;
 }
 .modal .m-switch + .m-legal { margin-top: .8rem; }
+
+/* ---- Registro con verificación: seguridad de contraseña y código ---- */
+.strength { display: flex; align-items: center; gap: .7rem; margin-top: .55rem; }
+.strength-bar { flex: 1; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.strength-bar span { display: block; height: 100%; width: 0; border-radius: 999px; transition: width .2s, background .2s; }
+.strength-bar span.n0 { width: 33%; background: #B3261E; }
+.strength-bar span.n1 { width: 66%; background: #D18A00; }
+.strength-bar span.n2 { width: 100%; background: #1E7A46; }
+.strength-label { font-size: .82rem; color: var(--muted); min-width: 8.5rem; text-align: right; }
+.reglas { list-style: none; margin: .5rem 0 0; padding: 0; font-size: .82rem; color: var(--muted); }
+.reglas li::before { content: "○ "; }
+.reglas li.ok { color: #1E7A46; }
+.reglas li.ok::before { content: "✓ "; }
+.reglas li.no { color: #B3261E; }
+.reglas li.no::before { content: "✗ "; }
+.codigo { text-align: center; font-size: 1.8rem; letter-spacing: .5em; padding-left: 1.2em; font-variant-numeric: tabular-nums; }
+.form-msg.ok-info { color: #1E7A46; }
+.btn.ghost { background: transparent; color: var(--link); border-color: var(--line); margin-top: .5rem; }
+
+/* ---- Ventana de fotos tras el registro ---- */
+.prev { position: relative; margin-top: 1.2rem; margin-bottom: 2.6rem; }
+.prev-portada, .prev-avatar { background: var(--soft) center / cover no-repeat; color: var(--muted); display: grid; place-items: center; font-size: .85rem; }
+.prev-portada { height: 120px; border-radius: 16px; border: 1.5px dashed var(--line); }
+.prev-avatar { position: absolute; left: 1.1rem; bottom: -2rem; width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--bg); box-shadow: 0 4px 14px rgba(18,20,46,.25); }

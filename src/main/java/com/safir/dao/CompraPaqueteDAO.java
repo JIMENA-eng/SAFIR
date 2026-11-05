@@ -187,7 +187,7 @@ public class CompraPaqueteDAO {
 
     /** Pagos con Yape que ya tienen código de operación y esperan revisión. */
     public List<Map<String, Object>> listarYapePendientes() throws SQLException {
-        String sql = "SELECT cp.id, u.nombre_publico, u.correo, cp.monedas, "
+        String sql = "SELECT cp.id, u.nombre_publico, COALESCE(u.correo, u.telefono) AS correo, cp.monedas, "
                 + "cp.precio_pagado_usd, cp.monto_pen, cp.referencia_pago, cp.creado_en "
                 + "FROM compra_paquete cp JOIN usuario u ON u.id = cp.usuario_id "
                 + "WHERE cp.pasarela = 'yape' AND cp.estado = 'pendiente' "

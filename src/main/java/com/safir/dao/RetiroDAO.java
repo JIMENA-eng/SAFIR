@@ -99,7 +99,7 @@ public class RetiroDAO {
 
     /** Solicitudes pendientes de revisión, las más antiguas primero. */
     public List<Map<String, Object>> listarPendientes() throws SQLException {
-        String sql = "SELECT r.id, r.creado_en, u.nombre_publico, u.correo, an.nivel, "
+        String sql = "SELECT r.id, r.creado_en, u.nombre_publico, COALESCE(u.correo, u.telefono) AS correo, an.nivel, "
                 + "r.monedas_solicitadas, r.monedas_plataforma, r.monedas_autor, "
                 + "r.valor_moneda_usd, r.monto_usd, r.metodo_pago, r.datos_pago "
                 + "FROM retiro r JOIN usuario u ON u.id = r.autor_id "

@@ -2,6 +2,7 @@ package com.safir.dao;
 
 import com.safir.config.ConexionBD;
 import com.safir.seguridad.PasswordUtil;
+import com.safir.seguridad.ValidadorRegistro;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,13 +13,21 @@ import java.util.Map;
 
 public class UsuarioDAO {
 
-    public long registrar(String correo, String nombre, String clave)
+    /**
+     * Crea la cuenta YA verificada. Se llama solo después de confirmar el
+     * código. Uno de correo/telefono es null según el canal elegido.
+     * "nombre" es el sobrenombre (nombre_publico); la clave llega ya cifrada.
+     */
+    public long registrarVerificado(String correo, String telefono,
+                                    String nombreUsuario, String nombre,
+                                    String hashClave)
             throws SQLException {
 
         String sqlUsuario =
                 "INSERT INTO usuario " +
-                "(correo, contrasena_hash, nombre_publico) " +
-                "VALUES (?, ?, ?) RETURNING id";
+                "(correo, telefono, nombre_usuario, contrasena_hash, " +
+                " nombre_publico, datos_consentidos_en) " +
+                "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP) RETURNING id";
 
         String sqlRol =
                 "INSERT INTO usuario_rol (usuario_id, rol_id) " +
@@ -40,9 +49,11 @@ public class UsuarioDAO {
                 try (PreparedStatement ps =
                         conexion.prepareStatement(sqlUsuario)) {
 
-                    ps.setString(1, correo.trim());
-                    ps.setString(2, PasswordUtil.hash(clave));
-                    ps.setString(3, nombre.trim());
+                    ps.setString(1, correo);
+                    ps.setString(2, telefono);
+                    ps.setString(3, nombreUsuario.trim());
+                    ps.setString(4, hashClave);
+                    ps.setString(5, nombre.trim());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
@@ -102,8 +113,49 @@ public class UsuarioDAO {
         }
     }
 
-    public Map<String, Object> iniciarSesion(String correo, String clave)
+    /** true si ya existe una cuenta con ese correo (minúsculas) o teléfono (+51...). */
+    public boolean existeContacto(String canal, String destino)
             throws SQLException {
+
+        String sql = "telefono".equals(canal)
+                ? "SELECT 1 FROM usuario WHERE telefono = ?"
+                : "SELECT 1 FROM usuario WHERE LOWER(correo) = LOWER(?)";
+
+        return existe(sql, destino);
+    }
+
+    public boolean existeNombreUsuario(String nombreUsuario) throws SQLException {
+        return existe("SELECT 1 FROM usuario WHERE LOWER(nombre_usuario) = LOWER(?)",
+                nombreUsuario.trim());
+    }
+
+    public boolean existeNombrePublico(String nombre) throws SQLException {
+        return existe("SELECT 1 FROM usuario WHERE LOWER(nombre_publico) = LOWER(?)",
+                nombre.trim());
+    }
+
+    private boolean existe(String sql, String valor) throws SQLException {
+        try (Connection c = ConexionBD.conectar();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, valor);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /** Inicia sesión con correo O teléfono ("identificador") y contraseña. */
+    public Map<String, Object> iniciarSesion(String identificador, String clave)
+            throws SQLException {
+
+        boolean porCorreo = ValidadorRegistro.esCorreo(identificador);
+        String valor = porCorreo
+                ? identificador.trim()
+                : ValidadorRegistro.normalizarTelefono(identificador);
+
+        if (valor == null) {
+            return null;
+        }
 
         String sql =
                 "SELECT u.id, u.nombre_publico, u.contrasena_hash, " +
@@ -113,14 +165,15 @@ public class UsuarioDAO {
                 "LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id " +
                 "LEFT JOIN rol r ON r.id = ur.rol_id " +
                 "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
-                "WHERE LOWER(u.correo) = LOWER(?) " +
+                "WHERE " + (porCorreo ? "LOWER(u.correo) = LOWER(?) "
+                                      : "u.telefono = ? ") +
                 "GROUP BY u.id, u.nombre_publico, " +
                 "u.contrasena_hash, u.estado_cuenta, p.avatar_ruta";
 
         try (Connection conexion = ConexionBD.conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            ps.setString(1, correo.trim());
+            ps.setString(1, valor);
 
             try (ResultSet rs = ps.executeQuery()) {
 

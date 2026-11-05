@@ -23,7 +23,7 @@
     boolean restablecido = "1".equals(request.getParameter("restablecido"));
 
    
-    String correoPrevio = esc(request.getParameter("correo"));
+    String correoPrevio = esc(request.getParameter("identificador"));
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -203,9 +203,9 @@
     <% } %>
 
     <form id="loginForm" action="<%= contexto %>/auth/login" method="post" novalidate>
-      <label for="loginUser">Correo electrónico</label>
-      <input id="loginUser" name="correo" type="email" maxlength="254" autocomplete="username"
-             placeholder="tucorreo@ejemplo.com" value="<%= correoPrevio %>">
+      <label for="loginUser">Correo o número de teléfono</label>
+      <input id="loginUser" name="identificador" type="text" maxlength="254" autocomplete="username"
+             placeholder="tucorreo@ejemplo.com o 999 888 777" value="<%= correoPrevio %>">
 
       <label for="loginPass">Contraseña</label>
       <div class="pw">
@@ -239,6 +239,12 @@
 
   function say(text, kind) { msg.className = 'form-msg' + (kind ? ' ' + kind : ''); msg.textContent = text; }
   function isEmail(v) { return /^[^ @]+@[^ @]+[.][^ @]+$/.test(v); }
+  function phoneOk(v) {
+    var s = v.replace(/[\s\-().]/g, '');
+    if (s.indexOf('00') === 0) s = '+' + s.slice(2);
+    if (s.charAt(0) !== '+') { if (!/^9\d{8}$/.test(s)) return false; s = '+51' + s; }
+    return /^\+[1-9]\d{7,14}$/.test(s);
+  }
 
   // Mostrar / ocultar contraseña
   var t = document.querySelector('.pw-toggle');
@@ -252,7 +258,8 @@
 
   // Valida y, si todo está bien, envía a /auth/login
   form.addEventListener('submit', function (e) {
-    if (!isEmail(user.value.trim())) { e.preventDefault(); return say('Escribe un correo electrónico válido.', 'err'); }
+    var v = user.value.trim();
+    if (v.indexOf('@') >= 0 ? !isEmail(v) : !phoneOk(v)) { e.preventDefault(); return say('Escribe un correo o un número de teléfono válido.', 'err'); }
     if (!pass.value) { e.preventDefault(); return say('Escribe tu contraseña.', 'err'); }
     say('Ingresando…', 'ok');
   });

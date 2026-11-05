@@ -184,7 +184,7 @@ public class CuentaDAO {
 
     /** Reembolsos por eliminación de cuenta que aún hay que pagar. */
     public List<Map<String, Object>> listarReembolsosPendientes() throws SQLException {
-        String sql = "SELECT r.id, r.creado_en, u.nombre_publico, u.correo, r.monedas, "
+        String sql = "SELECT r.id, r.creado_en, u.nombre_publico, COALESCE(u.correo, u.telefono) AS correo, r.monedas, "
                 + "r.valor_bruto_usd, r.comision_pct, r.comision_usd, r.monto_usd, "
                 + "r.monedas_perdidas, r.metodo_pago, r.datos_pago "
                 + "FROM reembolso_cuenta r JOIN usuario u ON u.id = r.usuario_id "
