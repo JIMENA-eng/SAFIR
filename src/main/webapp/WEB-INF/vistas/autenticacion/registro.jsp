@@ -30,7 +30,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Iniciar sesión · SAFIR</title>
+<title>Crear cuenta · SAFIR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
@@ -183,7 +183,7 @@
 
 <!-- Ventana flotante: POST /auth/login -->
 <div class="overlay">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="regTitle">
     <a class="close" href="<%= contexto %>/index.jsp" aria-label="Cerrar y volver al inicio">×</a>
 
     <div class="m-brand" aria-hidden="true">
@@ -192,44 +192,38 @@
       <span>SAFIR</span>
     </div>
 
-    <h2 id="loginTitle">Iniciar sesión</h2>
-    <p class="m-sub">Entra para continuar tu lectura.</p>
-    <% if (eliminada) { %>
-    <div class="bonus" role="status">
-      <p><b>Tu cuenta fue eliminada.</b> Si te correspondía un reembolso, lo recibirás en el destino que indicaste.</p>
-    </div>
+    <h2 id="regTitle">Crear cuenta</h2>
+    <p class="m-sub">Únete a SAFIR para leer y publicar historias.</p>
 
-    <% } %>
-    <% if (registrado) { %>
-    <div class="bonus" role="status">
-      <span class="coin" aria-hidden="true">S</span>
-      <p><b>¡Registro exitoso!</b> Por ser tu primera vez en SAFIR recibiste un <b>regalo de bienvenida en monedas</b>. Inicia sesión para verlo en tu cuenta.</p>
-    </div>
-    <% } %>
+    <form id="regForm" action="<%= contexto %>/auth/registro" method="post" novalidate>
+      <label for="regNombre">Sobrenombre</label>
+      <input id="regNombre" name="nombre" type="text" maxlength="60" autocomplete="nickname"
+             placeholder="Como te verán los demás" value="<%= esc(request.getParameter("nombre")) %>">
 
-    <% if (restablecido) { %>
-    <p class="aviso-ok" role="status"><b>Contraseña actualizada.</b> Ya puedes iniciar sesión con la nueva.</p>
-    <% } %>
+      <label for="regUsuario">Nombre de usuario</label>
+      <input id="regUsuario" name="usuario" type="text" maxlength="30" autocomplete="username"
+             placeholder="3 a 30: letras, números, punto o _" value="<%= esc(request.getParameter("usuario")) %>">
 
-    <form id="loginForm" action="<%= contexto %>/auth/login" method="post" novalidate>
-      <label for="loginUser">Correo o número de teléfono</label>
-      <input id="loginUser" name="identificador" type="text" maxlength="254" autocomplete="username"
-             placeholder="tucorreo@ejemplo.com o 999 888 777" value="<%= correoPrevio %>">
+      <label for="regContacto">Correo o número de teléfono</label>
+      <input id="regContacto" name="contacto" type="text" maxlength="254" autocomplete="email"
+             placeholder="tucorreo@ejemplo.com o 999 888 777" value="<%= esc(request.getParameter("contacto")) %>">
 
-      <label for="loginPass">Contraseña</label>
+      <label for="regPass">Contraseña</label>
       <div class="pw">
-        <input id="loginPass" name="clave" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+        <input id="regPass" name="clave" type="password" maxlength="72" autocomplete="new-password" placeholder="Mínimo 8 caracteres y una mayúscula">
         <button class="pw-toggle" type="button" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
       </div>
-      <a class="olvido" href="<%= contexto %>/auth/recuperar">¿Olvidaste tu contraseña?</a>
+
+      <label for="regPass2">Repetir contraseña</label>
+      <input id="regPass2" name="repetir" type="password" maxlength="72" autocomplete="new-password" placeholder="Repite tu contraseña">
 
       <% if (!error.isEmpty()) { %>
-        <p class="form-msg err" id="loginMsg" role="alert"><%= error %></p>
+        <p class="form-msg err" id="regMsg" role="alert"><%= error %></p>
       <% } else { %>
-        <p class="form-msg" id="loginMsg" role="status"></p>
+        <p class="form-msg" id="regMsg" role="status"></p>
       <% } %>
 
-      <button class="btn" type="submit">Iniciar sesión</button>
+      <button class="btn" type="submit">Crear cuenta</button>
     </form>
 
     <%
@@ -247,19 +241,21 @@
     </div>
     <% } %>
 
-    <p class="m-switch">¿No tienes una cuenta? <a href="<%= contexto %>/auth/registro">Registrarse</a></p>
+    <p class="m-switch">¿Ya tienes una cuenta? <a href="<%= contexto %>/auth/login">Iniciar sesión</a></p>
   </div>
 </div>
 
 <script>
 (function () {
-  // Tema guardado (el mismo del resto del sitio)
   try { if (localStorage.getItem('safir-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
 
-  var form = document.getElementById('loginForm');
-  var user = document.getElementById('loginUser');
-  var pass = document.getElementById('loginPass');
-  var msg = document.getElementById('loginMsg');
+  var form = document.getElementById('regForm');
+  var nombre = document.getElementById('regNombre');
+  var usuario = document.getElementById('regUsuario');
+  var contacto = document.getElementById('regContacto');
+  var pass = document.getElementById('regPass');
+  var pass2 = document.getElementById('regPass2');
+  var msg = document.getElementById('regMsg');
 
   function say(text, kind) { msg.className = 'form-msg' + (kind ? ' ' + kind : ''); msg.textContent = text; }
   function isEmail(v) { return /^[^ @]+@[^ @]+[.][^ @]+$/.test(v); }
@@ -269,31 +265,49 @@
     if (s.charAt(0) !== '+') { if (!/^9\d{8}$/.test(s)) return false; s = '+51' + s; }
     return /^\+[1-9]\d{7,14}$/.test(s);
   }
+  function numerosSeguidos(c) {
+    var asc = 1, desc = 1, rep = 1;
+    for (var i = 1; i < c.length; i++) {
+      var a = c.charAt(i - 1), b = c.charAt(i);
+      if (/\d/.test(a) && /\d/.test(b)) {
+        asc  = (+b === +a + 1) ? asc + 1  : 1;
+        desc = (+b === +a - 1) ? desc + 1 : 1;
+        rep  = (b === a)       ? rep + 1  : 1;
+      } else { asc = desc = rep = 1; }
+      if (asc >= 4 || desc >= 4 || rep >= 4) return true;
+    }
+    return false;
+  }
 
-  // Mostrar / ocultar contraseña
   var t = document.querySelector('.pw-toggle');
   t.addEventListener('click', function () {
     var show = pass.type === 'password';
     pass.type = show ? 'text' : 'password';
+    pass2.type = pass.type;
     t.textContent = show ? 'Ocultar' : 'Mostrar';
     t.setAttribute('aria-pressed', show ? 'true' : 'false');
     t.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
   });
 
-  // Valida y, si todo está bien, envía a /auth/login
   form.addEventListener('submit', function (e) {
-    var v = user.value.trim();
-    if (v.indexOf('@') >= 0 ? !isEmail(v) : !phoneOk(v)) { e.preventDefault(); return say('Escribe un correo o un número de teléfono válido.', 'err'); }
-    if (!pass.value) { e.preventDefault(); return say('Escribe tu contraseña.', 'err'); }
-    say('Ingresando…', 'ok');
+    var n = nombre.value.trim(), u = usuario.value.trim(), c = contacto.value.trim(), p = pass.value;
+    var err = null;
+    if (!n || n.length > 60) err = 'Escribe tu sobrenombre (hasta 60 caracteres).';
+    else if (!/^[A-Za-z0-9_.]{3,30}$/.test(u)) err = 'El usuario debe tener de 3 a 30 caracteres: letras, números, punto o guion bajo.';
+    else if (c.indexOf('@') >= 0 ? !isEmail(c) : !phoneOk(c)) err = 'Escribe un correo o un número de teléfono válido.';
+    else if (p.length < 8) err = 'La contraseña debe tener al menos 8 caracteres.';
+    else if (!/[A-ZÁÉÍÓÚÑ]/.test(p)) err = 'La contraseña debe incluir al menos una letra mayúscula.';
+    else if (numerosSeguidos(p)) err = 'No uses números seguidos (12345678) ni repetidos (1111).';
+    else if (p !== pass2.value) err = 'Las contraseñas no coinciden.';
+    if (err) { e.preventDefault(); return say(err, 'err'); }
+    say('Enviando código…', 'ok');
   });
 
-  // Escape cierra la ventana y vuelve al index
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') window.location.href = document.querySelector('.close').href;
   });
 
-  (user.value ? pass : user).focus();
+  nombre.focus();
 })();
 </script>
 </body>
