@@ -1,0 +1,20 @@
+/* Cuenta · ajustes para pantallas pequeñas */
+/* Responsive */
+@media (max-width: 900px) {
+  .reading .wrap, .write .wrap, .hub { grid-template-columns: 1fr; }
+  .hero .wrap { flex-direction: column; min-height: 0; }
+  .stage { position: relative; right: auto; top: auto; transform: none; width: min(92%, 440px); margin: 1.5rem auto 0; }
+  nav { display: none; }
+  header.bar .wrap { justify-content: space-between; }
+  .theme-toggle { margin-left: auto; }
+}
+@media (max-width: 480px) {
+  .continue .row { grid-template-columns: 90px 1fr; }
+  .coin-num { font-size: 2.7rem; }
+  header.bar .btn.ghost-bar { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plane-float, .chapters li { animation: none; }
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}

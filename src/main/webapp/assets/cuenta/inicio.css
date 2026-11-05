@@ -1,0 +1,80 @@
+/* Cuenta · barra de usuario, menú, bienvenida y 'Mis obras' */
+/* ===== Inicio (usuario con sesión) ===== */
+.btn.user { background: transparent; color: #E9E7FF; border-color: rgba(233,231,255,.5); gap: .55rem; max-width: 20ch; }
+.btn.user:hover { border-color: #fff; color: #fff; }
+.btn.user b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--lav-soft); color: var(--indigo); display: inline-grid; place-items: center; font: 600 .85rem var(--sans); flex: none; }
+
+.welcome { background: var(--soft); padding: clamp(2.5rem, 6vw, 4.2rem) 0; }
+.welcome h1 { font-size: clamp(2.2rem, 5.2vw, 3.8rem); max-width: 14em; }
+.welcome .lead { margin-top: .9rem; color: var(--text); max-width: 34em; }
+.search { margin-top: 1.7rem; display: flex; gap: .7rem; max-width: 680px; }
+.search input {
+  flex: 1; min-width: 0; font: inherit; padding: .95rem 1.4rem; border-radius: 999px;
+  border: 1.5px solid var(--outline); background: var(--surface); color: var(--text);
+}
+.search input::placeholder { color: #8b8ba3; }
+.search input:focus { outline: none; box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+
+.block { padding: clamp(2.6rem, 6vw, 4rem) 0 0; }
+.block:last-of-type { padding-bottom: clamp(3rem, 7vw, 5rem); }
+.block h2 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); }
+.block .sec-lead { margin-top: .6rem; }
+
+.resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.2rem; margin-top: 1.7rem; }
+.resume { display: grid; grid-template-columns: 84px 1fr; gap: 1.1rem; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 1.1rem; }
+.resume .cv svg { width: 100%; height: auto; display: block; border-radius: 8px; }
+.resume .progress { margin: .8rem 0 .5rem; }
+.resume .progress i { width: var(--p, 0%); }
+.resume .pct { font-size: .85rem; color: var(--muted); margin-bottom: .8rem; }
+
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1.7rem 1.3rem; margin-top: 1.8rem; }
+.shelf .book { width: auto; }
+.tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+.tab { font: 500 .95rem var(--sans); padding: .6rem 1.15rem; border-radius: 999px; border: 1.5px solid var(--outline); background: transparent; color: var(--link); cursor: pointer; }
+.tab:hover { background: var(--soft); }
+.tab[aria-selected="true"] { background: var(--btn); color: var(--btn-text); border-color: transparent; }
+.tab small { opacity: .75; margin-left: .25rem; }
+
+.off { display: none !important; }
+.nores { display: none; margin-top: 2.5rem; color: var(--muted); }
+.nores.on { display: block; }
+.hint { margin-top: 1.6rem; font-size: .88rem; color: var(--muted); }
+
+/* Menú de usuario */
+header.bar { position: relative; z-index: 50; }
+.menu-wrap { position: relative; }
+.btn.user .caret { width: 12px; height: 12px; flex: none; transition: transform .2s; }
+.btn.user[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.menu {
+  position: absolute; right: 0; top: calc(100% + .6rem); min-width: 240px; padding: .5rem;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 24px 50px -18px rgba(18,20,46,.5); animation: rise .2s cubic-bezier(.2,.8,.2,1);
+}
+.menu[hidden] { display: none; }
+.menu-head { padding: .6rem .8rem .7rem; border-bottom: 1px solid var(--line); margin-bottom: .35rem; }
+.menu-head b { display: block; color: var(--title); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-head small { color: var(--muted); }
+.menu a { display: block; padding: .65rem .8rem; border-radius: 10px; text-decoration: none; color: var(--text); font-size: .98rem; }
+.menu a:hover, .menu a:focus-visible { background: var(--soft); color: var(--title); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Avión de papel en la bienvenida */
+.welcome { position: relative; overflow: hidden; }
+.welcome .wrap { position: relative; }
+.welcome .wrap > *:not(.welcome-plane) { position: relative; z-index: 1; }
+.welcome-plane { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: min(340px, 34%); pointer-events: none; z-index: 0; }
+.welcome-plane svg { width: 100%; height: auto; overflow: visible; display: block; }
+
+/* Mis obras */
+.new-work {
+  aspect-ratio: 3/4; border: 1.5px dashed var(--outline); border-radius: 12px; background: transparent;
+  color: var(--link); font: 500 1rem var(--sans); cursor: pointer; padding: 1rem; text-align: center;
+  display: grid; place-content: center; gap: .4rem;
+}
+.new-work:hover { background: var(--soft); }
+.new-work span { font-size: 2rem; line-height: 1; font-weight: 300; }
+
+@media (max-width: 760px) {
+  .welcome-plane { position: relative; top: auto; right: auto; transform: none; width: 200px; margin: 1.6rem 0 0 auto; }
+}

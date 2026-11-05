@@ -1,0 +1,22 @@
+/* Cuenta · contenido de la página Mi cuenta */
+/* Cuenta */
+.account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 2rem; }
+.profile-top { display: flex; align-items: center; gap: 1.2rem; }
+.big-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--lav); color: #fff; display: grid; place-items: center; font: 500 2rem var(--sans); flex: none; }
+.profile-top h2 { font-size: 1.7rem; overflow-wrap: anywhere; }
+.muted { color: var(--muted); }
+.dl { margin: 1.6rem 0 0; display: grid; gap: .9rem; }
+.dl div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line); }
+.dl dt { color: var(--muted); }
+.dl dd { margin: 0; color: var(--title); font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+.moves { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; gap: .8rem; }
+.move { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; }
+.move-text b { display: block; color: var(--title); font-weight: 500; }
+.move-text small { color: var(--muted); }
+.coin.sm { width: 40px; height: 40px; font-size: 1.1rem; box-shadow: inset 0 0 0 3px rgba(184,131,42,.25); }
+.plus { font: 500 1.2rem var(--sans); color: #1F7A4D; }
+:root[data-theme="dark"] .plus { color: #7BE0A9; }
+.total-row { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.2rem; padding: 1rem 1.2rem; border-radius: 16px; background: var(--soft); color: var(--muted); }
+.total-row b { color: var(--title); font-weight: 600; }
+@media (max-width: 900px) { .account-grid { grid-template-columns: 1fr; } }
