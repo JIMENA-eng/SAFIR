@@ -187,6 +187,7 @@
         <a role="menuitem" href="#" data-pendiente>Notificaciones</a>
         <a role="menuitem" href="#" data-pendiente>Mensajes</a>
         <a role="menuitem" href="<%= contexto %>/auth/inicio#mis-obras">Mis obras</a>
+        
       </div>
     </div>
     <a class="btn small on-bar" href="<%= contexto %>/auth/logout">Cerrar sesión</a>
@@ -248,7 +249,7 @@
         <li class="move">
           <span class="coin sm" aria-hidden="true">S</span>
           <div class="move-text"><b>Bono de bienvenida</b><small>Por ser tu primera vez en SAFIR al registrarte</small></div>
-          <span class="plus">+5,000</span>
+          <span class="plus">+1,000</span>
         </li>
       </ul>
       <div class="total-row"><span>Saldo actual</span><b><%= monedasTxt %> monedas</b></div>
