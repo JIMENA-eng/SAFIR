@@ -1,6 +1,9 @@
 package com.safir.controlador;
 
 import com.safir.dao.RecuperacionDAO;
+import com.safir.dao.VerificacionDAO;
+import com.safir.seguridad.ValidadorRegistro;
+import com.safir.util.EnvioCodigo;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,9 +17,9 @@ import java.sql.SQLException;
  * Paso 1 de la recuperación de contraseña.
  *
  * GET  /auth/recuperar -> formulario para escribir el correo.
- * POST /auth/recuperar -> si el correo es de una cuenta activa, genera el
- *      enlace de recuperación. La respuesta es SIEMPRE la misma, exista o no
- *      el correo, para que nadie pueda averiguar qué correos tienen cuenta.
+ * POST /auth/recuperar -> si el correo está vinculado a una cuenta activa (y no
+ *      recuperó su contraseña en los últimos 30 días) envía un código de 6
+ *      dígitos y pasa a /auth/restablecer.
  */
 @WebServlet("/auth/recuperar")
 public class RecuperarServlet extends HttpServlet {
@@ -42,73 +45,58 @@ public class RecuperarServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         String correo = request.getParameter("correo");
+        correo = correo == null ? "" : correo.trim();
 
-        if (correo == null || correo.isBlank()
-                || correo.length() > 254 || !correo.contains("@")) {
+        if (!ValidadorRegistro.correoValido(correo)) {
             mostrarError(request, response,
                     "Escribe un correo electrónico válido.");
             return;
         }
 
+        long id;
         try {
             Long usuarioId = dao.buscarUsuarioActivo(correo);
 
-            if (usuarioId != null) {
-                String token = RecuperacionDAO.generarToken();
+            if (usuarioId == null) {
+                mostrarError(request, response,
+                        "Ese correo no está vinculado a ninguna cuenta.");
+                return;
+            }
 
-                if (dao.crearToken(usuarioId,
-                        RecuperacionDAO.hashDeToken(token))) {
-                    enviarEnlace(correo.trim(), armarEnlace(request, token));
-                }
+            int dias = dao.diasRestantesBloqueo(usuarioId);
+            if (dias > 0) {
+                mostrarError(request, response,
+                        "Ya cambiaste tu contraseña por recuperación hace poco. "
+                        + "Podrás volver a recuperarla dentro de " + dias
+                        + (dias == 1 ? " día." : " días."));
+                return;
+            }
+
+            String codigo = VerificacionDAO.generarCodigo();
+            id = dao.crearCodigo(usuarioId, codigo);
+
+            if (id < 0) {
+                mostrarError(request, response,
+                        "Ya te enviamos un código hace un momento. "
+                        + "Espera un minuto para pedir otro.");
+                return;
+            }
+
+            if (!EnvioCodigo.enviar("correo", correo.toLowerCase(), codigo,
+                    RecuperacionDAO.MINUTOS_VALIDEZ)) {
+                mostrarError(request, response,
+                        "No pudimos enviar el código. Inténtalo de nuevo en un minuto.");
+                return;
             }
         } catch (SQLException e) {
-            log("Error al generar la recuperación de contraseña", e);
+            log("Error al iniciar la recuperación de contraseña", e);
             mostrarError(request, response,
                     "Ocurrió un error al conectar con la base de datos.");
             return;
         }
 
-        // Misma respuesta exista o no la cuenta.
-        response.sendRedirect(
-                request.getContextPath() + "/auth/recuperar?enviado=1");
-    }
-
-    /** Dirección completa del enlace que recibirá el usuario. */
-    private String armarEnlace(HttpServletRequest request, String token) {
-        // En producción define la variable de entorno SAFIR_URL_BASE
-        // (por ejemplo https://safir.pe/safir) para no depender del
-        // encabezado Host de la petición.
-        String base = System.getenv("SAFIR_URL_BASE");
-
-        if (base == null || base.isBlank()) {
-            int puerto = request.getServerPort();
-            boolean puertoPorDefecto =
-                    ("http".equals(request.getScheme()) && puerto == 80)
-                    || ("https".equals(request.getScheme()) && puerto == 443);
-
-            base = request.getScheme() + "://" + request.getServerName()
-                    + (puertoPorDefecto ? "" : ":" + puerto)
-                    + request.getContextPath();
-        }
-
-        if (base.endsWith("/")) {
-            base = base.substring(0, base.length() - 1);
-        }
-        return base + "/auth/restablecer?token=" + token;
-    }
-
-    /**
-     * MODO DESARROLLO: todavía no se envía correo; el enlace se imprime en
-     * la consola del servidor (ventana de salida de NetBeans).
-     * Más adelante aquí se reemplaza por el envío real de correo.
-     */
-    private void enviarEnlace(String correo, String enlace) {
-        System.out.println("=====================================");
-        System.out.println("RECUPERACIÓN DE CONTRASEÑA (solo desarrollo)");
-        System.out.println("Para: " + correo);
-        System.out.println("Enlace (válido " + RecuperacionDAO.MINUTOS_VALIDEZ
-                + " minutos): " + enlace);
-        System.out.println("=====================================");
+        request.getSession(true).setAttribute("recId", id);
+        response.sendRedirect(request.getContextPath() + "/auth/restablecer");
     }
 
     private void mostrarError(HttpServletRequest request,

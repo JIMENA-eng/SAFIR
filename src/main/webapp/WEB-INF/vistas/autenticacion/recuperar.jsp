@@ -9,7 +9,6 @@
 <%
     String contexto = request.getContextPath();
     String error = esc((String) request.getAttribute("error"));
-    boolean enviado = "1".equals(request.getParameter("enviado"));
     String correoPrevio = esc(request.getParameter("correo"));
 %>
 <!DOCTYPE html>
@@ -48,16 +47,8 @@
     </div>
 
     <h2 id="recTitle">Recuperar contraseña</h2>
-    <p class="m-sub">Te enviaremos un enlace para crear una nueva.</p>
+    <p class="m-sub">Escribe el correo de tu cuenta y te enviaremos un código de 6 dígitos.</p>
 
-    <% if (enviado) { %>
-      <p class="aviso" role="status">
-        Si el correo está registrado, te enviamos un enlace para restablecer
-        tu contraseña. Revisa tu bandeja de entrada (y la carpeta de spam).
-        El enlace vale <b>30 minutos</b>.
-      </p>
-      <p class="m-switch"><a href="<%= contexto %>/auth/login">Volver a iniciar sesión</a></p>
-    <% } else { %>
       <form id="recForm" action="<%= contexto %>/auth/recuperar" method="post" novalidate>
         <label for="recCorreo">Correo electrónico</label>
         <input id="recCorreo" name="correo" type="email" maxlength="254" autocomplete="email"
@@ -69,10 +60,9 @@
           <p class="form-msg" id="recMsg" role="status"></p>
         <% } %>
 
-        <button class="btn" type="submit">Enviar enlace</button>
+        <button class="btn" type="submit">Enviar código</button>
       </form>
       <p class="m-switch">¿Ya la recordaste? <a href="<%= contexto %>/auth/login">Iniciar sesión</a></p>
-    <% } %>
   </div>
 </div>
 
