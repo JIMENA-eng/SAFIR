@@ -134,6 +134,15 @@
   .olvido { display: block; margin-top: .55rem; text-align: right; font-size: .9rem; font-weight: 500; color: var(--link); text-underline-offset: 3px; }
   .aviso-ok { margin-top: 1.2rem; padding: .9rem 1rem; border-radius: 16px; font-size: .95rem; line-height: 1.5;
               background: rgba(30,122,70,.12); border: 1px solid rgba(30,122,70,.4); color: var(--title); }
+  /* Inicio de sesión con redes sociales */
+  .social { margin-top: 1.2rem; display: grid; gap: .6rem; }
+  .social-sep { display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
+  .social-sep::before, .social-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .btn-social { display: flex; align-items: center; justify-content: center; padding: .85rem 1rem; border-radius: 999px;
+    border: 1.5px solid var(--line); background: rgba(255,255,255,.75); color: var(--title); font: 500 .98rem var(--sans); text-decoration: none; }
+  :root[data-theme="dark"] .btn-social { background: rgba(18,20,46,.6); }
+  .btn-social:hover { border-color: var(--lav); }
+  .social-legal { font-size: .8rem; color: var(--muted); text-align: center; }
   @media (prefers-reduced-motion: reduce) { .overlay, .modal, .bg-plane svg { animation: none; } }
 </style>
 </head>
@@ -222,6 +231,21 @@
 
       <button class="btn" type="submit">Iniciar sesión</button>
     </form>
+
+    <%
+      String[][] redes = {{"google", "Google"}, {"facebook", "Facebook"}, {"x", "X"}};
+      boolean hayRedes = false;
+      for (String[] rd : redes) { if (com.safir.seguridad.SocialAuth.configurado(rd[0])) hayRedes = true; }
+    %>
+    <% if (hayRedes) { %>
+    <div class="social">
+      <p class="social-sep"><span>o continúa con</span></p>
+      <% for (String[] rd : redes) { if (com.safir.seguridad.SocialAuth.configurado(rd[0])) { %>
+      <a class="btn-social" href="<%= contexto %>/auth/social/<%= rd[0] %>">Continuar con <%= rd[1] %></a>
+      <% } } %>
+      <p class="social-legal">Al continuar autorizas el uso de tus datos personales según nuestra política de privacidad.</p>
+    </div>
+    <% } %>
 
     <p class="m-switch">¿No tienes una cuenta? <a href="<%= contexto %>/auth/registro">Registrarse</a></p>
   </div>

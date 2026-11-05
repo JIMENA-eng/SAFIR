@@ -130,3 +130,13 @@ input[type="file"]::file-selector-button {
 .prev-portada, .prev-avatar { background: var(--soft) center / cover no-repeat; color: var(--muted); display: grid; place-items: center; font-size: .85rem; }
 .prev-portada { height: 120px; border-radius: 16px; border: 1.5px dashed var(--line); }
 .prev-avatar { position: absolute; left: 1.1rem; bottom: -2rem; width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--bg); box-shadow: 0 4px 14px rgba(18,20,46,.25); }
+
+/* Inicio de sesión con redes sociales */
+.social { margin-top: 1.2rem; display: grid; gap: .6rem; }
+.social-sep { display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
+.social-sep::before, .social-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.btn-social { display: flex; align-items: center; justify-content: center; padding: .85rem 1rem; border-radius: 999px;
+  border: 1.5px solid var(--line); background: rgba(255,255,255,.75); color: var(--title); font: 500 .98rem var(--sans); text-decoration: none; }
+:root[data-theme="dark"] .btn-social { background: rgba(18,20,46,.6); }
+.btn-social:hover { border-color: var(--lav); }
+.social-legal { font-size: .8rem; color: var(--muted); text-align: center; }
