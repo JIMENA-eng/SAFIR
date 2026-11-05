@@ -314,4 +314,38 @@ public class UsuarioDAO {
         }
         return imagenes;
     }
+
+    /**
+     * Datos para la tarjeta de perfil del menú de cuenta. Claves: "sobrenombre"
+     * (nombre_publico), "usuario" (nombre_usuario), "avatar" y "portada" (estas
+     * dos pueden ser null). Devuelve un mapa vacío si el usuario no existe.
+     */
+    public Map<String, String> obtenerPerfilMenu(long usuarioId)
+            throws SQLException {
+
+        String sql =
+                "SELECT u.nombre_publico, u.nombre_usuario, " +
+                "p.avatar_ruta, p.portada_ruta " +
+                "FROM usuario u " +
+                "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
+                "WHERE u.id = ?";
+
+        Map<String, String> datos = new HashMap<>();
+
+        try (Connection conexion = ConexionBD.conectar();
+             PreparedStatement ps = conexion.prepareStatement(sql)) {
+
+            ps.setLong(1, usuarioId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    datos.put("sobrenombre", rs.getString("nombre_publico"));
+                    datos.put("usuario", rs.getString("nombre_usuario"));
+                    datos.put("avatar", rs.getString("avatar_ruta"));
+                    datos.put("portada", rs.getString("portada_ruta"));
+                }
+            }
+        }
+        return datos;
+    }
 }

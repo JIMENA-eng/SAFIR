@@ -1,4 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
+<%!
+    /** Escapa texto para colocarlo dentro de HTML. */
+    private static String esc(String t) {
+        return t == null ? "" : t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
+    }
+%>
 <%
     String contexto = request.getContextPath();
 
@@ -38,8 +45,19 @@
     inicial = inicial
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             .replace("\"", "&quot;").replace("'", "&#39;");
-        String avatarRuta = (sesion != null && sesion.getAttribute("avatarRuta") != null)
-            ? String.valueOf(sesion.getAttribute("avatarRuta")) : null;
+    // Foto y portada: lo que cargó InicioServlet; si no llegó, la sesión.
+    String avatarRuta = request.getAttribute("menuAvatar") != null
+            ? String.valueOf(request.getAttribute("menuAvatar"))
+            : ((sesion != null && sesion.getAttribute("avatarRuta") != null)
+                ? String.valueOf(sesion.getAttribute("avatarRuta")) : null);
+    String portadaRuta = request.getAttribute("menuPortada") != null
+            ? String.valueOf(request.getAttribute("menuPortada")) : null;
+    String sobrenombreMenu = request.getAttribute("menuSobrenombre") != null
+            ? String.valueOf(request.getAttribute("menuSobrenombre"))
+            : ((sesion != null && sesion.getAttribute("nombreUsuario") != null)
+                ? String.valueOf(sesion.getAttribute("nombreUsuario")) : "lector");
+    String usuarioMenu = request.getAttribute("menuUsuario") != null
+            ? String.valueOf(request.getAttribute("menuUsuario")) : "";
     String avatarHtml = (avatarRuta == null) ? inicial
             : "<img src=\"" + contexto + "/media/"
               + avatarRuta.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
@@ -182,12 +200,25 @@
           <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
         </button>
         <div class="menu" id="userMenu" role="menu" aria-label="Menú de usuario" hidden>
-          <div class="menu-head"><b><%= nombreUsuario %></b><small>Sesión iniciada</small></div>
-          <a role="menuitem" href="<%= contexto %>/perfil">Mi perfil</a>
+          <a class="profile-card" role="menuitem" href="<%= contexto %>/perfil" aria-label="Editar perfil de <%= esc(sobrenombreMenu) %>">
+            <span class="pc-cover">
+              <% if (portadaRuta != null) { %><img src="<%= contexto %>/media/<%= esc(portadaRuta) %>" alt=""><% } %>
+            </span>
+            <span class="pc-avatar" aria-hidden="true"><%= avatarHtml %></span>
+            <span class="pc-body">
+              <span class="pc-names">
+                <b><%= esc(sobrenombreMenu) %></b>
+                <% if (!usuarioMenu.isEmpty()) { %><small>@<%= esc(usuarioMenu) %></small><% } %>
+              </span>
+              <span class="pc-edit" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </span>
+            </span>
+          </a>
           <a role="menuitem" href="<%= contexto %>/auth/cuenta">Mi cuenta</a>
           <a role="menuitem" href="<%= contexto %>/biblioteca">Mi biblioteca</a>
           <a role="menuitem" href="<%= contexto %>/notificaciones">Notificaciones</a>
-          <a role="menuitem" href="<%= contexto %>/catalogo">Catálogo</a>
+          <a role="menuitem" href="#" data-pendiente>Mensajes</a>
           <% if (esAutor) { %>
           <div class="sep" role="separator"></div>
           <a role="menuitem" href="<%= contexto %>/autor/panel">Panel de autor</a>
@@ -195,7 +226,6 @@
           <% } %>
           <div class="sep" role="separator"></div>
           <a role="menuitem" href="#" data-pendiente>Configuraciones</a>
-          <a role="menuitem" href="#" data-pendiente>Mensajes</a>
           <div class="sep" role="separator"></div>
           <a role="menuitem" class="logout" href="<%= contexto %>/auth/logout">Cerrar sesión</a>
         </div>
