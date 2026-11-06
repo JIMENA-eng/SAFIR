@@ -1,9 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ include file="/WEB-INF/vistas/comunes/encabezado-datos.jspf" %>
 <%--
     Formulario de obra (crear / editar). Lo usa ObraEdicionServlet.
     Atributos: generos (lista de {id, nombre}), modoEdicion, obra (mapa, solo al editar),
     error y los valores *Formulario cuando se vuelve a mostrar tras un error de validación.
+    El encabezado es el compartido (encabezado-datos.jspf + encabezado.jspf), igual que en Mi cuenta y Perfil.
 --%>
 <c:set var="tituloSel"
        value="${not empty tituloFormulario ? tituloFormulario : (modoEdicion ? obra.titulo : '')}"/>
@@ -15,115 +17,219 @@
        value="${not empty clasificacionFormulario ? clasificacionFormulario : (modoEdicion ? obra.clasificacion : 'todo_publico')}"/>
 <c:set var="bloqueoSel"
        value="${not empty bloqueoFormulario ? bloqueoFormulario : (modoEdicion ? obra.bloqueoActivo : false)}"/>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-        <c:choose>
-            <c:when test="${modoEdicion}">Editar obra</c:when>
-            <c:otherwise>Nueva obra</c:otherwise>
-        </c:choose>
-        | SAFIR
-    </title>
-    <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/assets/css/estilos.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><c:choose><c:when test="${modoEdicion}">Editar obra</c:when><c:otherwise>Nueva obra</c:otherwise></c:choose> · SAFIR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Literata:opsz,wght@7..72,300;7..72,400;7..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<%= contexto %>/assets/inicio/encabezadoinicio.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/autor/obra-formulario.css">
+<script>
+  // Mismo modo claro/noche que el resto de SAFIR
+  try { if (localStorage.getItem('safir-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+</script>
 </head>
 <body>
 
-<main class="contenedor-formulario">
-    <h1>
-        <c:choose>
-            <c:when test="${modoEdicion}">Editar obra</c:when>
-            <c:otherwise>Crear una obra</c:otherwise>
-        </c:choose>
-    </h1>
+<%@ include file="/WEB-INF/vistas/comunes/encabezado.jspf" %>
 
-    <c:if test="${not empty error}">
-        <div class="mensaje-error" role="alert">
-            <c:out value="${error}"/>
+<main class="of-main">
+
+  <a class="of-volver" href="<%= contexto %>/auth/cuenta#mis-obras">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    Volver a Mi cuenta
+  </a>
+
+  <div class="of-titulo">
+    <h1><c:choose><c:when test="${modoEdicion}">Editar obra</c:when><c:otherwise>Crear una obra</c:otherwise></c:choose></h1>
+    <p>
+      <c:choose>
+        <c:when test="${modoEdicion}">Actualiza los datos de tu obra. Los cambios se ven en cuanto guardes.</c:when>
+        <c:otherwise>Cuéntanos lo básico. Se guardará como borrador y podrás publicarla cuando tenga al menos un capítulo publicado.</c:otherwise>
+      </c:choose>
+    </p>
+  </div>
+
+  <c:if test="${not empty error}">
+    <p class="of-aviso" role="alert"><c:out value="${error}"/></p>
+  </c:if>
+
+  <c:choose>
+    <c:when test="${modoEdicion}">
+      <c:url var="urlFormulario" value="/autor/obra/editar"><c:param name="id" value="${obra.id}"/></c:url>
+    </c:when>
+    <c:otherwise>
+      <c:url var="urlFormulario" value="/autor/obra/nueva"/>
+    </c:otherwise>
+  </c:choose>
+
+  <div class="of-grid">
+
+    <form class="of-form" id="obraForm" method="post" action="${urlFormulario}">
+
+      <!-- 1. Datos principales -->
+      <div class="of-card">
+        <h2><span class="of-num">1</span> Datos de la obra</h2>
+
+        <div class="of-campo">
+          <div class="of-label-fila">
+            <label for="titulo">Título <b aria-hidden="true">*</b></label>
+            <span class="of-contador" id="tituloCont" aria-live="polite">0/100</span>
+          </div>
+          <input type="text" id="titulo" name="titulo" maxlength="100" required autocomplete="off"
+                 placeholder="Ej.: El faro de las estrellas"
+                 value="<c:out value='${tituloSel}'/>">
         </div>
-    </c:if>
 
-    <c:choose>
-        <c:when test="${modoEdicion}">
-            <c:url var="urlFormulario" value="/autor/obra/editar">
-                <c:param name="id" value="${obra.id}"/>
-            </c:url>
-        </c:when>
-        <c:otherwise>
-            <c:url var="urlFormulario" value="/autor/obra/nueva"/>
-        </c:otherwise>
-    </c:choose>
-
-    <form method="post" action="${urlFormulario}">
-
-        <div class="campo">
-            <label for="titulo">Título *</label>
-            <input type="text" id="titulo" name="titulo"
-                   maxlength="100" required
-                   value="<c:out value='${tituloSel}'/>">
-            <small>Máximo 100 caracteres.</small>
-        </div>
-
-        <div class="campo">
+        <div class="of-campo">
+          <div class="of-label-fila">
             <label for="descripcion">Descripción</label>
-            <textarea id="descripcion" name="descripcion"
-                      rows="6"><c:out value="${descripcionSel}"/></textarea>
+            <span class="of-contador" id="descCont" aria-live="polite">0/2000</span>
+          </div>
+          <textarea id="descripcion" name="descripcion" rows="6" maxlength="2000"
+                    placeholder="¿De qué trata? Una buena sinopsis invita a leer."><c:out value="${descripcionSel}"/></textarea>
+          <small>Opcional, pero ayuda a que los lectores se animen a empezar.</small>
         </div>
+      </div>
 
-        <div class="campo">
-            <label for="generoId">Género *</label>
-            <select id="generoId" name="generoId" required>
-                <option value="">Selecciona un género</option>
-                <c:forEach var="g" items="${generos}">
-                    <option value="${g.id}" ${g.id == generoSel ? 'selected' : ''}>
-                        <c:out value="${g.nombre}"/>
-                    </option>
-                </c:forEach>
-            </select>
-        </div>
+      <!-- 2. Género -->
+      <div class="of-card">
+        <h2><span class="of-num">2</span> Género <b class="of-req" aria-hidden="true">*</b></h2>
+        <fieldset class="of-fieldset">
+          <legend class="of-sr">Género de la obra</legend>
+          <div class="of-chips" id="generos">
+            <c:forEach var="g" items="${generos}">
+              <label class="of-chip">
+                <input type="radio" name="generoId" value="${g.id}" required ${g.id == generoSel ? 'checked' : ''}>
+                <span><c:out value="${g.nombre}"/></span>
+              </label>
+            </c:forEach>
+          </div>
+        </fieldset>
+      </div>
 
-        <div class="campo">
-            <label for="clasificacion">Clasificación *</label>
-            <select id="clasificacion" name="clasificacion" required>
-                <option value="todo_publico"
-                        ${clasificacionSel == 'todo_publico' ? 'selected' : ''}>
-                    Todo público
-                </option>
-                <option value="mayores_13"
-                        ${clasificacionSel == 'mayores_13' ? 'selected' : ''}>
-                    Mayores de 13
-                </option>
-                <option value="mayores_18"
-                        ${clasificacionSel == 'mayores_18' ? 'selected' : ''}>
-                    Mayores de 18 (+18)
-                </option>
-            </select>
-        </div>
+      <!-- 3. Clasificación -->
+      <div class="of-card">
+        <h2><span class="of-num">3</span> Clasificación <b class="of-req" aria-hidden="true">*</b></h2>
+        <fieldset class="of-fieldset">
+          <legend class="of-sr">Clasificación por edad</legend>
+          <div class="of-opciones" id="clasificaciones">
+            <label class="of-opcion">
+              <input type="radio" name="clasificacion" value="todo_publico" ${clasificacionSel == 'todo_publico' ? 'checked' : ''}>
+              <span class="of-opcion-cuerpo"><b>Todo público</b><small>Para cualquier lector.</small></span>
+            </label>
+            <label class="of-opcion">
+              <input type="radio" name="clasificacion" value="mayores_13" ${clasificacionSel == 'mayores_13' ? 'checked' : ''}>
+              <span class="of-opcion-cuerpo"><b>Mayores de 13</b><small>Para lectores desde los 13 años.</small></span>
+            </label>
+            <label class="of-opcion">
+              <input type="radio" name="clasificacion" value="mayores_18" ${clasificacionSel == 'mayores_18' ? 'checked' : ''}>
+              <span class="of-opcion-cuerpo"><b>Mayores de 18 (+18)</b><small>Contenido solo para adultos.</small></span>
+            </label>
+          </div>
+        </fieldset>
+      </div>
 
-        <div class="acciones-formulario">
-            <div class="campo">
-                <label>
-                    <input type="checkbox" name="bloqueoActivo" ${bloqueoSel ? 'checked' : ''}>
-                    Cobrar monedas por los capítulos avanzados
-                </label>
-                <small>Desactivado: todos los capítulos son gratis. Activado: los primeros
-                    capítulos siguen libres y los siguientes se desbloquean con monedas.</small>
-            </div>
-            <button type="submit">
-                <c:choose>
-                    <c:when test="${modoEdicion}">Guardar cambios</c:when>
-                    <c:otherwise>Crear obra</c:otherwise>
-                </c:choose>
-            </button>
+      <!-- 4. Monedas -->
+      <div class="of-card">
+        <h2><span class="of-num">4</span> Capítulos con monedas</h2>
+        <label class="of-switch">
+          <input type="checkbox" name="bloqueoActivo" role="switch" ${bloqueoSel ? 'checked' : ''}>
+          <span class="of-pista" aria-hidden="true"><i></i></span>
+          <span class="of-switch-texto">
+            <b>Cobrar monedas por los capítulos avanzados</b>
+            <small>Desactivado: todos los capítulos son gratis. Activado: los primeros capítulos siguen libres y los siguientes se desbloquean con monedas.</small>
+          </span>
+        </label>
+      </div>
 
-            <a href="${pageContext.request.contextPath}/autor/panel">Cancelar</a>
-        </div>
+      <div class="of-acciones">
+        <button type="submit" class="btn" id="btnGuardar">
+          <c:choose><c:when test="${modoEdicion}">Guardar cambios</c:when><c:otherwise>Crear obra</c:otherwise></c:choose>
+        </button>
+        <a class="btn outline" href="<%= contexto %>/auth/cuenta#mis-obras">Cancelar</a>
+      </div>
     </form>
+
+    <!-- Vista previa (se actualiza mientras escribes) -->
+    <aside class="of-previa" aria-label="Vista previa de la obra">
+      <p class="of-previa-etq">Así se verá tu obra</p>
+      <div class="of-tarjeta">
+        <span class="of-portada" id="pvInicial" aria-hidden="true">?</span>
+        <div class="of-tarjeta-info">
+          <b id="pvTitulo" class="vacio">Título de tu obra</b>
+          <div class="of-etiquetas">
+            <span class="of-etiqueta" id="pvGenero">Género</span>
+            <span class="of-etiqueta alt" id="pvClasif">Todo público</span>
+            <span class="of-etiqueta oro" id="pvMonedas" hidden>Con monedas</span>
+          </div>
+        </div>
+        <p class="of-tarjeta-desc vacio" id="pvDesc">Aquí aparecerá la descripción de tu obra.</p>
+      </div>
+    </aside>
+
+  </div>
 </main>
 
+<script src="<%= contexto %>/assets/js/inicio.js"></script>
+<script>
+(function () {
+  var form = document.getElementById('obraForm');
+  var titulo = document.getElementById('titulo');
+  var desc = document.getElementById('descripcion');
+  var tituloCont = document.getElementById('tituloCont');
+  var descCont = document.getElementById('descCont');
+  var pvInicial = document.getElementById('pvInicial');
+  var pvTitulo = document.getElementById('pvTitulo');
+  var pvGenero = document.getElementById('pvGenero');
+  var pvClasif = document.getElementById('pvClasif');
+  var pvDesc = document.getElementById('pvDesc');
+  var pvMonedas = document.getElementById('pvMonedas');
+  var monedas = form.querySelector('input[name="bloqueoActivo"]');
+
+  function marcado(nombre) { return form.querySelector('input[name="' + nombre + '"]:checked'); }
+  function textoDe(input) {
+    if (!input) return '';
+    var el = input.parentNode.querySelector('b') || input.parentNode.querySelector('span');
+    return el ? el.textContent.trim() : '';
+  }
+
+  function actualizar() {
+    var t = titulo.value.trim();
+    var d = desc.value.trim();
+    tituloCont.textContent = titulo.value.length + '/100';
+    descCont.textContent = desc.value.length + '/2000';
+
+    pvTitulo.textContent = t || 'Título de tu obra';
+    pvTitulo.className = t ? '' : 'vacio';
+    pvInicial.textContent = t ? Array.from(t)[0].toUpperCase() : '?';
+
+    var g = marcado('generoId');
+    pvGenero.textContent = g ? textoDe(g) : 'Género';
+    pvGenero.className = 'of-etiqueta' + (g ? '' : ' vacio');
+
+    var c = marcado('clasificacion');
+    pvClasif.textContent = c ? textoDe(c) : 'Todo público';
+
+    pvDesc.textContent = d || 'Aquí aparecerá la descripción de tu obra.';
+    pvDesc.className = 'of-tarjeta-desc' + (d ? '' : ' vacio');
+    pvMonedas.hidden = !monedas.checked;
+  }
+
+  form.addEventListener('input', actualizar);
+  form.addEventListener('change', actualizar);
+  actualizar();
+
+  // Evita enviar dos veces el formulario
+  form.addEventListener('submit', function () {
+    var b = document.getElementById('btnGuardar');
+    if (form.checkValidity()) { b.disabled = true; b.style.opacity = '.7'; }
+  });
+})();
+</script>
 </body>
 </html>

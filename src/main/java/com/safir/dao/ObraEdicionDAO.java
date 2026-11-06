@@ -40,8 +40,8 @@ public class ObraEdicionDAO {
             long obraId, long autorId) throws SQLException {
 
         String sql = """
-            SELECT id, titulo, descripcion, genero_id, clasificacion
-                       obra.put("bloqueoActivo", rs.getBoolean("bloqueo_activo"));
+            SELECT id, titulo, descripcion, genero_id, clasificacion,
+                   bloqueo_activo
             FROM obra
             WHERE id = ? AND autor_id = ?
             """;
@@ -64,6 +64,7 @@ public class ObraEdicionDAO {
                 obra.put("generoId", rs.getInt("genero_id"));
                 obra.put("clasificacion",
                          rs.getString("clasificacion"));
+                obra.put("bloqueoActivo", rs.getBoolean("bloqueo_activo"));
 
                 return obra;
             }

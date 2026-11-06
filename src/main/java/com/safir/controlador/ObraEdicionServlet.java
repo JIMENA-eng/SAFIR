@@ -1,7 +1,7 @@
-
 package com.safir.controlador;
 
 import com.safir.dao.ObraEdicionDAO;
+import com.safir.util.EncabezadoUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -292,5 +292,10 @@ public class ObraEdicionServlet extends HttpServlet {
     private void prepararFormulario(HttpServletRequest request)
             throws SQLException {
         request.setAttribute("generos", dao.listarGeneros());
+        // Datos del encabezado compartido (foto, portada, @usuario, puntos rojos)
+        Long usuarioId = obtenerUsuarioId(request);
+        if (usuarioId != null) {
+            EncabezadoUtil.cargar(request, usuarioId);
+        }
     }
 }
