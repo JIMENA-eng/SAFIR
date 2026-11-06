@@ -68,18 +68,6 @@
   .autor-cta h3 { font-family: var(--serif); font-weight: 300; color: var(--title); font-size: 1.2rem; }
   .autor-cta p { color: var(--muted); font-size: .92rem; margin-top: .2rem; }
 
-  /* Accesos */
-  .accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; }
-  .acceso { display: flex; flex-direction: column; gap: .25rem; padding: 1.1rem 1.2rem; background: var(--card); border: 1px solid var(--line);
-    border-radius: 18px; color: var(--title); transition: transform .15s, border-color .15s, box-shadow .15s; }
-  .acceso:hover { transform: translateY(-2px); border-color: var(--lav); box-shadow: var(--shadow); }
-  .acceso b { font-weight: 600; }
-  .acceso small { color: var(--muted); font-size: .85rem; }
-  .acceso.destacado { background: var(--btn); border-color: var(--btn); }
-  .acceso.destacado b, .acceso.destacado small { color: var(--btn-text); }
-
-  .salir { margin-top: 2rem; text-align: center; }
-
   @media (max-width: 600px) {
     .subidas { grid-template-columns: 1fr; }
     .pf-cover { height: 150px; }

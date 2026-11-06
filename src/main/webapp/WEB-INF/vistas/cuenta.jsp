@@ -26,12 +26,16 @@
     String idMostrar = esc(idUsuario);
     String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
     long[] est = request.getAttribute("estadisticas") instanceof long[]
-        ? (long[]) request.getAttribute("estadisticas") : new long[5];
+            ? (long[]) request.getAttribute("estadisticas") : new long[5];
     String nSeguidores = String.format(java.util.Locale.US, "%,d", est[0]);
     String nValoraciones = String.format(java.util.Locale.US, "%,d", est[1]);
     String nListas = String.format(java.util.Locale.US, "%,d", est[2]);
     String nObras = String.format(java.util.Locale.US, "%,d", est[3]);
     String nSeguidos = String.format(java.util.Locale.US, "%,d", est[4]);
+    java.util.List<String[]> siguiendoLista = request.getAttribute("siguiendo") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("siguiendo") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> seguidoresLista = request.getAttribute("seguidores") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("seguidores") : new java.util.ArrayList<String[]>();
     String nombrePublico = esc(sobrenombreMenu);
     String usuarioArroba = usuarioMenu.isEmpty() ? "" : "@" + esc(usuarioMenu);
     String bioCuenta = request.getAttribute("menuBiografia") == null ? ""
@@ -72,6 +76,23 @@
                 d = "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>";
         }
         return "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + d + "</svg>";
+    }
+%>
+<%!
+    /** Una fila de persona (avatar o inicial, sobrenombre y @usuario). pr = {sobrenombre, usuario, avatar}. */
+    private static String filaPersona(String[] pr, String contexto) {
+        String nombre = pr[0] == null ? "" : pr[0];
+        String ini = nombre.isEmpty() ? "?"
+                : new String(Character.toChars(Character.toUpperCase(nombre.codePointAt(0))));
+        StringBuilder sb = new StringBuilder("<li><span class=\"cuenta-mini\" aria-hidden=\"true\">");
+        if (pr[2] != null && !pr[2].isEmpty()) {
+            sb.append("<img src=\"").append(contexto).append("/media/").append(esc(pr[2])).append("\" alt=\"\">");
+        } else {
+            sb.append(esc(ini));
+        }
+        sb.append("</span><span class=\"cuenta-persona\"><b>").append(esc(nombre)).append("</b>");
+        if (pr[1] != null && !pr[1].isEmpty()) sb.append("<small>@").append(esc(pr[1])).append("</small>");
+        return sb.append("</span></li>").toString();
     }
 %>
 <!DOCTYPE html>
@@ -177,7 +198,7 @@
           <% if (!usuarioArroba.isEmpty()) { %>
           <p class="cuenta-usuario"><%= usuarioArroba %></p>
           <% } %>
-        <ul class="cuenta-stats" aria-label="Estadísticas del perfil">
+          <ul class="cuenta-stats" aria-label="Estadísticas del perfil">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><b><%= nSeguidores %></b><span>Seguidores</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><b><%= nSeguidos %></b><span>Siguiendo</span></li>
             <li><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><b><%= nValoraciones %></b><span>Valoraciones</span></li>
@@ -207,46 +228,100 @@
     </a>
   </section>
 
-  <!-- MONEDAS -->
+  <!-- CONTENIDO: izquierda = más sobre mí, siguiendo y seguidores; derecha = el resto -->
   <section class="block">
     <div class="wrap">
-      <div class="cuenta-monedas">
-        <article class="coins" id="coinsCard">
-          <h3>Mis monedas</h3>
-          <p>Tus recompensas de lectura, logros y compras viven en un solo saldo.</p>
-          <div class="coin-row">
-            <div class="coin" aria-hidden="true">S</div>
-            <div class="coin-num" id="coinNum" aria-label="<%= monedasTxt %> monedas"><%= monedasTxt %></div>
+      <div class="cuenta-cols">
+
+        <aside class="cuenta-col-izq">
+          <article class="cuenta-panel" id="mas-sobre-mi">
+            <h3>Más sobre mí</h3>
+            <% if (bioCuenta.isEmpty()) { %>
+            <p class="muted">Aún no has escrito nada sobre ti. Usa el lápiz de arriba para añadir tu descripción.</p>
+            <% } else { %>
+            <p class="cuenta-bio"><%= bioCuenta %></p>
+            <% } %>
+          </article>
+
+          <article class="cuenta-panel" id="siguiendo">
+            <h3>Siguiendo <span class="cuenta-count"><%= nSeguidos %></span></h3>
+            <% if (siguiendoLista.isEmpty()) { %>
+            <p class="muted">Aún no sigues a ningún autor.</p>
+            <% } else { %>
+            <ul class="cuenta-personas">
+              <% for (String[] pr : siguiendoLista) { %><%= filaPersona(pr, contexto) %><% } %>
+            </ul>
+            <% if (est[4] > siguiendoLista.size()) { %>
+            <p class="cuenta-mas">y <%= est[4] - siguiendoLista.size() %> más</p>
+            <% } %>
+            <% } %>
+          </article>
+
+          <article class="cuenta-panel" id="seguidores">
+            <h3>Seguidores <span class="cuenta-count"><%= nSeguidores %></span></h3>
+            <% if (seguidoresLista.isEmpty()) { %>
+            <p class="muted">Todavía nadie te sigue.</p>
+            <% } else { %>
+            <ul class="cuenta-personas">
+              <% for (String[] pr : seguidoresLista) { %><%= filaPersona(pr, contexto) %><% } %>
+            </ul>
+            <% if (est[0] > seguidoresLista.size()) { %>
+            <p class="cuenta-mas">y <%= est[0] - seguidoresLista.size() %> más</p>
+            <% } %>
+            <% } %>
+          </article>
+        </aside>
+
+        <div class="cuenta-col-der">
+          <!-- MONEDAS -->
+          <article class="coins" id="coinsCard">
+            <h3>Mis monedas</h3>
+            <p>Tus recompensas de lectura, logros y compras viven en un solo saldo.</p>
+            <div class="coin-row">
+              <div class="coin" aria-hidden="true">S</div>
+              <div class="coin-num" id="coinNum" aria-label="<%= monedasTxt %> monedas"><%= monedasTxt %></div>
+            </div>
+            <a class="btn small gold" href="#movimientos">Ver movimientos</a>
+          </article>
+
+          <!-- ACCESOS -->
+          <div class="cuenta-bloque" id="accesos">
+            <h2>Accesos</h2>
+            <div class="cuenta-accesos">
+              <% if (esAutor) { %>
+              <a class="cuenta-acceso destacado" href="<%= contexto %>/autor/panel"><b>Panel de autor</b><small>Gestiona tus obras</small></a>
+              <% } %>
+              <a class="cuenta-acceso" href="<%= contexto %>/biblioteca"><b>Mi biblioteca</b><small>Tus lecturas guardadas</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/billetera"><b>Mi billetera</b><small>Monedas y compras</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/notificaciones"><b>Mis notificaciones</b><small>Novedades de tus obras</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/catalogo"><b>Explorar el catálogo</b><small>Descubre nuevas historias</small></a>
+            </div>
           </div>
-          <a class="btn small gold" href="#movimientos">Ver movimientos</a>
-        </article>
+
+          <!-- MOVIMIENTOS -->
+          <div class="cuenta-bloque" id="movimientos">
+            <h2>Monedas ganadas</h2>
+            <p class="sec-lead">El detalle de cómo ha crecido tu saldo.</p>
+            <ul class="moves">
+              <li class="move">
+                <span class="coin sm" aria-hidden="true">S</span>
+                <div class="move-text"><b>Bono de bienvenida</b><small>Por ser tu primera vez en SAFIR al registrarte</small></div>
+                <span class="plus">+1,000</span>
+              </li>
+            </ul>
+            <div class="total-row"><span>Saldo actual</span><b><%= monedasTxt %> monedas</b></div>
+          </div>
+
+          <!-- SESIÓN -->
+          <div class="cuenta-bloque">
+            <h2>Sesión</h2>
+            <p class="sec-lead">Cuando termines, cierra tu sesión para proteger tu cuenta.</p>
+            <p style="margin-top:1.4rem"><a class="btn" href="<%= contexto %>/auth/logout">Cerrar sesión</a></p>
+            <p style="margin-top:1rem"><a href="<%= contexto %>/auth/cuenta/eliminar">Eliminar mi cuenta</a></p>
+          </div>
+        </div>
+
       </div>
-    </div>
-  </section>
-
-  <!-- MOVIMIENTOS -->
-  <section class="block" id="movimientos">
-    <div class="wrap">
-      <h2>Monedas ganadas</h2>
-      <p class="sec-lead">El detalle de cómo ha crecido tu saldo.</p>
-      <ul class="moves">
-        <li class="move">
-          <span class="coin sm" aria-hidden="true">S</span>
-          <div class="move-text"><b>Bono de bienvenida</b><small>Por ser tu primera vez en SAFIR al registrarte</small></div>
-          <span class="plus">+1,000</span>
-        </li>
-      </ul>
-      <div class="total-row"><span>Saldo actual</span><b><%= monedasTxt %> monedas</b></div>
-    </div>
-  </section>
-
-  <!-- SESIÓN -->
-  <section class="block">
-    <div class="wrap">
-      <h2>Sesión</h2>
-      <p class="sec-lead">Cuando termines, cierra tu sesión para proteger tu cuenta.</p>
-      <p style="margin-top:1.4rem"><a class="btn" href="<%= contexto %>/auth/logout">Cerrar sesión</a></p>
-      <p style="margin-top:1rem"><a href="<%= contexto %>/auth/cuenta/eliminar">Eliminar mi cuenta</a></p>
     </div>
   </section>
 </main>

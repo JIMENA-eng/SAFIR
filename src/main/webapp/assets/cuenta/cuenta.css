@@ -51,6 +51,7 @@
 .cuenta-stats svg { width: 17px; height: 17px; flex: none; }
 .cuenta-stats b { font-weight: 600; }
 .cuenta-stats span { color: rgba(255,255,255,.85); }
+
 .cuenta-redes-titulo { font-size: 1.15rem; font-weight: 500; margin: 0 0 .9rem; max-width: none; color: #fff;
   text-shadow: 0 1px 8px rgba(0,0,0,.45); }
 .cuenta-lado-redes .muted { color: rgba(255,255,255,.8); }
@@ -74,4 +75,40 @@
   .cuenta-hero-body { grid-template-columns: 1fr; gap: 1.4rem; }
   .cuenta-lado-perfil { flex-direction: column; align-items: flex-start; gap: .8rem; }
   .cuenta-lado-redes { border-left: 0; border-top: 1px solid rgba(255,255,255,.3); padding: 1.2rem 3.5rem 0 0; }
+}
+
+/* ===== Contenido de Mi cuenta: izquierda (sobre mí, siguiendo, seguidores) y derecha (el resto) ===== */
+.cuenta-cols { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.cuenta-col-izq { display: grid; gap: 1.2rem; }
+.cuenta-col-der { min-width: 0; }
+.cuenta-bloque { margin-top: 2.4rem; }
+
+.cuenta-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 1.3rem 1.4rem; }
+.cuenta-panel h3 { font-size: 1.15rem; margin: 0 0 .8rem; display: flex; align-items: center; gap: .55rem; }
+.cuenta-count { display: inline-block; padding: .05rem .6rem; border-radius: 999px; background: var(--soft);
+  color: var(--title); font: 600 .8rem var(--sans); }
+.cuenta-bio { white-space: pre-line; overflow-wrap: anywhere; }
+.cuenta-personas { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.cuenta-personas li { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.cuenta-mini { width: 40px; height: 40px; border-radius: 50%; flex: none; overflow: hidden; display: grid; place-items: center;
+  background: var(--lav); color: #fff; font: 600 1rem var(--sans); }
+.cuenta-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cuenta-persona { display: grid; min-width: 0; line-height: 1.25; }
+.cuenta-persona b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cuenta-persona small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cuenta-mas { margin: .8rem 0 0; color: var(--muted); font-size: .9rem; }
+
+/* Accesos */
+.cuenta-accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+.cuenta-acceso { display: flex; flex-direction: column; gap: .25rem; padding: 1.1rem 1.2rem; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 18px; color: var(--title); text-decoration: none;
+  transition: transform .15s, border-color .15s, box-shadow .15s; }
+.cuenta-acceso:hover { transform: translateY(-2px); border-color: var(--lav); box-shadow: 0 12px 34px -18px rgba(37,40,102,.35); }
+.cuenta-acceso b { font-weight: 600; }
+.cuenta-acceso small { color: var(--muted); font-size: .85rem; }
+.cuenta-acceso.destacado { background: var(--btn); border-color: var(--btn); }
+.cuenta-acceso.destacado b, .cuenta-acceso.destacado small { color: var(--btn-text); }
+
+@media (max-width: 900px) {
+  .cuenta-cols { grid-template-columns: 1fr; }
 }

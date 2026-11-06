@@ -469,4 +469,43 @@ public class UsuarioDAO {
         }
         return new long[5];
     }
+
+    // ===== Listas de personas del perfil =====
+
+    /** Autores a los que sigue el usuario: cada elemento es {sobrenombre, usuario, avatar}. */
+    public List<String[]> listarSiguiendo(long usuarioId, int limite) throws SQLException {
+        return listarSeguimiento(
+            "SELECT u.nombre_publico, u.nombre_usuario, p.avatar_ruta " +
+            "FROM seguimiento_autor s " +
+            "JOIN usuario u ON u.id = s.autor_id " +
+            "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
+            "WHERE s.seguidor_id = ? AND u.estado_cuenta = 'activa' " +
+            "ORDER BY s.creado_en DESC LIMIT ?", usuarioId, limite);
+    }
+
+    /** Personas que siguen al usuario: cada elemento es {sobrenombre, usuario, avatar}. */
+    public List<String[]> listarSeguidores(long usuarioId, int limite) throws SQLException {
+        return listarSeguimiento(
+            "SELECT u.nombre_publico, u.nombre_usuario, p.avatar_ruta " +
+            "FROM seguimiento_autor s " +
+            "JOIN usuario u ON u.id = s.seguidor_id " +
+            "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
+            "WHERE s.autor_id = ? AND u.estado_cuenta = 'activa' " +
+            "ORDER BY s.creado_en DESC LIMIT ?", usuarioId, limite);
+    }
+
+    private List<String[]> listarSeguimiento(String sql, long usuarioId, int limite) throws SQLException {
+        List<String[]> lista = new ArrayList<>();
+        try (Connection c = ConexionBD.conectar();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            ps.setInt(2, limite);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new String[]{rs.getString(1), rs.getString(2), rs.getString(3)});
+                }
+            }
+        }
+        return lista;
+    }
 }

@@ -35,7 +35,8 @@ public class CuentaServlet extends HttpServlet {
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             request.setAttribute("enlaces", usuarioDAO.obtenerEnlaces(id));
             request.setAttribute("estadisticas", usuarioDAO.obtenerEstadisticasPerfil(id));
-            
+            request.setAttribute("siguiendo", usuarioDAO.listarSiguiendo(id, 12));
+            request.setAttribute("seguidores", usuarioDAO.listarSeguidores(id, 12));
         } catch (SQLException e) {
             throw new ServletException("Error al cargar el saldo.", e);
         }

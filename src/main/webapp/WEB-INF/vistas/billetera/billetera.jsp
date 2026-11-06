@@ -83,7 +83,7 @@
     </c:otherwise>
 </c:choose>
 
-<p><a href="${pageContext.request.contextPath}/perfil">Volver al perfil</a></p>
+<p><a href="${pageContext.request.contextPath}/cuenta">Volver al perfil</a></p>
 
 </body>
 </html>

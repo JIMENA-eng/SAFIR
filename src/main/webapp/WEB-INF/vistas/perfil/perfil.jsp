@@ -143,23 +143,6 @@
             </div>
         </section>
     </c:if>
-
-    <!-- Accesos -->
-    <section class="seccion">
-        <h2>Accesos</h2>
-        <div class="accesos">
-            <c:if test="${esAutor}">
-                <a class="acceso destacado" href="${ctx}/autor/panel"><b>Panel de autor</b><small>Gestiona tus obras</small></a>
-            </c:if>
-            <a class="acceso" href="${ctx}/biblioteca"><b>Mi biblioteca</b><small>Tus lecturas guardadas</small></a>
-            <a class="acceso" href="${ctx}/billetera"><b>Mi billetera</b><small>Monedas y compras</small></a>
-            <a class="acceso" href="${ctx}/notificaciones"><b>Mis notificaciones</b><small>Novedades de tus obras</small></a>
-            <a class="acceso" href="${ctx}/auth/cuenta"><b>Mi cuenta</b><small>Datos de tu cuenta</small></a>
-            <a class="acceso" href="${ctx}/catalogo"><b>Explorar el catálogo</b><small>Descubre nuevas historias</small></a>
-        </div>
-    </section>
-
-    <p class="salir"><a class="btn outline" href="${ctx}/auth/logout">Cerrar sesión</a></p>
 </main>
 
 <script>
