@@ -20,3 +20,10 @@
 .total-row { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.2rem; padding: 1rem 1.2rem; border-radius: 16px; background: var(--soft); color: var(--muted); }
 .total-row b { color: var(--title); font-weight: 600; }
 @media (max-width: 900px) { .account-grid { grid-template-columns: 1fr; } }
+
+/* Descripción y enlaces en la tarjeta de perfil */
+.dd-bio { white-space: pre-line; }
+.dd-enlaces { display: flex; flex-wrap: wrap; gap: .4rem; }
+.dd-enlaces a { display: inline-block; padding: .15rem .7rem; border-radius: 999px; background: var(--soft);
+  color: var(--title); font-size: .85rem; font-weight: 500; text-decoration: none; text-transform: capitalize; }
+.dd-enlaces a:hover { text-decoration: underline; text-underline-offset: 3px; }

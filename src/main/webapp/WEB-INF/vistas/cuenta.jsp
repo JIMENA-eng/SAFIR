@@ -1,52 +1,36 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
-<%!
-    private static String esc(String t) {
-        if (t == null) return "";
-        return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                .replace("\"", "&quot;").replace("'", "&#39;");
-    }
-%>
+<%@ include file="/WEB-INF/vistas/comunes/encabezado-datos.jspf" %>
 <%
-    String contexto = request.getContextPath();
-
-    jakarta.servlet.http.HttpSession sesion = request.getSession(false);
-
-    String nombreRaw = "lector";
+    // Datos propios de "Mi cuenta" (nombreUsuario, avatarHtml, contexto, sesion vienen del encabezado compartido)
     String rolesRaw = "lector";
     String idUsuario = "";
-    int monedas = 0; // bono de bienvenida por el primer registro
-
+    int monedas = 0;
     if (sesion != null) {
-        if (sesion.getAttribute("nombreUsuario") != null) {
-            nombreRaw = String.valueOf(sesion.getAttribute("nombreUsuario"));
-        }
-        Object r = sesion.getAttribute("roles");
-        if (r instanceof java.util.Collection) {
-            rolesRaw = ((java.util.Collection<?>) r).stream()
+        Object rolesCuenta = sesion.getAttribute("roles");
+        if (rolesCuenta instanceof java.util.Collection) {
+            rolesRaw = ((java.util.Collection<?>) rolesCuenta).stream()
                     .map(String::valueOf)
                     .collect(java.util.stream.Collectors.joining(", "));
-        } else if (r != null) {
-            rolesRaw = String.valueOf(r);
+        } else if (rolesCuenta != null) {
+            rolesRaw = String.valueOf(rolesCuenta);
         }
         if (sesion.getAttribute("usuarioId") != null) {
             idUsuario = String.valueOf(sesion.getAttribute("usuarioId"));
         }
-        Object m = request.getAttribute("monedas");
-        if (m instanceof Number) {
-            monedas = ((Number) m).intValue();
-        }
     }
-
-    String nombreUsuario = esc(nombreRaw);
-    String inicial = esc(nombreRaw.isBlank() ? "S" : nombreRaw.trim().substring(0, 1).toUpperCase());
+    Object monedasAttr = request.getAttribute("monedas");
+    if (monedasAttr instanceof Number) {
+        monedas = ((Number) monedasAttr).intValue();
+    }
     String roles = esc(rolesRaw);
     String idMostrar = esc(idUsuario);
     String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
-    String avatarRuta = (sesion != null && sesion.getAttribute("avatarRuta") != null)
-            ? String.valueOf(sesion.getAttribute("avatarRuta")) : null;
-    String avatarHtml = (avatarRuta == null) ? inicial
-            : "<img src=\"" + contexto + "/media/" + esc(avatarRuta)
-              + "\" alt=\"\" style=\"width:100%;height:100%;border-radius:50%;object-fit:cover\">";
+    String nombrePublico = esc(sobrenombreMenu);
+    String usuarioArroba = usuarioMenu.isEmpty() ? "" : "@" + esc(usuarioMenu);
+    String bioCuenta = request.getAttribute("menuBiografia") == null ? ""
+            : esc(String.valueOf(request.getAttribute("menuBiografia")));
+    java.util.List<String[]> enlacesCuenta = request.getAttribute("enlaces") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("enlaces") : new java.util.ArrayList<String[]>();
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -57,45 +41,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Literata:opsz,wght@7..72,400;7..72,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/base.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/landing.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/animaciones.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/ventanas.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/responsive.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/inicio.css">
-<link rel="stylesheet" href="<%= contexto %>/assets/css/cuenta/cuenta.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/base.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/landing.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/animaciones.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/ventanas.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/responsive.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/inicio.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/inicio/encabezadoinicio.css">
+<link rel="stylesheet" href="<%= contexto %>/assets/cuenta/cuenta.css">
 </head>
 <body>
-
-<!-- Símbolo del logo (aproximación vectorial; reemplazar por el archivo oficial) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <path id="star" d="M0,-1 Q.12,-.12 1,0 Q.12,.12 0,1 Q-.12,.12 -1,0 Q-.12,-.12 0,-1Z"/>
-    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#CBC9F4"/><stop offset="1" stop-color="#A9A5EE"/>
-    </linearGradient>
-    <symbol id="plane-color" viewBox="300 230 380 280">
-      <use href="#star" transform="translate(368 275) scale(35)" fill="#5051AE"/>
-      <use href="#star" transform="translate(322 327) scale(17)" fill="#5051AE"/>
-      <path d="M388 405C330 440 310 480 360 493C420 502 480 482 528 459C470 475 400 478 372 462C350 448 360 425 388 405Z" fill="url(#orb)"/>
-      <polygon points="368,350 642,258 440,382" fill="#CBC9F4"/>
-      <polygon points="440,382 642,258 458,461" fill="#5051AE"/>
-      <polygon points="458,461 440,382 500,420" fill="#28296D"/>
-      <polygon points="642,258 545,453 484,404" fill="#BDB9F2"/>
-      <path d="M620 345C662 345 676 366 656 396C640 419 610 431 582 439C620 421 646 400 646 380C646 365 636 352 620 345Z" fill="url(#orb)"/>
-    </symbol>
-    <symbol id="plane-white" viewBox="300 230 380 280">
-      <use href="#star" transform="translate(368 275) scale(35)" fill="#F4F3FF"/>
-      <use href="#star" transform="translate(322 327) scale(17)" fill="#F4F3FF"/>
-      <path d="M388 405C330 440 310 480 360 493C420 502 480 482 528 459C470 475 400 478 372 462C350 448 360 425 388 405Z" fill="#B7B6D6"/>
-      <polygon points="368,350 642,258 440,382" fill="#C9C8DC"/>
-      <polygon points="440,382 642,258 458,461" fill="#A9A8C6"/>
-      <polygon points="458,461 440,382 500,420" fill="#8E8DB0"/>
-      <polygon points="642,258 545,453 484,404" fill="#E9E8F5"/>
-      <path d="M620 345C662 345 676 366 656 396C640 419 610 431 582 439C620 421 646 400 646 380C646 365 636 352 620 345Z" fill="#B7B6D6"/>
-    </symbol>
-  </defs>
-</svg>
 
 <!-- Portadas ilustradas (SVG propio, paleta SAFIR) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -161,38 +116,7 @@
   </defs>
 </svg>
 
-<header class="bar">
-  <div class="wrap">
-    <a class="brand" href="<%= contexto %>/auth/inicio" aria-label="SAFIR, inicio">
-      <svg viewBox="0 0 380 280" role="img" aria-hidden="true"><use href="#plane-white"/></svg>
-      <span>SAFIR</span>
-    </a>
-    <nav aria-label="Principal">
-      <a href="<%= contexto %>/auth/inicio#continuar">Continuar leyendo</a>
-      <a href="<%= contexto %>/auth/inicio#recomendados">Recomendados</a>
-      <a href="<%= contexto %>/auth/inicio#listados">Mis listados</a>
-      <a href="<%= contexto %>/auth/inicio#mis-obras">Mis obras</a>
-    </nav>
-    <button class="theme-toggle" id="themeBtn" type="button" aria-pressed="false">Modo noche</button>
-    <div class="menu-wrap">
-      <button class="btn small user" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-        <span class="avatar" aria-hidden="true"><%= avatarHtml %></span><b><%= nombreUsuario %></b>
-        <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
-      </button>
-      <div class="menu" id="userMenu" role="menu" aria-label="Menú de usuario" hidden>
-        <div class="menu-head"><b><%= nombreUsuario %></b><small>Sesión iniciada</small></div>
-        <a role="menuitem" href="<%= contexto %>/auth/cuenta">Mi cuenta</a>
-        <a role="menuitem" href="#" data-pendiente>Configuraciones</a>
-        <a role="menuitem" href="<%= contexto %>/auth/inicio#listados">Mi biblioteca</a>
-        <a role="menuitem" href="#" data-pendiente>Notificaciones</a>
-        <a role="menuitem" href="#" data-pendiente>Mensajes</a>
-        <a role="menuitem" href="<%= contexto %>/auth/inicio#mis-obras">Mis obras</a>
-        
-      </div>
-    </div>
-    <a class="btn small on-bar" href="<%= contexto %>/auth/logout">Cerrar sesión</a>
-  </div>
-</header>
+<%@ include file="/WEB-INF/vistas/comunes/encabezado.jspf" %>
 
 <main id="cuenta">
   <!-- ENCABEZADO DE LA PÁGINA -->
@@ -214,17 +138,31 @@
           <div class="profile-top">
             <div class="big-avatar" aria-hidden="true"><%= avatarHtml %></div>
             <div>
-              <h2><%= nombreUsuario %></h2>
+              <h2><%= nombrePublico %></h2>
               <p class="muted">Cuenta de SAFIR</p>
             </div>
           </div>
           <dl class="dl">
-            <div><dt>Nombre público</dt><dd><%= nombreUsuario %></dd></div>
+            <div><dt>Nombre público</dt><dd><%= nombrePublico %></dd></div>
+            <% if (!usuarioArroba.isEmpty()) { %>
+            <div><dt>Nombre de usuario</dt><dd><%= usuarioArroba %></dd></div>
+            <% } %>
+            <% if (!bioCuenta.isEmpty()) { %>
+            <div><dt>Descripción</dt><dd class="dd-bio"><%= bioCuenta %></dd></div>
+            <% } %>
+            <% if (!enlacesCuenta.isEmpty()) { %>
+            <div><dt>Enlaces</dt><dd class="dd-enlaces">
+              <% for (String[] en : enlacesCuenta) { %>
+              <a href="<%= esc(en[1]) %>" target="_blank" rel="noopener noreferrer nofollow"><%= esc(en[0]) %></a>
+              <% } %>
+            </dd></div>
+            <% } %>
             <div><dt>Tipo de cuenta</dt><dd><%= roles %></dd></div>
             <% if (!idMostrar.isEmpty()) { %>
             <div><dt>ID de usuario</dt><dd>#<%= idMostrar %></dd></div>
             <% } %>
           </dl>
+          <p style="margin-top:1.2rem"><a class="btn small" href="<%= contexto %>/perfil#editar-perfil">Editar perfil</a></p>
         </article>
 
         <article class="coins" id="coinsCard">
@@ -277,24 +215,9 @@
   </div>
 </footer>
 
+<script src="<%= contexto %>/assets/js/inicio.js"></script>
 <script>
 (function () {
-  // Modo noche
-  var root = document.documentElement;
-  var themeBtn = document.getElementById('themeBtn');
-  function setTheme(t) {
-    if (t === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme');
-    themeBtn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
-    themeBtn.textContent = t === 'dark' ? 'Modo claro' : 'Modo noche';
-    try { localStorage.setItem('safir-theme', t); } catch (e) {}
-  }
-  var saved = null;
-  try { saved = localStorage.getItem('safir-theme'); } catch (e) {}
-  setTheme(saved === 'dark' ? 'dark' : 'light');
-  themeBtn.addEventListener('click', function () {
-    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  });
-
   // Animación del saldo de monedas
   var card = document.getElementById('coinsCard');
   var numEl = document.getElementById('coinNum');
@@ -310,27 +233,6 @@
       if (k < 1) requestAnimationFrame(paso);
     })(performance.now());
   }
-
-  // Menú de usuario
-  var menuBtn = document.getElementById('userMenuBtn');
-  var menu = document.getElementById('userMenu');
-  function setMenu(open) {
-    menu.hidden = !open;
-    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  menuBtn.addEventListener('click', function (e) { e.stopPropagation(); setMenu(menu.hidden); });
-  document.addEventListener('click', function (e) {
-    if (!menu.hidden && !menu.contains(e.target)) setMenu(false);
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !menu.hidden) { setMenu(false); menuBtn.focus(); }
-  });
-  Array.prototype.forEach.call(menu.querySelectorAll('a'), function (a) {
-    a.addEventListener('click', function (e) {
-      if (a.hasAttribute('data-pendiente')) e.preventDefault();
-      setMenu(false);
-    });
-  });
 })();
 </script>
 </body>

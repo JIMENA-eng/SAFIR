@@ -13,36 +13,6 @@
 </head>
 <body>
 
-<!-- Símbolo del logo (aproximación vectorial; reemplazar por el archivo oficial) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <path id="star" d="M0,-1 Q.12,-.12 1,0 Q.12,.12 0,1 Q-.12,.12 -1,0 Q-.12,-.12 0,-1Z"/>
-    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#CBC9F4"/><stop offset="1" stop-color="#A9A5EE"/>
-    </linearGradient>
-    <symbol id="plane-color" viewBox="300 230 380 280">
-      <use href="#star" transform="translate(368 275) scale(35)" fill="#5051AE"/>
-      <use href="#star" transform="translate(322 327) scale(17)" fill="#5051AE"/>
-      <path d="M388 405C330 440 310 480 360 493C420 502 480 482 528 459C470 475 400 478 372 462C350 448 360 425 388 405Z" fill="url(#orb)"/>
-      <polygon points="368,350 642,258 440,382" fill="#CBC9F4"/>
-      <polygon points="440,382 642,258 458,461" fill="#5051AE"/>
-      <polygon points="458,461 440,382 500,420" fill="#28296D"/>
-      <polygon points="642,258 545,453 484,404" fill="#BDB9F2"/>
-      <path d="M620 345C662 345 676 366 656 396C640 419 610 431 582 439C620 421 646 400 646 380C646 365 636 352 620 345Z" fill="url(#orb)"/>
-    </symbol>
-    <symbol id="plane-white" viewBox="300 230 380 280">
-      <use href="#star" transform="translate(368 275) scale(35)" fill="#F4F3FF"/>
-      <use href="#star" transform="translate(322 327) scale(17)" fill="#F4F3FF"/>
-      <path d="M388 405C330 440 310 480 360 493C420 502 480 482 528 459C470 475 400 478 372 462C350 448 360 425 388 405Z" fill="#B7B6D6"/>
-      <polygon points="368,350 642,258 440,382" fill="#C9C8DC"/>
-      <polygon points="440,382 642,258 458,461" fill="#A9A8C6"/>
-      <polygon points="458,461 440,382 500,420" fill="#8E8DB0"/>
-      <polygon points="642,258 545,453 484,404" fill="#E9E8F5"/>
-      <path d="M620 345C662 345 676 366 656 396C640 419 610 431 582 439C620 421 646 400 646 380C646 365 636 352 620 345Z" fill="#B7B6D6"/>
-    </symbol>
-  </defs>
-</svg>
-
 <!-- Portadas ilustradas (SVG propio, paleta SAFIR) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>

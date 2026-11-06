@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import com.safir.dao.BilleteraDAO;
+import com.safir.dao.UsuarioDAO;
+import com.safir.util.EncabezadoUtil;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -28,6 +30,9 @@ public class CuentaServlet extends HttpServlet {
           try {
             long id = ((Number) sesion.getAttribute("usuarioId")).longValue();
             request.setAttribute("monedas", billeteraDAO.obtenerSaldo(id));
+            // Encabezado compartido (foto, sobrenombre, puntos rojos) y datos del perfil.
+            EncabezadoUtil.cargar(request, id);
+            request.setAttribute("enlaces", new UsuarioDAO().obtenerEnlaces(id));
         } catch (SQLException e) {
             throw new ServletException("Error al cargar el saldo.", e);
         }

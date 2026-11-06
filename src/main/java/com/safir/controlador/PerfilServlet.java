@@ -115,7 +115,7 @@ public class PerfilServlet extends HttpServlet {
                 if (a != null) { ImagenUtil.borrar(antes.get("avatar"));  sesion.setAttribute("avatarRuta", a); }
                 if (p != null) { ImagenUtil.borrar(antes.get("portada")); }
             }
-            response.sendRedirect(request.getContextPath() + "/perfil?ok=1");
+            response.sendRedirect(request.getContextPath() + "/auth/cuenta");
 
         } catch (IllegalArgumentException | IllegalStateException e) {
             mostrarError(request, response, nombre, usuario, bio,
