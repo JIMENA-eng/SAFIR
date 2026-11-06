@@ -2,6 +2,7 @@ package com.safir.controlador;
 
 import com.safir.dao.GestionCapituloDAO;
 import com.safir.modelo.Capitulo;
+import com.safir.util.EncabezadoUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -213,6 +214,7 @@ public class GestionCapituloServlet extends HttpServlet {
                 }
             }
 
+            EncabezadoUtil.cargar(request, autorId);
             request.setAttribute("obraId", obraId);
             request.setAttribute("capitulo", capitulo);
 
@@ -346,6 +348,7 @@ public class GestionCapituloServlet extends HttpServlet {
             }
 
             if (error != null) {
+                EncabezadoUtil.cargar(request, autorId);
                 request.setAttribute("error", error);
                 request.setAttribute("obraId", obraId);
                 request.setAttribute("tituloFormulario", titulo);

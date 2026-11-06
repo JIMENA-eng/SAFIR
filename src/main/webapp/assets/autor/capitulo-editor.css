@@ -1,0 +1,72 @@
+/* SAFIR · Editor de capítulo (WEB-INF/vistas/autor/editor.jsp).
+   Se carga DESPUÉS de encabezadoinicio.css, que aporta variables, .btn y el encabezado. */
+:root {
+  --ce-err-bg: #FDECEA; --ce-err: #B3261E;
+  --ce-ok-bg: #DDF3E4; --ce-ok: #1E6B3A;
+  --ce-shadow: 0 12px 34px -18px rgba(37,40,102,.35);
+}
+:root[data-theme="dark"] {
+  --ce-err-bg: #3a1b1b; --ce-err: #f1a39d;
+  --ce-ok-bg: #173a24; --ce-ok: #8fd8a8;
+  --ce-shadow: 0 12px 34px -18px rgba(0,0,0,.7);
+}
+
+.ce-main { max-width: 860px; margin: 0 auto; padding: 1.6rem 1.25rem 4rem; }
+.ce-main h1 { max-width: none; }
+.ce-main p { margin: 0; }
+
+/* Volver + título */
+.ce-volver { display: inline-flex; align-items: center; gap: .3rem; color: var(--link); text-decoration: none; font-size: .95rem; font-weight: 500; }
+.ce-volver svg { width: 18px; height: 18px; }
+.ce-volver:hover { text-decoration: underline; text-underline-offset: 4px; }
+.ce-titulo { margin: 1rem 0 1.6rem; }
+.ce-titulo h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(1.9rem, 4.4vw, 2.7rem); color: var(--title); }
+.ce-titulo p { margin-top: .6rem; color: var(--muted); max-width: 40em; }
+.ce-estado { display: flex; flex-wrap: wrap; gap: .45rem; }
+.ce-pildora { padding: .15rem .7rem; border-radius: 999px; background: var(--soft); color: var(--title); font-size: .8rem; font-weight: 500; }
+.ce-pildora.ok { background: var(--ce-ok-bg); color: var(--ce-ok); }
+.ce-pildora.borrador { background: #FBEBC8; color: #6b4a07; }
+
+/* Aviso de error */
+.ce-aviso { padding: .75rem 1rem; border-radius: 12px; margin-bottom: 1.2rem; font-size: .95rem; background: var(--ce-err-bg); color: var(--ce-err); }
+
+/* Tarjeta y campos */
+.ce-form { display: grid; gap: 1.1rem; }
+.ce-card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 1.4rem; box-shadow: var(--ce-shadow); }
+.ce-campo { display: grid; gap: .4rem; }
+.ce-campo + .ce-campo { margin-top: 1.2rem; }
+.ce-label-fila { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.ce-campo label { font-size: .95rem; font-weight: 600; color: var(--title); }
+.ce-campo label b { color: var(--lav); }
+.ce-contador { font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ce-contador.limite { color: var(--ce-err); font-weight: 600; }
+.ce-campo small { color: var(--muted); font-size: .85rem; }
+.ce-campo input[type="text"], .ce-campo textarea {
+  width: 100%; font: inherit; color: var(--text); background: var(--bg);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: .75rem .95rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.ce-campo input[type="text"] { font-family: var(--serif); font-size: 1.15rem; }
+/* El contenido se escribe con tipografía de lectura */
+.ce-campo textarea { resize: vertical; min-height: 380px; font-family: var(--serif); font-size: 1.05rem; line-height: 1.75; }
+.ce-campo input::placeholder, .ce-campo textarea::placeholder { color: var(--muted); opacity: .7; }
+.ce-campo input:focus, .ce-campo textarea:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+
+/* Botones */
+.ce-acciones { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.ce-acciones .btn { font-weight: 600; }
+
+/* Publicar */
+.ce-publicar { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; margin-top: 1.6rem; }
+.ce-publicar-texto { display: grid; gap: .25rem; }
+.ce-publicar-texto b { color: var(--title); font-weight: 600; }
+.ce-publicar-texto small { color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.ce-publicar .btn { font-weight: 600; flex: none; }
+
+@media (max-width: 600px) {
+  .ce-card { padding: 1.1rem; }
+  .ce-campo textarea { min-height: 300px; }
+  .ce-acciones .btn { flex: 1 1 auto; }
+  .ce-publicar { flex-direction: column; align-items: stretch; }
+}
+@media (prefers-reduced-motion: reduce) { .ce-main * { transition: none !important; } }

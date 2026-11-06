@@ -175,6 +175,9 @@
         <button type="submit" class="btn" id="btnGuardar">
           <c:choose><c:when test="${modoEdicion}">Guardar cambios</c:when><c:otherwise>Crear obra</c:otherwise></c:choose>
         </button>
+        <c:if test="${modoEdicion}">
+          <a class="btn outline" href="<%= contexto %>/autor/capitulos?obraId=${obra.id}">Administrar capítulos</a>
+        </c:if>
         <a class="btn outline" href="<%= contexto %>/auth/cuenta#mis-obras">Cancelar</a>
       </div>
     </form>
@@ -204,7 +207,16 @@
   </div>
 </main>
 
+<%-- Aviso flotante: aparece al volver de guardar (?guardado=1) y se oculta solo --%>
+<c:if test="${modoEdicion and param.guardado == '1'}">
+  <div class="of-toast" id="avisoGuardado" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+    <span>Los cambios se guardaron correctamente.</span>
+  </div>
+</c:if>
+
 <script src="<%= contexto %>/assets/js/inicio.js"></script>
+<script src="<%= contexto %>/assets/js/aviso-flotante.js"></script>
 <script>
 (function () {
   var form = document.getElementById('obraForm');
