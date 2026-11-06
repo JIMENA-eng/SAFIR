@@ -41,7 +41,7 @@ public class ObraEdicionDAO {
 
         String sql = """
             SELECT id, titulo, descripcion, genero_id, clasificacion,
-                   bloqueo_activo
+                   bloqueo_activo, portada_ruta
             FROM obra
             WHERE id = ? AND autor_id = ?
             """;
@@ -65,6 +65,7 @@ public class ObraEdicionDAO {
                 obra.put("clasificacion",
                          rs.getString("clasificacion"));
                 obra.put("bloqueoActivo", rs.getBoolean("bloqueo_activo"));
+                obra.put("portadaRuta", rs.getString("portada_ruta"));
 
                 return obra;
             }
@@ -149,6 +150,20 @@ public class ObraEdicionDAO {
             }
         }
     }
+    /** Guarda la ruta de la portada (ej. "obra/12-uuid.jpg") de una obra propia. */
+    public boolean actualizarPortada(long obraId, long autorId, String portadaRuta)
+            throws SQLException {
+        String sql = "UPDATE obra SET portada_ruta = ? WHERE id = ? AND autor_id = ?";
+
+        try (Connection con = ConexionBD.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, portadaRuta);
+            ps.setLong(2, obraId);
+            ps.setLong(3, autorId);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     public boolean actualizarBloqueo(long obraId, long autorId, boolean activo)
         throws SQLException {
     String sql = "UPDATE obra SET bloqueo_activo = ? WHERE id = ? AND autor_id = ?";

@@ -10,6 +10,12 @@
 <body>
 
 <h1><c:out value="${obra.titulo}"/></h1>
+
+<c:if test="${not empty obra.portadaRuta}">
+    <img src="${pageContext.request.contextPath}/media/<c:out value='${obra.portadaRuta}'/>"
+         alt="Portada de <c:out value='${obra.titulo}'/>"
+         style="width:220px;max-width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;">
+</c:if>
 <c:if test="${not empty flashOk}">
     <p style="color:green"><c:out value="${flashOk}"/></p>
 </c:if>

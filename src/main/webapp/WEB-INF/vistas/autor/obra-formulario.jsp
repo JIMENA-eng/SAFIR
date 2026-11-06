@@ -69,11 +69,32 @@
 
   <div class="of-grid">
 
-    <form class="of-form" id="obraForm" method="post" action="${urlFormulario}">
+    <form class="of-form" id="obraForm" method="post" action="${urlFormulario}" enctype="multipart/form-data">
 
       <!-- 1. Datos principales -->
       <div class="of-card">
         <h2><span class="of-num">1</span> Datos de la obra</h2>
+
+        <div class="of-datos">
+
+        <!-- Lado izquierdo: portada del libro -->
+        <div class="of-subida">
+          <span class="of-subida-etq">Portada</span>
+          <label class="of-subida-caja" for="portadaInput">
+            <img id="portadaImg" alt="Portada del libro"
+                 <c:if test="${empty obra.portadaRuta}">hidden</c:if>
+                 <c:if test="${not empty obra.portadaRuta}">src="${pageContext.request.contextPath}/media/<c:out value='${obra.portadaRuta}'/>"</c:if>>
+            <span class="of-subida-vacio" id="portadaVacio" <c:if test="${not empty obra.portadaRuta}">hidden</c:if>>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+              Subir portada
+            </span>
+          </label>
+          <input type="file" name="portada" id="portadaInput" class="of-sr" accept="image/png,image/jpeg,image/webp">
+          <small id="portadaNombre">JPG, PNG o WebP · hasta 5 MB</small>
+        </div>
+
+        <!-- Lado derecho: título y descripción -->
+        <div class="of-datos-campos">
 
         <div class="of-campo">
           <div class="of-label-fila">
@@ -94,6 +115,9 @@
                     placeholder="¿De qué trata? Una buena sinopsis invita a leer."><c:out value="${descripcionSel}"/></textarea>
           <small>Opcional, pero ayuda a que los lectores se animen a empezar.</small>
         </div>
+
+        </div><!-- /of-datos-campos -->
+        </div><!-- /of-datos -->
       </div>
 
       <!-- 2. Género -->
@@ -159,7 +183,12 @@
     <aside class="of-previa" aria-label="Vista previa de la obra">
       <p class="of-previa-etq">Así se verá tu obra</p>
       <div class="of-tarjeta">
-        <span class="of-portada" id="pvInicial" aria-hidden="true">?</span>
+        <span class="of-portada" id="pvInicial" aria-hidden="true">
+          <img id="pvImg" alt=""
+               <c:if test="${empty obra.portadaRuta}">hidden</c:if>
+               <c:if test="${not empty obra.portadaRuta}">src="${pageContext.request.contextPath}/media/<c:out value='${obra.portadaRuta}'/>"</c:if>>
+          <span id="pvLetra">?</span>
+        </span>
         <div class="of-tarjeta-info">
           <b id="pvTitulo" class="vacio">Título de tu obra</b>
           <div class="of-etiquetas">
@@ -183,7 +212,13 @@
   var desc = document.getElementById('descripcion');
   var tituloCont = document.getElementById('tituloCont');
   var descCont = document.getElementById('descCont');
-  var pvInicial = document.getElementById('pvInicial');
+  var pvLetra = document.getElementById('pvLetra');
+  var pvImg = document.getElementById('pvImg');
+  var inPortada = document.getElementById('portadaInput');
+  var portadaImg = document.getElementById('portadaImg');
+  var portadaVacio = document.getElementById('portadaVacio');
+  var portadaNombre = document.getElementById('portadaNombre');
+  var AYUDA = portadaNombre.textContent;
   var pvTitulo = document.getElementById('pvTitulo');
   var pvGenero = document.getElementById('pvGenero');
   var pvClasif = document.getElementById('pvClasif');
@@ -206,7 +241,8 @@
 
     pvTitulo.textContent = t || 'Título de tu obra';
     pvTitulo.className = t ? '' : 'vacio';
-    pvInicial.textContent = t ? Array.from(t)[0].toUpperCase() : '?';
+    pvLetra.textContent = t ? Array.from(t)[0].toUpperCase() : '?';
+    pvLetra.hidden = !pvImg.hidden;
 
     var g = marcado('generoId');
     pvGenero.textContent = g ? textoDe(g) : 'Género';
@@ -219,6 +255,25 @@
     pvDesc.className = 'of-tarjeta-desc' + (d ? '' : ' vacio');
     pvMonedas.hidden = !monedas.checked;
   }
+
+  // Portada: valida y muestra la imagen elegida (formulario y vista previa)
+  inPortada.addEventListener('change', function () {
+    var f = inPortada.files && inPortada.files[0];
+    if (!f) return;
+    if (['image/jpeg', 'image/png', 'image/webp'].indexOf(f.type) < 0) {
+      alert('Formato no permitido. Usa JPG, PNG o WebP.');
+      inPortada.value = ''; return;
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      alert('La portada supera el máximo de 5 MB.');
+      inPortada.value = ''; return;
+    }
+    var url = URL.createObjectURL(f);
+    portadaImg.src = url; portadaImg.hidden = false; portadaVacio.hidden = true;
+    pvImg.src = url; pvImg.hidden = false;
+    portadaNombre.textContent = f.name;
+    actualizar();
+  });
 
   form.addEventListener('input', actualizar);
   form.addEventListener('change', actualizar);

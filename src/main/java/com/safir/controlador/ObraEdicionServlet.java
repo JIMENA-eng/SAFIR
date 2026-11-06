@@ -2,6 +2,9 @@ package com.safir.controlador;
 
 import com.safir.dao.ObraEdicionDAO;
 import com.safir.util.EncabezadoUtil;
+import com.safir.util.ImagenUtil;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,6 +22,7 @@ import java.util.Map;
     "/autor/obra/nueva",
     "/autor/obra/editar"
 })
+@MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 8 * 1024 * 1024)
 public class ObraEdicionServlet extends HttpServlet {
 
     private final ObraEdicionDAO dao = new ObraEdicionDAO();
@@ -185,6 +189,15 @@ public class ObraEdicionServlet extends HttpServlet {
             return;
         }
 
+        // La portada se lee primero: con multipart, si supera el límite no se leen los demás campos.
+        Part portada = null;
+        String errorPortada = null;
+        try {
+            portada = request.getPart("portada");
+        } catch (IllegalStateException e) {
+            errorPortada = "La portada supera el máximo de 5 MB.";
+        }
+
         String titulo = request.getParameter("titulo");
         String descripcion = request.getParameter("descripcion");
         String generoTexto = request.getParameter("generoId");
@@ -199,7 +212,9 @@ public class ObraEdicionServlet extends HttpServlet {
         String error = null;
         int generoId = -1;
 
-        if (titulo.isBlank()) {
+        if (errorPortada != null) {
+            error = errorPortada;
+        } else if (titulo.isBlank()) {
             error = "El título es obligatorio.";
         } else if (titulo.length() > 100) {
             error = "El título no puede superar los 100 caracteres.";
@@ -223,6 +238,14 @@ public class ObraEdicionServlet extends HttpServlet {
                     "mayores_18"
                 ).contains(clasificacion)) {
             error = "Selecciona una clasificación válida.";
+        }
+
+        if (error == null && ImagenUtil.hayArchivo(portada)) {
+            try {
+                ImagenUtil.validar(portada, ImagenUtil.MAX_PORTADA);
+            } catch (IllegalArgumentException e) {
+                error = e.getMessage();
+            }
         }
 
         try {
@@ -262,22 +285,40 @@ public class ObraEdicionServlet extends HttpServlet {
                 return;
             }
 
+            // Portada nueva (null si no se eligió archivo)
+            String portadaNueva = ImagenUtil.hayArchivo(portada)
+                    ? ImagenUtil.guardar(portada, "obra", usuarioId,
+                            ImagenUtil.MAX_PORTADA)
+                    : null;
+
             if (edicion) {
+                Map<String, Object> antes = dao.obtenerPropia(obraId, usuarioId);
                 boolean actualizado = dao.actualizarPropia(
                     obraId, usuarioId, titulo, descripcion,
                     generoId, clasificacion);
 
                 if (!actualizado) {
+                    ImagenUtil.borrar(portadaNueva);
                     response.sendError(
                         HttpServletResponse.SC_NOT_FOUND,
                         "La obra no existe o no te pertenece.");
                     return;
                 }
                 dao.actualizarBloqueo(obraId, usuarioId, bloqueo);
+
+                if (portadaNueva != null) {
+                    dao.actualizarPortada(obraId, usuarioId, portadaNueva);
+                    if (antes != null) {
+                        ImagenUtil.borrar((String) antes.get("portadaRuta"));
+                    }
+                }
             } else {
                 long nuevaId = dao.crear(usuarioId, titulo, descripcion,
                         generoId, clasificacion);
                 dao.actualizarBloqueo(nuevaId, usuarioId, bloqueo);
+                if (portadaNueva != null) {
+                    dao.actualizarPortada(nuevaId, usuarioId, portadaNueva);
+                }
             }
 
             response.sendRedirect(

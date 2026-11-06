@@ -17,11 +17,11 @@ public class CuentaObrasDAO {
 
     /**
      * Obras del autor en un estado dado ('publicada' o 'borrador').
-     * Fila: {id, titulo, genero, avance, lecturas, promedio, capPublicados, capBorrador}
+     * Fila: {id, titulo, genero, avance, lecturas, promedio, capPublicados, capBorrador, portadaRuta}
      */
     public List<String[]> listarObras(long autorId, String estado) throws SQLException {
         String sql =
-            "SELECT o.id, o.titulo, g.nombre AS genero, o.avance, " +
+            "SELECT o.id, o.titulo, g.nombre AS genero, o.avance, o.portada_ruta, " +
             "       COALESCE(e.total_lecturas, 0) AS lecturas, " +
             "       COALESCE(e.promedio, 0)       AS promedio, " +
             "       (SELECT COUNT(*) FROM capitulo c WHERE c.obra_id = o.id AND c.estado = 'publicado') AS cap_pub, " +
@@ -47,7 +47,8 @@ public class CuentaObrasDAO {
                         String.valueOf(rs.getLong("lecturas")),
                         rs.getBigDecimal("promedio").toPlainString(),
                         String.valueOf(rs.getLong("cap_pub")),
-                        String.valueOf(rs.getLong("cap_bor"))
+                        String.valueOf(rs.getLong("cap_bor")),
+                        rs.getString("portada_ruta")
                     });
                 }
             }

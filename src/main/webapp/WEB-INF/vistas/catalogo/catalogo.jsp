@@ -224,6 +224,14 @@
             justify-content: center;
             color: white;
             font-size: 55px;
+            overflow: hidden;
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .book-content {
@@ -434,7 +442,15 @@
                     <c:forEach var="obra" items="${obras}">
                         <article class="book-card">
 
-                            <div class="book-cover">✦</div>
+                            <div class="book-cover">
+                                <c:choose>
+                                    <c:when test="${not empty obra.portadaRuta}">
+                                        <img src="${pageContext.request.contextPath}/media/<c:out value='${obra.portadaRuta}'/>"
+                                             alt="Portada de <c:out value='${obra.titulo}'/>" loading="lazy">
+                                    </c:when>
+                                    <c:otherwise>✦</c:otherwise>
+                                </c:choose>
+                            </div>
 
                             <div class="book-content">
 

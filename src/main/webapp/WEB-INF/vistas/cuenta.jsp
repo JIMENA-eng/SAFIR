@@ -51,13 +51,18 @@
             ? (java.util.List<String[]>) request.getAttribute("misListas") : new java.util.ArrayList<String[]>();
 %>
 <%!
-    /** Tarjeta de una obra. ob = {id, titulo, genero, avance, lecturas, promedio, capPub, capBorrador}. */
+    /** Tarjeta de una obra. ob = {id, titulo, genero, avance, lecturas, promedio, capPub, capBorrador, portadaRuta}. */
     private static String tarjetaObra(String[] ob, String contexto, boolean borrador) {
         String titulo = ob[1] == null ? "" : ob[1];
         String ini = titulo.isEmpty() ? "?"
                 : new String(Character.toChars(Character.toUpperCase(titulo.codePointAt(0))));
         StringBuilder sb = new StringBuilder("<li class=\"mo-obra\">");
-        sb.append("<span class=\"mo-tile\" aria-hidden=\"true\">").append(esc(ini)).append("</span>");
+        if (ob.length > 8 && ob[8] != null && !ob[8].isEmpty()) {
+            sb.append("<span class=\"mo-tile\"><img src=\"").append(contexto).append("/media/")
+              .append(esc(ob[8])).append("\" alt=\"Portada de ").append(esc(titulo)).append("\"></span>");
+        } else {
+            sb.append("<span class=\"mo-tile\" aria-hidden=\"true\">").append(esc(ini)).append("</span>");
+        }
         sb.append("<div class=\"mo-info\"><b>").append(esc(titulo)).append("</b>");
         sb.append("<small>").append(esc(ob[2])).append(" · ");
         if (borrador) {

@@ -94,7 +94,24 @@
 .of-previa { position: sticky; top: 1.2rem; }
 .of-previa-etq { font-size: .85rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: .7rem; }
 .of-tarjeta { display: grid; grid-template-columns: 72px 1fr; gap: .9rem 1rem; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 1.1rem; box-shadow: var(--of-shadow); }
-.of-portada { width: 72px; height: 96px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(160deg, var(--indigo), var(--lav)); color: #fff; font: 400 2rem var(--serif); }
+.of-portada { position: relative; overflow: hidden; width: 72px; height: 96px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(160deg, var(--indigo), var(--lav)); color: #fff; font: 400 2rem var(--serif); }
+.of-portada img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.of-portada img[hidden], .of-portada span[hidden] { display: none; }
+
+/* Datos de la obra: portada a la izquierda, campos a la derecha */
+.of-datos { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+.of-datos-campos { display: grid; gap: 1.1rem; min-width: 0; }
+.of-datos-campos .of-campo + .of-campo { margin-top: 0; }
+.of-subida { display: grid; gap: .5rem; justify-items: center; text-align: center; }
+.of-subida-etq { justify-self: start; font-size: .95rem; font-weight: 600; color: var(--title); }
+.of-subida-caja { position: relative; overflow: hidden; width: 150px; aspect-ratio: 3 / 4; border-radius: 14px; border: 1.5px dashed var(--line); background: var(--bg); cursor: pointer; display: grid; place-items: center; transition: border-color .15s, background .15s; }
+.of-subida-caja:hover { border-color: var(--lav); background: var(--soft); }
+.of-subida-caja img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.of-subida-caja img[hidden], .of-subida-vacio[hidden] { display: none; }
+.of-subida-vacio { display: grid; gap: .4rem; justify-items: center; color: var(--muted); font-size: .9rem; font-weight: 500; }
+.of-subida-vacio svg { width: 34px; height: 34px; }
+.of-subida small { color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
+.of-subida .of-sr:focus-visible + small { text-decoration: underline; }
 .of-tarjeta-info { display: grid; gap: .55rem; min-width: 0; align-content: start; }
 .of-tarjeta-info b { font-family: var(--serif); font-weight: 500; font-size: 1.1rem; line-height: 1.25; color: var(--title); overflow-wrap: anywhere; }
 .of-tarjeta-info b.vacio, .of-tarjeta-desc.vacio, .of-etiqueta.vacio { opacity: .55; }
@@ -111,6 +128,8 @@
   .of-previa { display: none; }
 }
 @media (max-width: 600px) {
+  .of-datos { grid-template-columns: 1fr; }
+  .of-subida-etq { justify-self: center; }
   .of-opciones { grid-template-columns: 1fr; }
   .of-card { padding: 1.1rem; }
   .of-acciones .btn { flex: 1 1 auto; }
