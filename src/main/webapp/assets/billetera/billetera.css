@@ -110,3 +110,52 @@
   .bt-paquetes { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .bt-main * { transition: none !important; } }
+
+/* ===== Economía de autor (dentro de Mi billetera) ===== */
+.bt-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.bt-subtitulo { font-family: var(--serif); font-weight: 400; font-size: 1.15rem; color: var(--title); margin: 1.6rem 0 .8rem; }
+
+.bt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.bt-stat { display: grid; gap: .4rem; align-content: start; padding: 1.1rem 1.2rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.bt-stat-etq { color: var(--muted); font-size: .88rem; }
+.bt-stat-val { font: 400 1.9rem/1.1 var(--serif); color: var(--title); font-variant-numeric: tabular-nums; }
+.bt-stat-val span { font: 400 .95rem var(--sans); color: var(--muted); }
+.bt-stat-nota { color: var(--muted); font-size: .85rem; }
+
+.bt-progreso { width: 100%; height: 10px; border: 0; border-radius: 999px; background: var(--soft); overflow: hidden; -webkit-appearance: none; appearance: none; }
+.bt-progreso::-webkit-progress-bar { background: var(--soft); border-radius: 999px; }
+.bt-progreso::-webkit-progress-value { background: linear-gradient(90deg, var(--indigo), var(--lav)); border-radius: 999px; }
+.bt-progreso::-moz-progress-bar { background: linear-gradient(90deg, var(--indigo), var(--lav)); border-radius: 999px; }
+
+.bt-card { display: grid; gap: .8rem; justify-items: start; margin-bottom: 1rem; padding: 1.2rem 1.3rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.bt-card h3 { font-family: var(--serif); font-weight: 400; font-size: 1.15rem; color: var(--title); }
+.bt-card > p { max-width: 46em; }
+.bt-card form { margin: 0; }
+.bt-card .bt-form { width: 100%; max-width: 520px; padding: 0; border: 0; background: transparent; }
+.bt-estado-linea { color: var(--muted); }
+.bt-estado-linea.ok { color: var(--bt-pos); font-weight: 500; }
+.bt-estado-linea b { color: var(--title); }
+
+.bt-cond { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.bt-cond li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: .6rem; align-items: start; }
+.bt-cond svg { width: 22px; height: 22px; padding: 3px; border-radius: 50%; }
+.bt-cond .ok svg { color: var(--bt-pos); background: var(--bt-ok-bg); }
+.bt-cond .no svg { color: var(--bt-neg); background: var(--bt-error-bg); }
+
+.bt-form select { font: inherit; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: .65rem .8rem; cursor: pointer; }
+.bt-form input[type="number"], .bt-form input[type="email"] { font: inherit; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: .65rem .8rem; }
+.bt-form input[type="number"]:focus, .bt-form input[type="email"]:focus, .bt-form select:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+.bt-estimado { min-height: 1.4em; color: var(--muted); font-size: .92rem; }
+.bt-card .btn[disabled], .bt-form .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
+
+.bt-tabla-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+.bt-tabla { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.bt-tabla th, .bt-tabla td { padding: .7rem .9rem; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.bt-tabla td:last-child { white-space: normal; min-width: 10rem; }
+.bt-tabla th { color: var(--muted); font-weight: 500; font-size: .82rem; }
+.bt-tabla tbody tr:last-child td { border-bottom: 0; }
+
+.bt-badge { display: inline-block; padding: .1rem .65rem; border-radius: 999px; background: var(--soft); color: var(--title); font-size: .78rem; font-weight: 600; }
+.bt-badge.pend { background: var(--bt-info-bg); color: var(--link); border: 1px solid var(--outline); }
+.bt-badge.pag { background: var(--bt-ok-bg); color: var(--bt-pos); }
+.bt-badge.rech { background: var(--bt-error-bg); color: var(--bt-neg); }

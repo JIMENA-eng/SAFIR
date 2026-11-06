@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/** Solicitud de retiro del autor: POST /autor/retiro. */
+/** Solicitud de retiro del autor: POST /autor/retiro (se pide desde Mi billetera y vuelve a /billetera). */
 @WebServlet("/autor/retiro")
 public class RetiroServlet extends HttpServlet {
 
@@ -34,7 +34,7 @@ public class RetiroServlet extends HttpServlet {
         }
 
         long autorId = ((Number) sesion.getAttribute("usuarioId")).longValue();
-        String destino = request.getContextPath() + "/autor/economia";
+        String destino = request.getContextPath() + "/billetera";
 
         long monedas;
         try {
