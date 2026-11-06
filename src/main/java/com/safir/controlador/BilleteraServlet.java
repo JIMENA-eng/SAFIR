@@ -1,18 +1,25 @@
 package com.safir.controlador;
 
 import com.safir.dao.BilleteraDAO;
+import com.safir.dao.CompraPaqueteDAO;
+import com.safir.util.EncabezadoUtil;
+import com.safir.util.Flash;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import com.safir.dao.CompraPaqueteDAO;
-import com.safir.util.Flash;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-/** Billetera del usuario: GET /billetera. */
+/**
+ * Billetera del usuario: GET /billetera.
+ * Cambio respecto a la versión anterior: carga el encabezado compartido
+ * con EncabezadoUtil.cargar(...), igual que BibliotecaServlet.
+ */
 @WebServlet("/billetera")
 public class BilleteraServlet extends HttpServlet {
 
@@ -40,7 +47,9 @@ public class BilleteraServlet extends HttpServlet {
                     billeteraDAO.listarMovimientos(usuarioId, 50));
             request.setAttribute("etiquetas", BilleteraDAO.ETIQUETAS);
             request.setAttribute("paquetes", compraDAO.listarPaquetes(usuarioId));
-   Flash.aRequest(request);
+
+            EncabezadoUtil.cargar(request, usuarioId);
+            Flash.aRequest(request);
         } catch (SQLException e) {
             throw new ServletException("Error al cargar la billetera.", e);
         }

@@ -1,0 +1,112 @@
+/* SAFIR · Mi billetera y Pagar con Yape (WEB-INF/vistas/billetera/billetera.jsp y yape.jsp).
+   Se carga DESPUÉS de encabezadoinicio.css, que aporta variables, .btn y el encabezado. */
+:root {
+  --bt-pos: #1E7B4F; --bt-neg: #B3261E;
+  --bt-ok-bg: #E4F5EC; --bt-error-bg: #FDECEA; --bt-info-bg: var(--soft);
+  --bt-shadow: 0 12px 34px -18px rgba(37,40,102,.35);
+}
+:root[data-theme="dark"] {
+  --bt-pos: #7fd6a8; --bt-neg: #f1a39d;
+  --bt-ok-bg: #17332a; --bt-error-bg: #3a1b1b; --bt-info-bg: #181B3A;
+  --bt-shadow: 0 12px 34px -18px rgba(0,0,0,.7);
+}
+
+.bt-main { max-width: 1040px; margin: 0 auto; padding: 1.6rem 1.25rem 4rem; }
+.bt-main.bt-angosto { max-width: 640px; }
+.bt-main h1, .bt-main h2 { max-width: none; }
+.bt-main p { margin: 0; }
+
+.bt-volver { display: inline-flex; align-items: center; gap: .3rem; color: var(--link); text-decoration: none; font-size: .95rem; font-weight: 500; }
+.bt-volver svg { width: 18px; height: 18px; }
+.bt-volver:hover { text-decoration: underline; text-underline-offset: 4px; }
+.bt-titulo { margin: 1rem 0 1.4rem; }
+.bt-titulo h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(1.9rem, 4.4vw, 2.7rem); color: var(--title); }
+.bt-titulo p { margin-top: .6rem; color: var(--muted); max-width: 40em; }
+
+.bt-seccion { margin-top: 2.2rem; }
+.bt-seccion h2 { font-family: var(--serif); font-weight: 400; font-size: 1.4rem; color: var(--title); margin-bottom: 1rem; }
+.bt-nota { margin-top: .9rem; color: var(--muted); font-size: .88rem; }
+
+/* Avisos */
+.bt-aviso { margin: 0 0 1.1rem; padding: .8rem 1rem; border-radius: 14px; border: 1px solid var(--line); background: var(--bt-info-bg); color: var(--text); }
+.bt-aviso.ok { background: var(--bt-ok-bg); border-color: var(--bt-pos); }
+.bt-aviso.error { background: var(--bt-error-bg); border-color: var(--bt-neg); }
+
+/* Saldo */
+.bt-saldo { padding: 1.6rem 1.5rem; border-radius: 22px; color: #fff; background: linear-gradient(135deg, var(--indigo), var(--lav)); box-shadow: var(--bt-shadow); }
+.bt-saldo-etq { font-size: .9rem; opacity: .85; }
+.bt-saldo-monto { font: 300 clamp(2.2rem, 6vw, 3.4rem)/1.1 var(--serif); margin-top: .2rem; font-variant-numeric: tabular-nums; }
+.bt-saldo-monto span { font: 400 1rem var(--sans); opacity: .85; }
+.bt-promo { display: flex; align-items: flex-start; gap: .55rem; margin-top: 1rem; padding: .6rem .9rem; border-radius: 12px; background: rgba(255,255,255,.16); font-size: .92rem; }
+.bt-promo svg { width: 18px; height: 18px; flex: none; margin-top: .15rem; }
+
+/* Paquetes */
+.bt-paquetes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
+.bt-paquete { display: grid; gap: .6rem; align-content: start; padding: 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; transition: border-color .15s, box-shadow .15s; }
+.bt-paquete:hover { border-color: var(--lav); box-shadow: var(--bt-shadow); }
+.bt-paq-monedas { font: 400 1.7rem/1.1 var(--serif); color: var(--title); font-variant-numeric: tabular-nums; }
+.bt-paq-monedas span { font: 400 .9rem var(--sans); color: var(--muted); }
+.bt-paq-precio { color: var(--muted); }
+.bt-paq-precio strong { color: var(--text); font-size: 1.1rem; margin-left: .25rem; }
+.bt-paq-form { display: grid; gap: .5rem; margin: .3rem 0 0; }
+.bt-paq-form .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
+
+/* Filtros */
+.bt-filtros { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.1rem; }
+.bt-filtro { font: inherit; font-size: .92rem; font-weight: 500; cursor: pointer; padding: .45rem .95rem; border-radius: 999px; border: 1.5px solid var(--outline); background: transparent; color: var(--link); transition: background .15s, color .15s; }
+.bt-filtro:hover { background: var(--soft); }
+.bt-filtro.activo { background: var(--btn); color: var(--btn-text); border-color: transparent; }
+.bt-filtro:focus-visible { outline: 3px solid var(--lav); outline-offset: 2px; }
+.bt-n { margin-left: .25rem; opacity: .75; font-variant-numeric: tabular-nums; }
+
+/* Movimientos */
+.bt-movs { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.bt-mov { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; row-gap: .1rem; align-items: center; padding: .85rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+.bt-mov[hidden] { display: none; }
+.bt-mov-info { grid-row: 1 / span 2; min-width: 0; }
+.bt-mov-tipo { color: var(--text); font-weight: 500; overflow-wrap: anywhere; }
+.bt-mov-fecha { color: var(--muted); font-size: .85rem; }
+.bt-mov-monto { justify-self: end; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; color: var(--text); }
+.bt-mov-monto.pos { color: var(--bt-pos); }
+.bt-mov-monto.neg { color: var(--bt-neg); }
+.bt-mov-saldo { justify-self: end; color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
+
+/* Vacíos */
+.bt-vacio { display: grid; justify-items: center; gap: .5rem; text-align: center; padding: 2rem 1.2rem; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 20px; color: var(--muted); }
+.bt-vacio b { color: var(--title); font-weight: 600; }
+.bt-sin-resultados { margin-top: 1.2rem; text-align: center; color: var(--muted); }
+.bt-sin-resultados[hidden] { display: none; }
+
+/* Pagar con Yape */
+.bt-resumen { display: grid; gap: .2rem; padding: 1.3rem 1.4rem; margin-bottom: 1.4rem; border-radius: 20px; color: #fff; background: linear-gradient(135deg, var(--indigo), var(--lav)); }
+.bt-resumen-etq { font-size: .88rem; opacity: .85; }
+.bt-resumen-monedas { font: 300 2.2rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.bt-resumen-monedas span { font: 400 1rem var(--sans); opacity: .85; }
+.bt-resumen-monto b { font-weight: 600; }
+
+.bt-pasos { list-style: none; counter-reset: paso; margin: 0 0 1.4rem; padding: 0; display: grid; gap: .8rem; }
+.bt-pasos li { counter-increment: paso; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: .8rem; align-items: start; }
+.bt-pasos li::before { content: counter(paso); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--soft); color: var(--title); font-weight: 600; }
+.bt-pasos li > span { padding-top: .3rem; overflow-wrap: anywhere; }
+.bt-copiar { margin-left: .4rem; font: inherit; font-size: .82rem; font-weight: 500; cursor: pointer; padding: .15rem .7rem; border-radius: 999px; border: 1.5px solid var(--outline); background: transparent; color: var(--link); }
+.bt-copiar:hover { background: var(--soft); }
+.bt-copiar:focus-visible { outline: 3px solid var(--lav); outline-offset: 2px; }
+
+.bt-form { display: grid; gap: .6rem; padding: 1.2rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.bt-form label { font-weight: 500; color: var(--title); }
+.bt-form input[type="text"] { font: inherit; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: .65rem .8rem; }
+.bt-form input[type="text"]:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+.bt-form .btn { justify-self: start; }
+
+.bt-estado { display: grid; justify-items: center; gap: .6rem; text-align: center; padding: 2.2rem 1.2rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; }
+.bt-estado svg { width: 48px; height: 48px; }
+.bt-estado.ok svg { color: var(--bt-pos); }
+.bt-estado.error svg { color: var(--bt-neg); }
+.bt-estado b { color: var(--title); font-weight: 600; }
+.bt-estado .btn { margin-top: .6rem; }
+
+@media (max-width: 520px) {
+  .bt-saldo { padding: 1.3rem 1.1rem; }
+  .bt-paquetes { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .bt-main * { transition: none !important; } }

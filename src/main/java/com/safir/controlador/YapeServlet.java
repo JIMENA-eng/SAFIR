@@ -1,6 +1,7 @@
 package com.safir.controlador;
 
 import com.safir.dao.CompraPaqueteDAO;
+import com.safir.util.EncabezadoUtil;
 import com.safir.util.Flash;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -59,6 +60,7 @@ public class YapeServlet extends HttpServlet {
             request.setAttribute("compra", compra);
             request.setAttribute("yapeNumero", System.getenv("SAFIR_YAPE_NUMERO"));
             request.setAttribute("yapeTitular", System.getenv("SAFIR_YAPE_TITULAR"));
+            EncabezadoUtil.cargar(request, usuarioId);
             Flash.aRequest(request);
 
             request.getRequestDispatcher("/WEB-INF/vistas/billetera/yape.jsp")
