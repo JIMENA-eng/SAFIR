@@ -26,11 +26,12 @@
     String idMostrar = esc(idUsuario);
     String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
     long[] est = request.getAttribute("estadisticas") instanceof long[]
-        ? (long[]) request.getAttribute("estadisticas") : new long[4];
+        ? (long[]) request.getAttribute("estadisticas") : new long[5];
     String nSeguidores = String.format(java.util.Locale.US, "%,d", est[0]);
     String nValoraciones = String.format(java.util.Locale.US, "%,d", est[1]);
     String nListas = String.format(java.util.Locale.US, "%,d", est[2]);
     String nObras = String.format(java.util.Locale.US, "%,d", est[3]);
+    String nSeguidos = String.format(java.util.Locale.US, "%,d", est[4]);
     String nombrePublico = esc(sobrenombreMenu);
     String usuarioArroba = usuarioMenu.isEmpty() ? "" : "@" + esc(usuarioMenu);
     String bioCuenta = request.getAttribute("menuBiografia") == null ? ""
@@ -178,6 +179,7 @@
           <% } %>
         <ul class="cuenta-stats" aria-label="Estadísticas del perfil">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><b><%= nSeguidores %></b><span>Seguidores</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><b><%= nSeguidos %></b><span>Siguiendo</span></li>
             <li><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><b><%= nValoraciones %></b><span>Valoraciones</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg><b><%= nListas %></b><span>Listas</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><b><%= nObras %></b><span>Obras publicadas</span></li>
