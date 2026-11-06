@@ -64,12 +64,16 @@
     <a class="btn cl-nuevo" href="<%= contexto %>/autor/capitulo/nuevo?obraId=${obraId}">+ Nuevo capítulo</a>
   </header>
 
+  <c:if test="${total > 0 and nPublicados == 0}">
+    <p class="cl-nota">Tu obra sigue en borrador. Se publicará automáticamente cuando publiques su primer capítulo.</p>
+  </c:if>
+
   <c:choose>
     <c:when test="${empty capitulos}">
       <div class="cl-vacio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
         <p><b>Todavía no tienes capítulos en esta obra.</b></p>
-        <p>Escribe el primero, guárdalo como borrador y publícalo cuando esté listo.</p>
+        <p>Escribe el primero, guárdalo como borrador y publícalo: tu obra se publicará junto con él.</p>
         <a class="btn" href="<%= contexto %>/autor/capitulo/nuevo?obraId=${obraId}">Escribir el primer capítulo</a>
       </div>
     </c:when>
@@ -116,7 +120,9 @@
 <c:if test="${param.guardado == '1' or param.publicado == '1'}">
   <div class="cl-toast" id="avisoGuardado" role="status" aria-live="polite">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-    <span><c:choose><c:when test="${param.publicado == '1'}">El capítulo se publicó correctamente.</c:when><c:otherwise>El borrador se guardó correctamente.</c:otherwise></c:choose></span>
+    <span><c:choose>
+      <c:when test="${param.obraPublicada == '1'}">Capítulo publicado. ¡Tu obra ya está publicada y aparece en el catálogo!</c:when>
+      <c:when test="${param.publicado == '1'}">El capítulo se publicó correctamente.</c:when><c:otherwise>El borrador se guardó correctamente.</c:otherwise></c:choose></span>
   </div>
 </c:if>
 

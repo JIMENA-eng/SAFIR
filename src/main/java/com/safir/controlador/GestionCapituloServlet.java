@@ -275,6 +275,10 @@ public class GestionCapituloServlet extends HttpServlet {
                     return;
                 }
 
+                // ¿Es el primer capítulo? Entonces la obra se publicará con él.
+                boolean obraYaPublicada =
+                        dao.obraEstaPublicada(capitulo.getObraId(), autorId);
+
                 if (!dao.publicar(autorId, capituloId)) {
                     response.sendError(
                         HttpServletResponse.SC_CONFLICT,
@@ -285,7 +289,8 @@ public class GestionCapituloServlet extends HttpServlet {
                 response.sendRedirect(
                     request.getContextPath()
                     + "/autor/capitulos?obraId="
-                    + capitulo.getObraId() + "&publicado=1");
+                    + capitulo.getObraId() + "&publicado=1"
+                    + (obraYaPublicada ? "" : "&obraPublicada=1"));
                 return;
             }
 

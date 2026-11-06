@@ -47,7 +47,7 @@ public class ConvertirseAutorServlet extends HttpServlet {
             }
 
             response.sendRedirect(request.getContextPath()
-                    + (esAutor ? "/autor/obra/panel" : "/perfil?error=autor"));
+                    + (esAutor ? "/autor/obra/nueva" : "/perfil?error=autor"));
 
         } catch (SQLException e) {
             log("Error al asignar el rol de autor", e);

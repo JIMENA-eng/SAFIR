@@ -142,3 +142,10 @@
 .mo-listacard b { font-weight: 600; }
 .mo-listacard p { margin: 0; color: var(--muted); font-size: .88rem; }
 .mo-listacard small { color: var(--muted); font-size: .82rem; }
+
+/* Publicar obra despublicada (Mis borradores) y avisos de resultado */
+.mo-pub-form { margin: 0; display: inline; }
+.mo-pub { padding: 0; border: 0; background: none; color: var(--lav); font: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; }
+.mo-pub:hover { text-decoration: underline; }
+.mo-aviso { margin: 1rem 0 0; padding: .7rem 1rem; border-radius: 12px; font-size: .92rem; background: rgba(30,107,58,.1); color: #1e6b3a; border: 1px solid rgba(30,107,58,.25); }
+.mo-aviso.error { background: rgba(170,40,40,.08); color: #a82828; border-color: rgba(170,40,40,.25); }

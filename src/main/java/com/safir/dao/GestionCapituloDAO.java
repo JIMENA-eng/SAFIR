@@ -34,6 +34,27 @@ public class GestionCapituloDAO {
         }
     }
 
+    /** true si la obra del autor ya está publicada en el catálogo. */
+    public boolean obraEstaPublicada(long obraId, long autorId)
+            throws SQLException {
+
+        String sql = """
+            SELECT 1 FROM obra
+            WHERE id = ? AND autor_id = ? AND estado = 'publicada'
+            """;
+
+        try (Connection con = ConexionBD.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, obraId);
+            ps.setLong(2, autorId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public List<Capitulo> listarPorObra(
             long obraId, long autorId) throws SQLException {
 

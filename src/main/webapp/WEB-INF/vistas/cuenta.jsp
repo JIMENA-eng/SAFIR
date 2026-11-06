@@ -145,6 +145,32 @@
           <div class="cuenta-bloque" id="mis-obras">
             <h2>Mis obras y listas</h2>
 
+            <%-- Resultado de publicar / volver a borrador una obra (ObraPublicacionServlet) --%>
+            <%
+              String msgObra = null;
+              boolean msgObraError = false;
+              String pError = request.getParameter("error");
+              if ("1".equals(request.getParameter("publicada"))) {
+                  msgObra = "Tu obra ya está publicada y aparece en el catálogo.";
+              } else if ("1".equals(request.getParameter("despublicada"))) {
+                  msgObra = "La obra volvió a borrador y ya no aparece en el catálogo.";
+              } else if ("sin_capitulos".equals(pError)) {
+                  msgObra = "Tu obra aún no tiene capítulos publicados. Entra a «Capítulos» y publica el primero: la obra se publicará con él.";
+                  msgObraError = true;
+              } else if ("no_borrador".equals(pError)) {
+                  msgObra = "Esa obra ya estaba publicada."; msgObraError = true;
+              } else if ("no_existe".equals(pError)) {
+                  msgObra = "La obra no existe o no es tuya."; msgObraError = true;
+              } else if ("bd".equals(pError) || "publicar".equals(pError)) {
+                  msgObra = "No se pudo publicar la obra. Inténtalo de nuevo."; msgObraError = true;
+              } else if ("despublicar".equals(pError)) {
+                  msgObra = "No se pudo quitar la obra del catálogo."; msgObraError = true;
+              }
+              if (msgObra != null) {
+            %>
+            <p class="mo-aviso<%= msgObraError ? " error" : "" %>" role="<%= msgObraError ? "alert" : "status" %>"><%= msgObra %></p>
+            <% } %>
+
             <!-- Bloque 1: obras publicadas -->
             <section class="mo-bloque" id="obras-publicadas" aria-labelledby="mo-t1">
               <header class="mo-cab">
@@ -178,6 +204,7 @@
               <div class="mo-vacio">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 <p>Anímate, aún estás a tiempo de hacer volar tu imaginación.</p>
+                <p><small>Crea tu obra, escribe su primer capítulo y al publicarlo la obra se publica sola.</small></p>
               </div>
               <% } else { %>
               <ul class="mo-lista">

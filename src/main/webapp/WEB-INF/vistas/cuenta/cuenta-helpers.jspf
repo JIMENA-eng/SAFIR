@@ -1,4 +1,4 @@
-<%-- Mi cuenta: mÃ©todos que pintan tarjetas de obra/lista, filas de persona e Ã­conos de redes. Usa esc() de encabezado-datos.jspf. --%>
+<%-- Mi cuenta: métodos que pintan tarjetas de obra/lista, filas de persona e íconos de redes. Usa esc() de encabezado-datos.jspf. --%>
 <%!
     /** Tarjeta de una obra. ob = {id, titulo, genero, avance, lecturas, promedio, capPub, capBorrador, portadaRuta}. */
     private static String tarjetaObra(String[] ob, String contexto, boolean borrador) {
@@ -13,26 +13,37 @@
             sb.append("<span class=\"mo-tile\" aria-hidden=\"true\">").append(esc(ini)).append("</span>");
         }
         sb.append("<div class=\"mo-info\"><b>").append(esc(titulo)).append("</b>");
-        sb.append("<small>").append(esc(ob[2])).append(" Â· ");
+        sb.append("<small>").append(esc(ob[2])).append(" · ");
         if (borrador) {
             sb.append(esc(ob[7])).append(" cap. en borrador");
+            // Obra despublicada: conserva capítulos publicados
+            if (!"0".equals(ob[6])) {
+                sb.append(" · ").append(esc(ob[6])).append(" cap. publicados");
+            }
         } else {
-            sb.append(esc(ob[6])).append(" cap. Â· ").append(esc(ob[4])).append(" lecturas");
+            sb.append(esc(ob[6])).append(" cap. · ").append(esc(ob[4])).append(" lecturas");
         }
         sb.append("</small></div><div class=\"mo-acciones\">");
         if (!borrador) {
             sb.append("<a href=\"").append(contexto).append("/obra?id=").append(esc(ob[0])).append("\">Ver</a>");
         }
         sb.append("<a href=\"").append(contexto).append("/autor/obra/editar?id=").append(esc(ob[0])).append("\">Editar</a>");
-        sb.append("<a href=\"").append(contexto).append("/autor/capitulos?obraId=").append(esc(ob[0])).append("\">CapÃ­tulos</a>");
+        sb.append("<a href=\"").append(contexto).append("/autor/capitulos?obraId=").append(esc(ob[0])).append("\">Capítulos</a>");
+        // Una obra nueva se publica sola con su primer capítulo. Este botón solo
+        // sale si la obra fue devuelta a borrador y aún tiene capítulos publicados.
+        if (borrador && !"0".equals(ob[6])) {
+            sb.append("<form method=\"post\" class=\"mo-pub-form\" action=\"").append(contexto)
+              .append("/autor/obra/publicar\"><input type=\"hidden\" name=\"obraId\" value=\"")
+              .append(esc(ob[0])).append("\"><button type=\"submit\" class=\"mo-pub\">Publicar obra</button></form>");
+        }
         return sb.append("</div></li>").toString();
     }
     /** Tarjeta de una lista. li = {id, nombre, descripcion, publica, totalObras}. */
     private static String tarjetaLista(String[] li) {
         StringBuilder sb = new StringBuilder("<li class=\"mo-listacard\"><b>").append(esc(li[1])).append("</b>");
         if (li[2] != null && !li[2].isEmpty()) sb.append("<p>").append(esc(li[2])).append("</p>");
-        sb.append("<small>").append(esc(li[4])).append(" obras Â· ")
-          .append("true".equals(li[3]) ? "PÃºblica" : "Privada").append("</small></li>");
+        sb.append("<small>").append(esc(li[4])).append(" obras · ")
+          .append("true".equals(li[3]) ? "Pública" : "Privada").append("</small></li>");
         return sb.toString();
     }
 %>
@@ -49,7 +60,7 @@
             default:          return "Enlace";
         }
     }
-    /** Ãcono SVG (trazo) de cada red. */
+    /** Ícono SVG (trazo) de cada red. */
     private static String iconoRed(String red) {
         String d;
         switch (red == null ? "" : red) {

@@ -61,3 +61,6 @@
   .cl-acciones { grid-column: 1 / -1; justify-content: flex-end; }
 }
 @media (prefers-reduced-motion: reduce) { .cl-main *, .cl-toast { transition: none !important; animation: none !important; } }
+
+/* Nota: la obra se publica con su primer capítulo */
+.cl-nota { margin: 0 0 1rem; padding: .7rem 1rem; border-radius: 12px; font-size: .92rem; background: rgba(120,100,200,.08); border: 1px solid rgba(120,100,200,.2); }

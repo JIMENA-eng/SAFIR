@@ -13,8 +13,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Publica una obra (borrador -> publicada) o la devuelve a borrador.
+ * Quita una obra del catálogo (despublicar) o la vuelve a publicar.
  * POST /autor/obra/publicar | /autor/obra/despublicar  (parámetro obraId).
+ *
+ * La publicación normal YA NO se hace desde el panel de autor: la obra se
+ * publica sola al publicar su primer capítulo (GestionCapituloDAO.publicar).
+ * "publicar" queda solo para obras despublicadas que ya tienen capítulos
+ * publicados, y se usa desde "Mis borradores" en Mi cuenta.
  * El rol de autor ya lo exige AutorizacionFilter para /autor/*.
  */
 @WebServlet({"/autor/obra/publicar", "/autor/obra/despublicar"})
@@ -74,7 +79,9 @@ public class ObraPublicacionServlet extends HttpServlet {
             destino = "error=bd";
         }
 
+        // Ahora el resultado se muestra en Mi cuenta > Mis obras y listas
         response.sendRedirect(
-                request.getContextPath() + "/autor/panel?" + destino);
+                request.getContextPath() + "/auth/cuenta?" + destino
+                + "#mis-obras");
     }
 }

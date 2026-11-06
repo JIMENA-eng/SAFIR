@@ -19,38 +19,11 @@
     <c:if test="${param.guardado == '1'}">
         <p class="mensaje-exito">La obra se guardó correctamente.</p>
     </c:if>
-    <c:if test="${param.publicada == '1'}">
-        <p class="mensaje-exito">Tu obra ya está publicada y aparece en el catálogo.</p>
-    </c:if>
-    <c:if test="${param.despublicada == '1'}">
-        <p class="mensaje-exito">La obra volvió a borrador y ya no aparece en el catálogo.</p>
-    </c:if>
-    <c:if test="${param.error == 'sin_capitulos'}">
-        <p class="mensaje-error" role="alert">
-            Tu obra aún no tiene capítulos publicados. Entra a
-            «Administrar capítulos» y publica al menos uno.
-        </p>
-    </c:if>
-    <c:if test="${param.error == 'no_borrador'}">
-        <p class="mensaje-error" role="alert">Esa obra ya estaba publicada.</p>
-    </c:if>
-    <c:if test="${param.error == 'no_existe'}">
-        <p class="mensaje-error" role="alert">La obra no existe o no es tuya.</p>
-    </c:if>
-    <c:if test="${param.error == 'bd'}">
-        <p class="mensaje-error" role="alert">
-            La base de datos rechazó la publicación. Revisa el log de Tomcat
-            (línea "Error al cambiar el estado de la obra").
-        </p>
-    </c:if>
-    <c:if test="${param.error == 'publicar'}">
-        <p class="mensaje-error" role="alert">
-            No se pudo publicar la obra. Inténtalo de nuevo.
-        </p>
-    </c:if>
-    <c:if test="${param.error == 'despublicar'}">
-        <p class="mensaje-error" role="alert">No se pudo quitar la obra del catálogo.</p>
-    </c:if>
+    <p>
+        Para publicar una obra, publica su primer capítulo: la obra se
+        publica automáticamente con él. Tus borradores están en
+        <a href="${pageContext.request.contextPath}/auth/cuenta#obras-borradores">Mi cuenta</a>.
+    </p>
 
     <a href="${pageContext.request.contextPath}/autor/obra/nueva">
         Crear una obra
@@ -113,14 +86,9 @@
 
                     <c:choose>
                         <c:when test="${obra.estado == 'borrador'}">
-                            <form method="post" style="display:inline"
-                                  action="${pageContext.request.contextPath}/autor/obra/publicar">
-                                <input type="hidden" name="obraId" value="${obra.obraId}">
-                                <button type="submit">Publicar obra</button>
-                            </form>
-                            <c:if test="${obra.capitulosPublicados == 0}">
-                                <small>Publica al menos un capítulo para poder publicar la obra.</small>
-                            </c:if>
+                            <small>
+                                Borrador: se publicará sola al publicar su primer capítulo.
+                            </small>
                         </c:when>
 
                         <c:when test="${obra.estado == 'publicada'}">
