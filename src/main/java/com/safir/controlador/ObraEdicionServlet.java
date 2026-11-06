@@ -312,17 +312,23 @@ public class ObraEdicionServlet extends HttpServlet {
                         ImagenUtil.borrar((String) antes.get("portadaRuta"));
                     }
                 }
-            } else {
-                long nuevaId = dao.crear(usuarioId, titulo, descripcion,
-                        generoId, clasificacion);
-                dao.actualizarBloqueo(nuevaId, usuarioId, bloqueo);
-                if (portadaNueva != null) {
-                    dao.actualizarPortada(nuevaId, usuarioId, portadaNueva);
+                } else {
+                    long nuevaId = dao.crear(usuarioId, titulo, descripcion,
+                            generoId, clasificacion);
+                    dao.actualizarBloqueo(nuevaId, usuarioId, bloqueo);
+                    if (portadaNueva != null) {
+                        dao.actualizarPortada(nuevaId, usuarioId, portadaNueva);
+                    }
+                    // Obra recién creada: ir directo a escribir su primer capítulo
+                    response.sendRedirect(
+                        request.getContextPath()
+                        + "/autor/capitulo/nuevo?obraId=" + nuevaId);
+                    return;
                 }
-            }
 
-            response.sendRedirect(
-                request.getContextPath() + "/autor/panel?guardado=1");
+                // Edición de una obra existente: vuelve al panel
+                response.sendRedirect(
+                    request.getContextPath() + "/autor/panel?guardado=1");
 
         } catch (SQLException e) {
             throw new ServletException(
