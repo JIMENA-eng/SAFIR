@@ -26,12 +26,13 @@
     String idMostrar = esc(idUsuario);
     String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
     long[] est = request.getAttribute("estadisticas") instanceof long[]
-            ? (long[]) request.getAttribute("estadisticas") : new long[5];
+            ? (long[]) request.getAttribute("estadisticas") : new long[6];
     String nSeguidores = String.format(java.util.Locale.US, "%,d", est[0]);
     String nValoraciones = String.format(java.util.Locale.US, "%,d", est[1]);
     String nListas = String.format(java.util.Locale.US, "%,d", est[2]);
     String nObras = String.format(java.util.Locale.US, "%,d", est[3]);
     String nSeguidos = String.format(java.util.Locale.US, "%,d", est[4]);
+    String nBorradores = String.format(java.util.Locale.US, "%,d", est[5]);
     java.util.List<String[]> siguiendoLista = request.getAttribute("siguiendo") instanceof java.util.List
             ? (java.util.List<String[]>) request.getAttribute("siguiendo") : new java.util.ArrayList<String[]>();
     java.util.List<String[]> seguidoresLista = request.getAttribute("seguidores") instanceof java.util.List
@@ -42,6 +43,44 @@
             : esc(String.valueOf(request.getAttribute("menuBiografia")));
     java.util.List<String[]> enlacesCuenta = request.getAttribute("enlaces") instanceof java.util.List
             ? (java.util.List<String[]>) request.getAttribute("enlaces") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> obrasPub = request.getAttribute("obrasPublicadas") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("obrasPublicadas") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> obrasBor = request.getAttribute("obrasBorrador") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("obrasBorrador") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> listasUsuario = request.getAttribute("misListas") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("misListas") : new java.util.ArrayList<String[]>();
+%>
+<%!
+    /** Tarjeta de una obra. ob = {id, titulo, genero, avance, lecturas, promedio, capPub, capBorrador}. */
+    private static String tarjetaObra(String[] ob, String contexto, boolean borrador) {
+        String titulo = ob[1] == null ? "" : ob[1];
+        String ini = titulo.isEmpty() ? "?"
+                : new String(Character.toChars(Character.toUpperCase(titulo.codePointAt(0))));
+        StringBuilder sb = new StringBuilder("<li class=\"mo-obra\">");
+        sb.append("<span class=\"mo-tile\" aria-hidden=\"true\">").append(esc(ini)).append("</span>");
+        sb.append("<div class=\"mo-info\"><b>").append(esc(titulo)).append("</b>");
+        sb.append("<small>").append(esc(ob[2])).append(" · ");
+        if (borrador) {
+            sb.append(esc(ob[7])).append(" cap. en borrador");
+        } else {
+            sb.append(esc(ob[6])).append(" cap. · ").append(esc(ob[4])).append(" lecturas");
+        }
+        sb.append("</small></div><div class=\"mo-acciones\">");
+        if (!borrador) {
+            sb.append("<a href=\"").append(contexto).append("/obra?id=").append(esc(ob[0])).append("\">Ver</a>");
+        }
+        sb.append("<a href=\"").append(contexto).append("/autor/obra/editar?id=").append(esc(ob[0])).append("\">Editar</a>");
+        sb.append("<a href=\"").append(contexto).append("/autor/capitulos?obraId=").append(esc(ob[0])).append("\">Capítulos</a>");
+        return sb.append("</div></li>").toString();
+    }
+    /** Tarjeta de una lista. li = {id, nombre, descripcion, publica, totalObras}. */
+    private static String tarjetaLista(String[] li) {
+        StringBuilder sb = new StringBuilder("<li class=\"mo-listacard\"><b>").append(esc(li[1])).append("</b>");
+        if (li[2] != null && !li[2].isEmpty()) sb.append("<p>").append(esc(li[2])).append("</p>");
+        sb.append("<small>").append(esc(li[4])).append(" obras · ")
+          .append("true".equals(li[3]) ? "Pública" : "Privada").append("</small></li>");
+        return sb.toString();
+    }
 %>
 <%!
     /** Etiqueta visible de cada red. */
@@ -270,38 +309,9 @@
             <% } %>
             <% } %>
           </article>
-        </aside>
-
-        <div class="cuenta-col-der">
-          <!-- MONEDAS -->
-          <article class="coins" id="coinsCard">
-            <h3>Mis monedas</h3>
-            <p>Tus recompensas de lectura, logros y compras viven en un solo saldo.</p>
-            <div class="coin-row">
-              <div class="coin" aria-hidden="true">S</div>
-              <div class="coin-num" id="coinNum" aria-label="<%= monedasTxt %> monedas"><%= monedasTxt %></div>
-            </div>
-            <a class="btn small gold" href="#movimientos">Ver movimientos</a>
-          </article>
-
-          <!-- ACCESOS -->
-          <div class="cuenta-bloque" id="accesos">
-            <h2>Accesos</h2>
-            <div class="cuenta-accesos">
-              <% if (esAutor) { %>
-              <a class="cuenta-acceso destacado" href="<%= contexto %>/autor/panel"><b>Panel de autor</b><small>Gestiona tus obras</small></a>
-              <% } %>
-              <a class="cuenta-acceso" href="<%= contexto %>/biblioteca"><b>Mi biblioteca</b><small>Tus lecturas guardadas</small></a>
-              <a class="cuenta-acceso" href="<%= contexto %>/billetera"><b>Mi billetera</b><small>Monedas y compras</small></a>
-              <a class="cuenta-acceso" href="<%= contexto %>/notificaciones"><b>Mis notificaciones</b><small>Novedades de tus obras</small></a>
-              <a class="cuenta-acceso" href="<%= contexto %>/catalogo"><b>Explorar el catálogo</b><small>Descubre nuevas historias</small></a>
-            </div>
-          </div>
-
-          <!-- MOVIMIENTOS -->
-          <div class="cuenta-bloque" id="movimientos">
-            <h2>Monedas ganadas</h2>
-            <p class="sec-lead">El detalle de cómo ha crecido tu saldo.</p>
+          <article class="cuenta-panel" id="movimientos">
+            <h3>Monedas ganadas</h3>
+            <p class="muted">El detalle de cómo ha crecido tu saldo.</p>
             <ul class="moves">
               <li class="move">
                 <span class="coin sm" aria-hidden="true">S</span>
@@ -310,14 +320,82 @@
               </li>
             </ul>
             <div class="total-row"><span>Saldo actual</span><b><%= monedasTxt %> monedas</b></div>
+          </article>
+        </aside>
+
+        <div class="cuenta-col-der">
+          <!-- ACCESOS -->
+          <div class="cuenta-bloque" id="accesos">
+            <h2>Accesos</h2>
+            <div class="cuenta-accesos">
+              <a class="cuenta-acceso" href="<%= contexto %>/biblioteca"><b>Mi biblioteca</b><small>Tus lecturas guardadas</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/billetera"><b>Mi billetera</b><small>Monedas y compras</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/notificaciones"><b>Mis notificaciones</b><small>Novedades de tus obras</small></a>
+              <a class="cuenta-acceso" href="<%= contexto %>/mensajes" data-pendiente><b>Mis mensajes</b><small>Próximamente</small></a>
+            </div>
           </div>
 
-          <!-- SESIÓN -->
-          <div class="cuenta-bloque">
-            <h2>Sesión</h2>
-            <p class="sec-lead">Cuando termines, cierra tu sesión para proteger tu cuenta.</p>
-            <p style="margin-top:1.4rem"><a class="btn" href="<%= contexto %>/auth/logout">Cerrar sesión</a></p>
-            <p style="margin-top:1rem"><a href="<%= contexto %>/auth/cuenta/eliminar">Eliminar mi cuenta</a></p>
+          <!-- MIS OBRAS Y LISTAS: tres bloques -->
+          <div class="cuenta-bloque" id="mis-obras">
+            <h2>Mis obras y listas</h2>
+
+            <!-- Bloque 1: obras publicadas -->
+            <section class="mo-bloque" id="obras-publicadas" aria-labelledby="mo-t1">
+              <header class="mo-cab">
+                <h3 id="mo-t1">Mis obras publicadas <span class="cuenta-count"><%= obrasPub.size() %></span></h3>
+              </header>
+              <% if (obrasPub.isEmpty()) { %>
+              <div class="mo-vacio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <p>¡Ups! Aún no tienes obras.</p>
+              </div>
+              <% } else { %>
+              <ul class="mo-lista">
+                <% for (String[] ob : obrasPub) { %><%= tarjetaObra(ob, contexto, false) %><% } %>
+              </ul>
+              <% } %>
+            </section>
+
+            <!-- Bloque 2: borradores -->
+            <section class="mo-bloque" id="obras-borradores" aria-labelledby="mo-t2">
+              <header class="mo-cab">
+                <h3 id="mo-t2">Mis borradores <span class="cuenta-count"><%= obrasBor.size() %></span></h3>
+                <% if (esAutor) { %>
+                <a class="mo-crear" href="<%= contexto %>/autor/obra/nueva">+ Crear</a>
+                <% } else { %>
+                <form method="post" action="<%= contexto %>/auth/ser-autor" class="mo-crear-form">
+                  <button type="submit" class="mo-crear">+ Crear</button>
+                </form>
+                <% } %>
+              </header>
+              <% if (obrasBor.isEmpty()) { %>
+              <div class="mo-vacio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <p>Anímate, aún estás a tiempo de hacer volar tu imaginación.</p>
+              </div>
+              <% } else { %>
+              <ul class="mo-lista">
+                <% for (String[] ob : obrasBor) { %><%= tarjetaObra(ob, contexto, true) %><% } %>
+              </ul>
+              <% } %>
+            </section>
+
+            <!-- Bloque 3: listas -->
+            <section class="mo-bloque" id="obras-listas" aria-labelledby="mo-t3">
+              <header class="mo-cab">
+                <h3 id="mo-t3">Mis listas <span class="cuenta-count"><%= listasUsuario.size() %></span></h3>
+              </header>
+              <% if (listasUsuario.isEmpty()) { %>
+              <div class="mo-vacio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                <p>Aún no tienes listas.</p>
+              </div>
+              <% } else { %>
+              <ul class="mo-listas">
+                <% for (String[] li : listasUsuario) { %><%= tarjetaLista(li) %><% } %>
+              </ul>
+              <% } %>
+            </section>
           </div>
         </div>
 
@@ -339,21 +417,10 @@
 <script src="<%= contexto %>/assets/js/inicio.js"></script>
 <script>
 (function () {
-  // Animación del saldo de monedas
-  var card = document.getElementById('coinsCard');
-  var numEl = document.getElementById('coinNum');
-  var total = <%= monedas %>;
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  card.classList.add('in');
-  if (!reduce) {
-    var t0 = null;
-    (function paso(t) {
-      if (!t0) t0 = t;
-      var k = Math.min(1, (t - t0) / 1400);
-      numEl.textContent = Math.round(total * (1 - Math.pow(1 - k, 3))).toLocaleString('en-US');
-      if (k < 1) requestAnimationFrame(paso);
-    })(performance.now());
-  }
+  // Enlaces de módulos que aún no existen (mensajes, listas): no navegan.
+  Array.prototype.forEach.call(document.querySelectorAll('.cuenta-acceso[data-pendiente]'), function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); });
+  });
 })();
 </script>
 </body>

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import com.safir.dao.BilleteraDAO;
+import com.safir.dao.CuentaObrasDAO;
 import com.safir.dao.UsuarioDAO;
 import com.safir.util.EncabezadoUtil;
 import java.io.IOException;
@@ -37,6 +38,11 @@ public class CuentaServlet extends HttpServlet {
             request.setAttribute("estadisticas", usuarioDAO.obtenerEstadisticasPerfil(id));
             request.setAttribute("siguiendo", usuarioDAO.listarSiguiendo(id, 12));
             request.setAttribute("seguidores", usuarioDAO.listarSeguidores(id, 12));
+            // Sección "Mis obras y listas": publicadas, borradores y listas.
+            CuentaObrasDAO obrasDAO = new CuentaObrasDAO();
+            request.setAttribute("obrasPublicadas", obrasDAO.listarObras(id, "publicada"));
+            request.setAttribute("obrasBorrador", obrasDAO.listarObras(id, "borrador"));
+            request.setAttribute("misListas", obrasDAO.listarListas(id));
         } catch (SQLException e) {
             throw new ServletException("Error al cargar el saldo.", e);
         }

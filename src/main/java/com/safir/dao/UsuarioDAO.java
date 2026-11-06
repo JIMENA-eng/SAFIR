@@ -446,7 +446,7 @@ public class UsuarioDAO {
     }
 
     /**
-     * Cifras del perfil: {seguidores, valoraciones recibidas, listas creadas, obras publicadas, seguidos}.
+     * Cifras del perfil: {seguidores, valoraciones recibidas, listas creadas, obras publicadas, seguidos, borradores}.
      */
     public long[] obtenerEstadisticasPerfil(long usuarioId) throws SQLException {
         String sql =
@@ -455,19 +455,20 @@ public class UsuarioDAO {
             " (SELECT COUNT(*) FROM valoracion v JOIN obra o ON o.id = v.obra_id WHERE o.autor_id = ?) AS valoraciones, " +
             " (SELECT COUNT(*) FROM coleccion WHERE usuario_id = ?) AS listas, " +
             " (SELECT COUNT(*) FROM obra WHERE autor_id = ? AND estado = 'publicada') AS obras, " +
-            " (SELECT COUNT(*) FROM seguimiento_autor WHERE seguidor_id = ?) AS seguidos";
+            " (SELECT COUNT(*) FROM seguimiento_autor WHERE seguidor_id = ?) AS seguidos, " +
+            " (SELECT COUNT(*) FROM obra WHERE autor_id = ? AND estado = 'borrador') AS borradores";
         try (Connection c = ConexionBD.conectar();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            for (int i = 1; i <= 5; i++) ps.setLong(i, usuarioId);
+            for (int i = 1; i <= 6; i++) ps.setLong(i, usuarioId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new long[]{rs.getLong("seguidores"), rs.getLong("valoraciones"),
                                       rs.getLong("listas"), rs.getLong("obras"),
-                                      rs.getLong("seguidos")};
+                                      rs.getLong("seguidos"), rs.getLong("borradores")};
                 }
             }
         }
-        return new long[5];
+        return new long[6];
     }
 
     // ===== Listas de personas del perfil =====
