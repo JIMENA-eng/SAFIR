@@ -1,6 +1,7 @@
 package com.safir.controlador;
 
 import com.safir.dao.GestionCapituloDAO;
+import com.safir.dao.ObraEdicionDAO;
 import com.safir.modelo.Capitulo;
 import com.safir.util.EncabezadoUtil;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class GestionCapituloServlet extends HttpServlet {
 
     private final GestionCapituloDAO dao = new GestionCapituloDAO();
+    private final ObraEdicionDAO obraDao = new ObraEdicionDAO();
 
     private Long usuarioId(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
@@ -149,6 +151,8 @@ public class GestionCapituloServlet extends HttpServlet {
                 List<Capitulo> capitulos =
                         dao.listarPorObra(obraId, autorId);
 
+                EncabezadoUtil.cargar(request, autorId);
+                request.setAttribute("obra", obraDao.obtenerPropia(obraId, autorId));
                 request.setAttribute("obraId", obraId);
                 request.setAttribute("capitulos", capitulos);
 

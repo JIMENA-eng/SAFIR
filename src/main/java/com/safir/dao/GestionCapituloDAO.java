@@ -258,6 +258,18 @@ public class GestionCapituloDAO {
                     }
                 }
 
+                // Al publicar un capítulo, la obra pasa de borrador a publicada
+                try (PreparedStatement ps = con.prepareStatement("""
+                        UPDATE obra
+                        SET estado = 'publicada',
+                            publicada_en = COALESCE(publicada_en, now())
+                        WHERE id = ? AND autor_id = ? AND estado = 'borrador'
+                        """)) {
+                    ps.setLong(1, obraId);
+                    ps.setLong(2, autorId);
+                    ps.executeUpdate();
+                }
+
                 con.commit();
                 return true;
 

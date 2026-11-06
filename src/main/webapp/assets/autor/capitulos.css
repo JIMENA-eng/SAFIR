@@ -1,0 +1,63 @@
+/* SAFIR · Gestión de capítulos (WEB-INF/vistas/autor/capitulos.jsp).
+   Se carga DESPUÉS de encabezadoinicio.css, que aporta variables, .btn y el encabezado. */
+:root {
+  --cl-ok-bg: #DDF3E4; --cl-ok: #1E6B3A;
+  --cl-shadow: 0 12px 34px -18px rgba(37,40,102,.35);
+}
+:root[data-theme="dark"] {
+  --cl-ok-bg: #173a24; --cl-ok: #8fd8a8;
+  --cl-shadow: 0 12px 34px -18px rgba(0,0,0,.7);
+}
+
+.cl-main { max-width: 900px; margin: 0 auto; padding: 1.6rem 1.25rem 4rem; }
+.cl-main h1 { max-width: none; }
+.cl-main p { margin: 0; }
+
+.cl-volver { display: inline-flex; align-items: center; gap: .3rem; color: var(--link); text-decoration: none; font-size: .95rem; font-weight: 500; }
+.cl-volver svg { width: 18px; height: 18px; }
+.cl-volver:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* Cabecera de la obra */
+.cl-cab { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1.2rem; align-items: center; margin: 1.1rem 0 1.6rem; padding: 1.2rem; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--cl-shadow); }
+.cl-portada { position: relative; overflow: hidden; width: 72px; height: 96px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(160deg, var(--indigo), var(--lav)); color: #fff; font: 400 2rem var(--serif); }
+.cl-portada img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cl-etq { font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cl-cab h1 { margin-top: .15rem; font-family: var(--serif); font-weight: 400; font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.2; color: var(--title); overflow-wrap: anywhere; }
+.cl-resumen { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin: .7rem 0 0; padding: 0; color: var(--muted); font-size: .9rem; }
+.cl-resumen b { color: var(--title); font-weight: 600; }
+.cl-nuevo { font-weight: 600; white-space: nowrap; }
+
+/* Lista de capítulos */
+.cl-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; }
+.cl-item { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: 1rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; transition: border-color .15s, box-shadow .15s; }
+.cl-item:hover { border-color: var(--lav); box-shadow: var(--cl-shadow); }
+.cl-num { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--title); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cl-info { display: grid; gap: .35rem; min-width: 0; }
+.cl-nombre { font-family: var(--serif); font-weight: 500; font-size: 1.08rem; color: var(--title); overflow-wrap: anywhere; }
+.cl-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.cl-meta small { color: var(--muted); font-size: .82rem; }
+.cl-pildora { padding: .12rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 500; }
+.cl-pildora.ok { background: var(--cl-ok-bg); color: var(--cl-ok); }
+.cl-pildora.borrador { background: #FBEBC8; color: #6b4a07; }
+.cl-acciones { display: flex; align-items: center; gap: .55rem; }
+.cl-acciones form { margin: 0; }
+
+/* Sin capítulos */
+.cl-vacio { display: grid; justify-items: center; gap: .6rem; text-align: center; padding: 2.4rem 1.2rem; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 20px; color: var(--muted); }
+.cl-vacio svg { width: 44px; height: 44px; color: var(--lav); }
+.cl-vacio b { color: var(--title); font-weight: 600; }
+.cl-vacio .btn { margin-top: .6rem; font-weight: 600; }
+
+/* Aviso flotante */
+.cl-toast { position: fixed; left: 50%; bottom: 1.6rem; z-index: 50; display: flex; align-items: center; gap: .6rem; max-width: calc(100vw - 2rem); padding: .8rem 1.2rem; border-radius: 14px; background: var(--cl-ok-bg); color: var(--cl-ok); border: 1px solid rgba(30,107,58,.25); box-shadow: var(--cl-shadow); font-weight: 500; font-size: .95rem; transform: translate(-50%, 0); animation: cl-toast-in .3s ease-out; }
+.cl-toast svg { width: 20px; height: 20px; flex: none; }
+.cl-toast.oculto { opacity: 0; transform: translate(-50%, 16px); transition: opacity .35s, transform .35s; }
+@keyframes cl-toast-in { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+@media (max-width: 700px) {
+  .cl-cab { grid-template-columns: auto minmax(0, 1fr); }
+  .cl-nuevo { grid-column: 1 / -1; text-align: center; }
+  .cl-item { grid-template-columns: 40px minmax(0, 1fr); }
+  .cl-acciones { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) { .cl-main *, .cl-toast { transition: none !important; animation: none !important; } }
