@@ -2,6 +2,7 @@ package com.safir.controlador;
 
 import com.safir.dao.NotificacionDAO;
 import com.safir.modelo.Notificacion;
+import com.safir.util.EncabezadoUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,6 +15,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Notificaciones del usuario (GET /notificaciones).
+ * Cambio respecto a la versión anterior: carga el encabezado compartido
+ * con EncabezadoUtil.cargar(...), igual que BibliotecaServlet.
+ */
 @WebServlet("/notificaciones")
 public class NotificacionServlet extends HttpServlet {
 
@@ -47,6 +53,7 @@ public class NotificacionServlet extends HttpServlet {
             long pendientes =
                     notificacionDAO.contarNoLeidas(usuarioId);
 
+            EncabezadoUtil.cargar(request, usuarioId);
             request.setAttribute("notificaciones", notificaciones);
             request.setAttribute("pendientes", pendientes);
 
