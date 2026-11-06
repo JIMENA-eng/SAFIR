@@ -119,16 +119,6 @@
 <%@ include file="/WEB-INF/vistas/comunes/encabezado.jspf" %>
 
 <main id="cuenta">
-  <!-- ENCABEZADO DE LA PÁGINA -->
-  <section class="welcome">
-    <div class="wrap">
-      <div class="welcome-plane" aria-hidden="true">
-        <svg viewBox="0 0 380 280" class="plane-float"><use href="#plane-color"/></svg>
-      </div>
-      <h1>Mi cuenta</h1>
-      <p class="lead">Aquí ves los datos de tu cuenta y las monedas que has ganado en SAFIR.</p>
-    </div>
-  </section>
 
   <!-- PERFIL + MONEDAS -->
   <section class="block">

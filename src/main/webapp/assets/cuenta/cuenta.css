@@ -1,5 +1,6 @@
 /* Cuenta · contenido de la página Mi cuenta */
 /* Cuenta */
+.block:first-of-type { padding-top: 2rem; }
 .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 2rem; }
 .profile-top { display: flex; align-items: center; gap: 1.2rem; }
