@@ -32,6 +32,41 @@
     java.util.List<String[]> enlacesCuenta = request.getAttribute("enlaces") instanceof java.util.List
             ? (java.util.List<String[]>) request.getAttribute("enlaces") : new java.util.ArrayList<String[]>();
 %>
+<%!
+    /** Etiqueta visible de cada red. */
+    private static String nombreRed(String red) {
+        switch (red == null ? "" : red) {
+            case "instagram": return "Instagram";
+            case "facebook":  return "Facebook";
+            case "x":         return "X";
+            case "tiktok":    return "TikTok";
+            case "youtube":   return "YouTube";
+            case "web":       return "Sitio web";
+            default:          return "Enlace";
+        }
+    }
+    /** Ícono SVG (trazo) de cada red. */
+    private static String iconoRed(String red) {
+        String d;
+        switch (red == null ? "" : red) {
+            case "instagram":
+                d = "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" rx=\"5\" ry=\"5\"/><path d=\"M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z\"/><line x1=\"17.5\" x2=\"17.51\" y1=\"6.5\" y2=\"6.5\"/>"; break;
+            case "facebook":
+                d = "<path d=\"M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z\"/>"; break;
+            case "x":
+                d = "<path d=\"M4 4h4l12 16h-4z\"/><path d=\"M4 20l7-7M13 11l7-7\"/>"; break;
+            case "tiktok":
+                d = "<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>"; break;
+            case "youtube":
+                d = "<path d=\"M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17\"/><path d=\"m10 15 5-3-5-3z\"/>"; break;
+            case "web":
+                d = "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M2 12h20\"/><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/>"; break;
+            default:
+                d = "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>";
+        }
+        return "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + d + "</svg>";
+    }
+%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -119,42 +154,49 @@
 <%@ include file="/WEB-INF/vistas/comunes/encabezado.jspf" %>
 
 <main id="cuenta">
+  <!-- PERFIL: portada a todo el ancho, perfil a la izquierda y "Encuéntrame en" a la derecha -->
+  <section class="cuenta-hero" aria-label="Mi perfil">
+    <div class="cuenta-cover">
+      <% if (portadaRuta != null) { %>
+      <img src="<%= contexto %>/media/<%= esc(portadaRuta) %>" alt="">
+      <% } %>
+    </div>
 
-  <!-- PERFIL + MONEDAS -->
+    <div class="cuenta-hero-body">
+      <div class="cuenta-lado cuenta-lado-perfil">
+        <div class="cuenta-avatar" aria-hidden="true"><%= avatarHtml %></div>
+        <div class="cuenta-nombres">
+          <h1 class="cuenta-nombre"><%= nombrePublico %></h1>
+          <% if (!usuarioArroba.isEmpty()) { %>
+          <p class="cuenta-usuario"><%= usuarioArroba %></p>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="cuenta-lado cuenta-lado-redes">
+        <h2 class="cuenta-redes-titulo">Encuéntrame en:</h2>
+        <% if (enlacesCuenta.isEmpty()) { %>
+        <p class="muted">Aún no has añadido tus redes. Usa el lápiz para agregarlas.</p>
+        <% } else { %>
+        <ul class="cuenta-redes">
+          <% for (String[] en : enlacesCuenta) { %>
+          <li><a class="cuenta-red" href="<%= esc(en[1]) %>" target="_blank" rel="noopener noreferrer nofollow"
+                 title="<%= nombreRed(en[0]) %>"><%= iconoRed(en[0]) %><span><%= nombreRed(en[0]) %></span></a></li>
+          <% } %>
+        </ul>
+        <% } %>
+      </div>
+    </div>
+
+    <a class="cuenta-edit" href="<%= contexto %>/perfil#editar-perfil" aria-label="Editar perfil" title="Editar perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+    </a>
+  </section>
+
+  <!-- MONEDAS -->
   <section class="block">
     <div class="wrap">
-      <div class="account-grid">
-        <article class="card profile">
-          <div class="profile-top">
-            <div class="big-avatar" aria-hidden="true"><%= avatarHtml %></div>
-            <div>
-              <h2><%= nombrePublico %></h2>
-              <p class="muted">Cuenta de SAFIR</p>
-            </div>
-          </div>
-          <dl class="dl">
-            <div><dt>Nombre público</dt><dd><%= nombrePublico %></dd></div>
-            <% if (!usuarioArroba.isEmpty()) { %>
-            <div><dt>Nombre de usuario</dt><dd><%= usuarioArroba %></dd></div>
-            <% } %>
-            <% if (!bioCuenta.isEmpty()) { %>
-            <div><dt>Descripción</dt><dd class="dd-bio"><%= bioCuenta %></dd></div>
-            <% } %>
-            <% if (!enlacesCuenta.isEmpty()) { %>
-            <div><dt>Enlaces</dt><dd class="dd-enlaces">
-              <% for (String[] en : enlacesCuenta) { %>
-              <a href="<%= esc(en[1]) %>" target="_blank" rel="noopener noreferrer nofollow"><%= esc(en[0]) %></a>
-              <% } %>
-            </dd></div>
-            <% } %>
-            <div><dt>Tipo de cuenta</dt><dd><%= roles %></dd></div>
-            <% if (!idMostrar.isEmpty()) { %>
-            <div><dt>ID de usuario</dt><dd>#<%= idMostrar %></dd></div>
-            <% } %>
-          </dl>
-          <p style="margin-top:1.2rem"><a class="btn small" href="<%= contexto %>/perfil#editar-perfil">Editar perfil</a></p>
-        </article>
-
+      <div class="cuenta-monedas">
         <article class="coins" id="coinsCard">
           <h3>Mis monedas</h3>
           <p>Tus recompensas de lectura, logros y compras viven en un solo saldo.</p>
