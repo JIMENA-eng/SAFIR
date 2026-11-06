@@ -2,6 +2,7 @@ package com.safir.controlador;
 
 import com.safir.dao.BibliotecaDAO;
 import com.safir.dao.SeguimientoDAO;
+import com.safir.util.EncabezadoUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -45,6 +46,7 @@ public class BibliotecaServlet extends HttpServlet {
 
             List<Obra> obras = bibliotecaDAO.listar(usuarioId);
 
+            EncabezadoUtil.cargar(request, usuarioId);
             request.setAttribute("obras", obras);
 
             request.getRequestDispatcher(

@@ -1,0 +1,79 @@
+/* SAFIR · Mi biblioteca (WEB-INF/vistas/biblioteca/biblioteca.jsp).
+   Se carga DESPUÉS de encabezadoinicio.css, que aporta variables, .btn y el encabezado. */
+:root {
+  --bi-peligro: #B3261E; --bi-peligro-bg: #FDECEA;
+  --bi-fav: #D6455D;
+  --bi-shadow: 0 12px 34px -18px rgba(37,40,102,.35);
+}
+:root[data-theme="dark"] {
+  --bi-peligro: #f1a39d; --bi-peligro-bg: #3a1b1b;
+  --bi-fav: #f08a9b;
+  --bi-shadow: 0 12px 34px -18px rgba(0,0,0,.7);
+}
+
+.bi-main { max-width: 1040px; margin: 0 auto; padding: 1.6rem 1.25rem 4rem; }
+.bi-main h1, .bi-main h2 { max-width: none; }
+.bi-main p { margin: 0; }
+.bi-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.bi-volver { display: inline-flex; align-items: center; gap: .3rem; color: var(--link); text-decoration: none; font-size: .95rem; font-weight: 500; }
+.bi-volver svg { width: 18px; height: 18px; }
+.bi-volver:hover { text-decoration: underline; text-underline-offset: 4px; }
+.bi-titulo { margin: 1rem 0 1.4rem; }
+.bi-titulo h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(1.9rem, 4.4vw, 2.7rem); color: var(--title); }
+.bi-titulo p { margin-top: .6rem; color: var(--muted); max-width: 40em; }
+
+/* Filtros */
+.bi-filtros { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.3rem; }
+.bi-filtro { font: inherit; font-size: .92rem; font-weight: 500; cursor: pointer; padding: .45rem .95rem; border-radius: 999px; border: 1.5px solid var(--outline); background: transparent; color: var(--link); transition: background .15s, color .15s; }
+.bi-filtro:hover { background: var(--soft); }
+.bi-filtro.activo { background: var(--btn); color: var(--btn-text); border-color: transparent; }
+.bi-filtro:focus-visible { outline: 3px solid var(--lav); outline-offset: 2px; }
+.bi-n { margin-left: .25rem; opacity: .75; font-variant-numeric: tabular-nums; }
+
+/* Cuadrícula de obras */
+.bi-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1rem; }
+.bi-card { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; gap: 1rem; align-items: start; padding: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; transition: border-color .15s, box-shadow .15s; }
+.bi-card:hover { border-color: var(--lav); box-shadow: var(--bi-shadow); }
+.bi-card[hidden] { display: none; }
+
+.bi-portada { position: relative; overflow: hidden; width: 88px; height: 120px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(160deg, var(--indigo), var(--lav)); color: #fff; font: 400 2.2rem var(--serif); text-decoration: none; }
+.bi-portada img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.bi-info { display: grid; gap: .45rem; min-width: 0; align-content: start; }
+.bi-info h2 { font-family: var(--serif); font-weight: 500; font-size: 1.12rem; line-height: 1.25; }
+.bi-info h2 a { color: var(--title); text-decoration: none; overflow-wrap: anywhere; }
+.bi-info h2 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.bi-autor { color: var(--muted); font-size: .9rem; }
+.bi-etiquetas { display: flex; flex-wrap: wrap; gap: .35rem; }
+.bi-etiqueta { padding: .12rem .65rem; border-radius: 999px; background: var(--soft); color: var(--title); font-size: .78rem; font-weight: 500; }
+.bi-etiqueta.alt { background: transparent; border: 1px solid var(--line); }
+
+.bi-estado select { font: inherit; font-size: .92rem; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: .4rem .7rem; cursor: pointer; }
+.bi-estado select:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+
+/* Acciones: favorito y eliminar */
+.bi-acciones { display: grid; gap: .5rem; }
+.bi-acciones form { margin: 0; }
+.bi-icono { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 1.5px solid var(--line); background: var(--bg); color: var(--muted); transition: color .15s, border-color .15s, background .15s; }
+.bi-icono svg { width: 18px; height: 18px; }
+.bi-icono:hover { border-color: var(--lav); color: var(--title); }
+.bi-icono.on { color: var(--bi-fav); border-color: var(--bi-fav); }
+.bi-icono.peligro:hover { color: var(--bi-peligro); border-color: var(--bi-peligro); background: var(--bi-peligro-bg); }
+.bi-icono:focus-visible { outline: 3px solid var(--lav); outline-offset: 2px; }
+
+/* Vacíos */
+.bi-vacio { display: grid; justify-items: center; gap: .6rem; text-align: center; padding: 2.6rem 1.2rem; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 20px; color: var(--muted); }
+.bi-vacio svg { width: 44px; height: 44px; color: var(--lav); }
+.bi-vacio b { color: var(--title); font-weight: 600; }
+.bi-vacio .btn { margin-top: .6rem; font-weight: 600; }
+.bi-sin-resultados { margin-top: 1.4rem; text-align: center; color: var(--muted); }
+.bi-sin-resultados[hidden] { display: none; }
+
+@media (max-width: 520px) {
+  .bi-grid { grid-template-columns: 1fr; }
+  .bi-card { grid-template-columns: 72px minmax(0, 1fr); }
+  .bi-portada { width: 72px; height: 100px; }
+  .bi-acciones { grid-column: 1 / -1; grid-auto-flow: column; justify-content: end; }
+}
+@media (prefers-reduced-motion: reduce) { .bi-main * { transition: none !important; } }
