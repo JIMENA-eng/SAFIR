@@ -1,0 +1,51 @@
+<%-- Mi cuenta: prepara los datos que manda CuentaServlet (roles, monedas, estadísticas, listas). Incluir DESPUÉS de encabezado-datos.jspf. --%>
+<%
+    // Datos propios de "Mi cuenta" (nombreUsuario, avatarHtml, contexto, sesion vienen del encabezado compartido)
+    String rolesRaw = "lector";
+    String idUsuario = "";
+    int monedas = 0;
+    if (sesion != null) {
+        Object rolesCuenta = sesion.getAttribute("roles");
+        if (rolesCuenta instanceof java.util.Collection) {
+            rolesRaw = ((java.util.Collection<?>) rolesCuenta).stream()
+                    .map(String::valueOf)
+                    .collect(java.util.stream.Collectors.joining(", "));
+        } else if (rolesCuenta != null) {
+            rolesRaw = String.valueOf(rolesCuenta);
+        }
+        if (sesion.getAttribute("usuarioId") != null) {
+            idUsuario = String.valueOf(sesion.getAttribute("usuarioId"));
+        }
+    }
+    Object monedasAttr = request.getAttribute("monedas");
+    if (monedasAttr instanceof Number) {
+        monedas = ((Number) monedasAttr).intValue();
+    }
+    String roles = esc(rolesRaw);
+    String idMostrar = esc(idUsuario);
+    String monedasTxt = String.format(java.util.Locale.US, "%,d", monedas);
+    long[] est = request.getAttribute("estadisticas") instanceof long[]
+            ? (long[]) request.getAttribute("estadisticas") : new long[6];
+    String nSeguidores = String.format(java.util.Locale.US, "%,d", est[0]);
+    String nValoraciones = String.format(java.util.Locale.US, "%,d", est[1]);
+    String nListas = String.format(java.util.Locale.US, "%,d", est[2]);
+    String nObras = String.format(java.util.Locale.US, "%,d", est[3]);
+    String nSeguidos = String.format(java.util.Locale.US, "%,d", est[4]);
+    String nBorradores = String.format(java.util.Locale.US, "%,d", est[5]);
+    java.util.List<String[]> siguiendoLista = request.getAttribute("siguiendo") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("siguiendo") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> seguidoresLista = request.getAttribute("seguidores") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("seguidores") : new java.util.ArrayList<String[]>();
+    String nombrePublico = esc(sobrenombreMenu);
+    String usuarioArroba = usuarioMenu.isEmpty() ? "" : "@" + esc(usuarioMenu);
+    String bioCuenta = request.getAttribute("menuBiografia") == null ? ""
+            : esc(String.valueOf(request.getAttribute("menuBiografia")));
+    java.util.List<String[]> enlacesCuenta = request.getAttribute("enlaces") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("enlaces") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> obrasPub = request.getAttribute("obrasPublicadas") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("obrasPublicadas") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> obrasBor = request.getAttribute("obrasBorrador") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("obrasBorrador") : new java.util.ArrayList<String[]>();
+    java.util.List<String[]> listasUsuario = request.getAttribute("misListas") instanceof java.util.List
+            ? (java.util.List<String[]>) request.getAttribute("misListas") : new java.util.ArrayList<String[]>();
+%>

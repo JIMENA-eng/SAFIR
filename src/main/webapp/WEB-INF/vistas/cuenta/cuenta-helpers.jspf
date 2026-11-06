@@ -1,0 +1,90 @@
+<%-- Mi cuenta: métodos que pintan tarjetas de obra/lista, filas de persona e íconos de redes. Usa esc() de encabezado-datos.jspf. --%>
+<%!
+    /** Tarjeta de una obra. ob = {id, titulo, genero, avance, lecturas, promedio, capPub, capBorrador, portadaRuta}. */
+    private static String tarjetaObra(String[] ob, String contexto, boolean borrador) {
+        String titulo = ob[1] == null ? "" : ob[1];
+        String ini = titulo.isEmpty() ? "?"
+                : new String(Character.toChars(Character.toUpperCase(titulo.codePointAt(0))));
+        StringBuilder sb = new StringBuilder("<li class=\"mo-obra\">");
+        if (ob.length > 8 && ob[8] != null && !ob[8].isEmpty()) {
+            sb.append("<span class=\"mo-tile\"><img src=\"").append(contexto).append("/media/")
+              .append(esc(ob[8])).append("\" alt=\"Portada de ").append(esc(titulo)).append("\"></span>");
+        } else {
+            sb.append("<span class=\"mo-tile\" aria-hidden=\"true\">").append(esc(ini)).append("</span>");
+        }
+        sb.append("<div class=\"mo-info\"><b>").append(esc(titulo)).append("</b>");
+        sb.append("<small>").append(esc(ob[2])).append(" · ");
+        if (borrador) {
+            sb.append(esc(ob[7])).append(" cap. en borrador");
+        } else {
+            sb.append(esc(ob[6])).append(" cap. · ").append(esc(ob[4])).append(" lecturas");
+        }
+        sb.append("</small></div><div class=\"mo-acciones\">");
+        if (!borrador) {
+            sb.append("<a href=\"").append(contexto).append("/obra?id=").append(esc(ob[0])).append("\">Ver</a>");
+        }
+        sb.append("<a href=\"").append(contexto).append("/autor/obra/editar?id=").append(esc(ob[0])).append("\">Editar</a>");
+        sb.append("<a href=\"").append(contexto).append("/autor/capitulos?obraId=").append(esc(ob[0])).append("\">Capítulos</a>");
+        return sb.append("</div></li>").toString();
+    }
+    /** Tarjeta de una lista. li = {id, nombre, descripcion, publica, totalObras}. */
+    private static String tarjetaLista(String[] li) {
+        StringBuilder sb = new StringBuilder("<li class=\"mo-listacard\"><b>").append(esc(li[1])).append("</b>");
+        if (li[2] != null && !li[2].isEmpty()) sb.append("<p>").append(esc(li[2])).append("</p>");
+        sb.append("<small>").append(esc(li[4])).append(" obras · ")
+          .append("true".equals(li[3]) ? "Pública" : "Privada").append("</small></li>");
+        return sb.toString();
+    }
+%>
+<%!
+    /** Etiqueta visible de cada red. */
+    private static String nombreRed(String red) {
+        switch (red == null ? "" : red) {
+            case "instagram": return "Instagram";
+            case "facebook":  return "Facebook";
+            case "x":         return "X";
+            case "tiktok":    return "TikTok";
+            case "youtube":   return "YouTube";
+            case "web":       return "Sitio web";
+            default:          return "Enlace";
+        }
+    }
+    /** Ícono SVG (trazo) de cada red. */
+    private static String iconoRed(String red) {
+        String d;
+        switch (red == null ? "" : red) {
+            case "instagram":
+                d = "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" rx=\"5\" ry=\"5\"/><path d=\"M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z\"/><line x1=\"17.5\" x2=\"17.51\" y1=\"6.5\" y2=\"6.5\"/>"; break;
+            case "facebook":
+                d = "<path d=\"M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z\"/>"; break;
+            case "x":
+                d = "<path d=\"M4 4h4l12 16h-4z\"/><path d=\"M4 20l7-7M13 11l7-7\"/>"; break;
+            case "tiktok":
+                d = "<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>"; break;
+            case "youtube":
+                d = "<path d=\"M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17\"/><path d=\"m10 15 5-3-5-3z\"/>"; break;
+            case "web":
+                d = "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M2 12h20\"/><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/>"; break;
+            default:
+                d = "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>";
+        }
+        return "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + d + "</svg>";
+    }
+%>
+<%!
+    /** Una fila de persona (avatar o inicial, sobrenombre y @usuario). pr = {sobrenombre, usuario, avatar}. */
+    private static String filaPersona(String[] pr, String contexto) {
+        String nombre = pr[0] == null ? "" : pr[0];
+        String ini = nombre.isEmpty() ? "?"
+                : new String(Character.toChars(Character.toUpperCase(nombre.codePointAt(0))));
+        StringBuilder sb = new StringBuilder("<li><span class=\"cuenta-mini\" aria-hidden=\"true\">");
+        if (pr[2] != null && !pr[2].isEmpty()) {
+            sb.append("<img src=\"").append(contexto).append("/media/").append(esc(pr[2])).append("\" alt=\"\">");
+        } else {
+            sb.append(esc(ini));
+        }
+        sb.append("</span><span class=\"cuenta-persona\"><b>").append(esc(nombre)).append("</b>");
+        if (pr[1] != null && !pr[1].isEmpty()) sb.append("<small>@").append(esc(pr[1])).append("</small>");
+        return sb.append("</span></li>").toString();
+    }
+%>

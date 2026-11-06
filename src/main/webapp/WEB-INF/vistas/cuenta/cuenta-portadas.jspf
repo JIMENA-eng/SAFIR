@@ -1,0 +1,64 @@
+<%-- Mi cuenta: portadas ilustradas (símbolos SVG cv1..cv6). Usan #star y #plane-white del encabezado. --%>
+<!-- Portadas ilustradas (SVG propio, paleta SAFIR) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="cv1" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#252866"/>
+      <use href="#star" transform="translate(30 35) scale(9)" fill="#CBC9F4"/>
+      <use href="#star" transform="translate(112 28) scale(6)" fill="#CBC9F4"/>
+      <use href="#star" transform="translate(82 66) scale(5)" fill="#E9E7FF"/>
+      <path d="M0 165 Q75 122 150 165 V200 H0Z" fill="#1D2042"/>
+      <g stroke="#7775D6" stroke-width="2.5"><line x1="38" y1="182" x2="38" y2="152"/><line x1="75" y1="186" x2="75" y2="140"/><line x1="112" y1="182" x2="112" y2="155"/></g>
+      <use href="#star" transform="translate(38 150) scale(9)" fill="#E9E7FF"/>
+      <use href="#star" transform="translate(75 138) scale(11)" fill="#E9E7FF"/>
+      <use href="#star" transform="translate(112 153) scale(8)" fill="#E9E7FF"/>
+    </symbol>
+    <symbol id="cv2" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#CBC9F4"/>
+      <circle cx="108" cy="56" r="22" fill="#FFFCF7"/>
+      <polygon points="0,150 46,82 92,150" fill="#7775D6"/>
+      <polygon points="52,150 106,96 150,150" fill="#5051AE"/>
+      <rect y="150" width="150" height="50" fill="#252866"/>
+      <rect x="38" y="165" width="74" height="3" rx="1.5" fill="#7775D6"/>
+      <rect x="56" y="178" width="40" height="3" rx="1.5" fill="#7775D6"/>
+    </symbol>
+    <symbol id="cv3" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#12142E"/>
+      <circle cx="78" cy="82" r="44" fill="#E9E7FF"/>
+      <circle cx="58" cy="72" r="8" fill="#CBC9F4"/>
+      <circle cx="94" cy="98" r="10" fill="#CBC9F4"/>
+      <circle cx="92" cy="64" r="5" fill="#CBC9F4"/>
+      <use href="#plane-white" x="22" y="128" width="78" height="58"/>
+      <use href="#star" transform="translate(24 30) scale(6)" fill="#CBC9F4"/>
+      <use href="#star" transform="translate(128 150) scale(5)" fill="#CBC9F4"/>
+    </symbol>
+    <symbol id="cv4" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#5051AE"/>
+      <rect x="30" y="128" width="90" height="18" rx="3" fill="#252866"/>
+      <rect x="40" y="108" width="76" height="18" rx="3" fill="#CBC9F4"/>
+      <rect x="36" y="88" width="66" height="18" rx="3" fill="#E9E7FF" transform="rotate(-7 69 97)"/>
+      <use href="#star" transform="translate(32 46) scale(8)" fill="#E9E7FF"/>
+      <use href="#star" transform="translate(116 60) scale(6)" fill="#CBC9F4"/>
+      <use href="#star" transform="translate(86 28) scale(4)" fill="#E9E7FF"/>
+    </symbol>
+    <symbol id="cv5" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#E9E7FF"/>
+      <path d="M75 24 Q94 50 75 70 Q56 50 75 24Z" fill="#252866"/>
+      <g fill="none" stroke-width="7" stroke-linecap="round">
+        <path d="M-5 118 Q35 96 75 118 T155 118" stroke="#5051AE"/>
+        <path d="M-5 144 Q35 122 75 144 T155 144" stroke="#7775D6"/>
+        <path d="M-5 170 Q35 148 75 170 T155 170" stroke="#252866"/>
+      </g>
+    </symbol>
+    <symbol id="cv6" viewBox="0 0 150 200">
+      <rect width="150" height="200" fill="#252866"/>
+      <circle cx="75" cy="122" r="54" fill="#7775D6" opacity=".45"/>
+      <rect y="148" width="150" height="52" fill="#12142E"/>
+      <rect x="40" y="128" width="70" height="20" rx="5" fill="#CBC9F4"/>
+      <g fill="#252866"><rect x="48" y="134" width="10" height="8" rx="2"/><rect x="64" y="134" width="10" height="8" rx="2"/><rect x="80" y="134" width="10" height="8" rx="2"/><rect x="96" y="134" width="8" height="8" rx="2"/></g>
+      <g stroke="#5051AE" stroke-width="2"><line x1="0" y1="166" x2="150" y2="166"/><line x1="0" y1="182" x2="150" y2="182"/></g>
+      <use href="#star" transform="translate(30 36) scale(6)" fill="#E9E7FF"/>
+      <use href="#star" transform="translate(118 52) scale(8)" fill="#CBC9F4"/>
+    </symbol>
+  </defs>
+</svg>
