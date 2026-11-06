@@ -8,7 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UsuarioDAO {
@@ -325,7 +327,7 @@ public class UsuarioDAO {
 
         String sql =
                 "SELECT u.nombre_publico, u.nombre_usuario, " +
-                "p.avatar_ruta, p.portada_ruta " +
+                "p.avatar_ruta, p.portada_ruta, p.biografia " +
                 "FROM usuario u " +
                 "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
                 "WHERE u.id = ?";
@@ -343,9 +345,103 @@ public class UsuarioDAO {
                     datos.put("usuario", rs.getString("nombre_usuario"));
                     datos.put("avatar", rs.getString("avatar_ruta"));
                     datos.put("portada", rs.getString("portada_ruta"));
+                    datos.put("biografia", rs.getString("biografia"));
                 }
             }
         }
         return datos;
+    }
+
+    // ===== Edición de perfil: sobrenombre, usuario, descripción y enlaces =====
+
+    /** true si OTRO usuario ya usa ese sobrenombre (sin distinguir mayúsculas). */
+    public boolean sobrenombreDeOtro(long usuarioId, String valor) throws SQLException {
+        return existeDeOtro("SELECT 1 FROM usuario WHERE LOWER(nombre_publico) = LOWER(?) AND id <> ?",
+                valor, usuarioId);
+    }
+
+    /** true si OTRO usuario ya usa ese nombre de usuario. */
+    public boolean usuarioDeOtro(long usuarioId, String valor) throws SQLException {
+        return existeDeOtro("SELECT 1 FROM usuario WHERE LOWER(nombre_usuario) = LOWER(?) AND id <> ?",
+                valor, usuarioId);
+    }
+
+    private boolean existeDeOtro(String sql, String valor, long usuarioId) throws SQLException {
+        try (Connection c = ConexionBD.conectar();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, valor.trim());
+            ps.setLong(2, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /** Enlaces del perfil en orden: cada elemento es {red, url}. */
+    public List<String[]> obtenerEnlaces(long usuarioId) throws SQLException {
+        String sql = "SELECT red, url FROM perfil_enlace WHERE usuario_id = ? ORDER BY orden, id";
+        List<String[]> lista = new ArrayList<>();
+        try (Connection c = ConexionBD.conectar();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new String[]{rs.getString("red"), rs.getString("url")});
+                }
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Guarda sobrenombre, nombre de usuario, descripción y enlaces en una sola
+     * transacción. Los enlaces se reemplazan completos.
+     */
+    public void actualizarPerfil(long usuarioId, String sobrenombre, String usuario,
+                                 String biografia, List<String[]> enlaces)
+            throws SQLException {
+
+        try (Connection c = ConexionBD.conectar()) {
+            boolean original = c.getAutoCommit();
+            c.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = c.prepareStatement(
+                        "UPDATE usuario SET nombre_publico = ?, nombre_usuario = ? WHERE id = ?")) {
+                    ps.setString(1, sobrenombre);
+                    ps.setString(2, usuario);
+                    ps.setLong(3, usuarioId);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = c.prepareStatement(
+                        "UPDATE perfil_usuario SET biografia = ? WHERE usuario_id = ?")) {
+                    ps.setString(1, biografia == null || biografia.isEmpty() ? null : biografia);
+                    ps.setLong(2, usuarioId);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = c.prepareStatement(
+                        "DELETE FROM perfil_enlace WHERE usuario_id = ?")) {
+                    ps.setLong(1, usuarioId);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = c.prepareStatement(
+                        "INSERT INTO perfil_enlace (usuario_id, red, url, orden) VALUES (?, ?, ?, ?)")) {
+                    int orden = 0;
+                    for (String[] e : enlaces) {
+                        ps.setLong(1, usuarioId);
+                        ps.setString(2, e[0]);
+                        ps.setString(3, e[1]);
+                        ps.setInt(4, orden++);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                c.commit();
+            } catch (SQLException e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(original);
+            }
+        }
     }
 }

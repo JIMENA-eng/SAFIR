@@ -19,9 +19,11 @@
   // Buscador: evita enviar una búsqueda vacía al catálogo
   var form = document.getElementById('searchForm');
   var input = document.getElementById('searchInput');
-  form.addEventListener('submit', function (e) {
-    if (input.value.trim() === '') { e.preventDefault(); input.focus(); }
-  });
+  if (form && input) {
+    form.addEventListener('submit', function (e) {
+      if (input.value.trim() === '') { e.preventDefault(); input.focus(); }
+    });
+  }
 
   // Menú de usuario
   var menuBtn = document.getElementById('userMenuBtn');

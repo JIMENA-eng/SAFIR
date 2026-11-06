@@ -155,8 +155,14 @@ public class CuentaDAO {
                 // Las fotos de perfil y portada se desvinculan del perfil
                 // (los archivos los borra el servlet después de confirmar).
                 try (PreparedStatement ps = c.prepareStatement(
-                        "UPDATE perfil_usuario SET avatar_ruta = NULL, portada_ruta = NULL "
+                        "UPDATE perfil_usuario SET avatar_ruta = NULL, portada_ruta = NULL, "
+                        + "biografia = NULL, sitio_web = NULL "
                         + "WHERE usuario_id = ?")) {
+                    ps.setLong(1, usuarioId);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = c.prepareStatement(
+                        "DELETE FROM perfil_enlace WHERE usuario_id = ?")) {
                     ps.setLong(1, usuarioId);
                     ps.executeUpdate();
                 }

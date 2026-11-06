@@ -1,0 +1,110 @@
+/* SAFIR · Perfil (WEB-INF/vistas/perfil/perfil.jsp).
+   Se carga DESPUÉS de encabezadoinicio.css, que aporta variables, .btn y el encabezado. */
+:root {
+  --card: var(--surface);
+  --ok-bg: #E6F4EA; --ok: #1E7A46; --err-bg: #FDECEA; --err: #B3261E;
+  --shadow: 0 12px 34px -18px rgba(37,40,102,.35);
+}
+:root[data-theme="dark"] {
+  --ok-bg: #16301f; --ok: #7fd6a0; --err-bg: #3a1b1b; --err: #f1a39d;
+  --shadow: 0 12px 34px -18px rgba(0,0,0,.7);
+}
+/* encabezadoinicio.css da estilo global a section, h1, h2: aquí se neutraliza */
+.pf-main section { padding: 0; }
+.pf-main h2 { font-size: 1.4rem; max-width: none; font-family: var(--serif); font-weight: 300; }
+.pf-main h1 { max-width: none; }
+.pf-main p { margin: 0; }
+
+  :focus-visible { outline: 3px solid var(--lav); outline-offset: 3px; border-radius: 8px; }
+
+  .pf-main { max-width: 920px; margin: 0 auto; padding: 0 1.25rem 3rem; }
+
+  /* Mensajes */
+  .aviso { padding: .75rem 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: .95rem; }
+  .aviso.ok { background: var(--ok-bg); color: var(--ok); }
+  .aviso.error { background: var(--err-bg); color: var(--err); }
+
+  /* Cabecera del perfil */
+  .pf-hero { background: var(--card); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; }
+  .pf-cover { position: relative; height: 210px;
+    background:
+      radial-gradient(circle at 78% 30%, rgba(255,255,255,.55) 0 60px, transparent 62px),
+      repeating-radial-gradient(circle at 12% 120%, transparent 0 30px, rgba(255,255,255,.18) 30px 31.5px),
+      linear-gradient(135deg, var(--indigo), var(--lav)); }
+  .pf-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pf-body { position: relative; padding: 0 1.75rem 1.6rem; }
+  .pf-avatar { width: 112px; height: 112px; border-radius: 50%; margin-top: -56px; overflow: hidden; display: grid; place-items: center;
+    background: var(--soft); border: 5px solid var(--card); color: var(--title); font-family: var(--serif); font-size: 2.6rem; position: relative; }
+  .pf-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pf-nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(1.7rem, 4vw, 2.2rem); color: var(--title); line-height: 1.15; margin-top: .75rem; }
+  .pf-roles { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .6rem; }
+  .pf-chip { padding: .2rem .75rem; border-radius: 999px; background: var(--soft); color: var(--title); font-size: .82rem; font-weight: 500; text-transform: capitalize; }
+
+  /* Secciones */
+  .seccion { margin-top: 2rem; }
+  .seccion > h2 { font-family: var(--serif); font-weight: 300; color: var(--title); font-size: 1.4rem; margin-bottom: .9rem; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 1.4rem; }
+  .panel p.ayuda { color: var(--muted); font-size: .92rem; margin-bottom: 1rem; }
+
+  /* Subida de imágenes */
+  .subidas { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .subida { display: flex; flex-direction: column; gap: .35rem; padding: 1rem; border: 1.5px dashed var(--line); border-radius: 14px;
+    cursor: pointer; transition: border-color .15s, background .15s; }
+  .subida:hover, .subida:focus-within { border-color: var(--lav); background: var(--soft); }
+  .subida strong { color: var(--title); font-weight: 600; }
+  .subida span { color: var(--muted); font-size: .88rem; word-break: break-all; }
+  .subida input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+  .acciones { margin-top: 1.1rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: .7rem 1.5rem; border: 0; border-radius: 999px;
+    background: var(--btn); color: var(--btn-text); font: inherit; font-weight: 600; cursor: pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.outline { background: transparent; color: var(--title); border: 1px solid var(--line); }
+  
+
+  /* Invitación a ser autor */
+  .autor-cta { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    background: linear-gradient(135deg, var(--soft), var(--card)); }
+  .autor-cta h3 { font-family: var(--serif); font-weight: 300; color: var(--title); font-size: 1.2rem; }
+  .autor-cta p { color: var(--muted); font-size: .92rem; margin-top: .2rem; }
+
+  /* Accesos */
+  .accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; }
+  .acceso { display: flex; flex-direction: column; gap: .25rem; padding: 1.1rem 1.2rem; background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; color: var(--title); transition: transform .15s, border-color .15s, box-shadow .15s; }
+  .acceso:hover { transform: translateY(-2px); border-color: var(--lav); box-shadow: var(--shadow); }
+  .acceso b { font-weight: 600; }
+  .acceso small { color: var(--muted); font-size: .85rem; }
+  .acceso.destacado { background: var(--btn); border-color: var(--btn); }
+  .acceso.destacado b, .acceso.destacado small { color: var(--btn-text); }
+
+  .salir { margin-top: 2rem; text-align: center; }
+
+  @media (max-width: 600px) {
+    .subidas { grid-template-columns: 1fr; }
+    .pf-cover { height: 150px; }
+    .pf-body { padding: 0 1.1rem 1.3rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Editar perfil */
+.pf-user { color: var(--muted); font-size: .98rem; margin-top: .15rem; }
+.pf-bio { margin-top: .7rem !important; max-width: 46em; white-space: pre-line; }
+.pf-enlaces { list-style: none; padding: 0; margin: .8rem 0 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.pf-enlaces a { display: inline-block; padding: .25rem .8rem; border-radius: 999px; background: var(--soft);
+  color: var(--title); font-size: .85rem; font-weight: 500; text-decoration: none; text-transform: capitalize; }
+.pf-enlaces a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pf-form { display: grid; gap: 1.1rem; }
+.pf-campo { display: grid; gap: .35rem; font-size: .92rem; font-weight: 500; color: var(--title); }
+.pf-campo input, .pf-campo textarea, .pf-fila select, .pf-fila input {
+  width: 100%; font: inherit; font-weight: 400; color: var(--text); background: var(--card);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: .65rem .85rem; }
+.pf-campo textarea { resize: vertical; min-height: 96px; }
+.pf-campo input:focus, .pf-campo textarea:focus, .pf-fila select:focus, .pf-fila input:focus {
+  outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+.pf-ayuda { color: var(--muted); font-size: .85rem; font-weight: 400; }
+.pf-redes { border: 0; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.pf-redes legend { font-size: .92rem; font-weight: 500; color: var(--title); padding: 0; margin-bottom: .35rem; }
+.pf-fila { display: grid; grid-template-columns: 150px 1fr; gap: .6rem; }
+.pf-fila select { text-transform: capitalize; }
+@media (max-width: 600px) { .pf-fila { grid-template-columns: 1fr; } }

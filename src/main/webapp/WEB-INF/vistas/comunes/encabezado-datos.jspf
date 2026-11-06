@@ -1,0 +1,65 @@
+<%-- Datos del encabezado (esc(), sesión, foto, contadores). Incluir ANTES del <!DOCTYPE>. --%>
+<%!
+    /** Escapa texto para colocarlo dentro de HTML. */
+    private static String esc(String t) {
+        return t == null ? "" : t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
+    }
+%>
+<%
+    String contexto = request.getContextPath();
+
+    jakarta.servlet.http.HttpSession sesion = request.getSession(false);
+    String nombreUsuario = "lector";
+    if (sesion != null && sesion.getAttribute("nombreUsuario") != null) {
+        nombreUsuario = String.valueOf(sesion.getAttribute("nombreUsuario"));
+    }
+    // Roles guardados en sesión por LoginServlet (texto "lector, autor", colección o arreglo).
+    boolean esAutor = false;
+    if (sesion != null && sesion.getAttribute("roles") != null) {
+        Object rolesSesion = sesion.getAttribute("roles");
+        java.util.List<String> listaRoles = new java.util.ArrayList<String>();
+        if (rolesSesion instanceof java.util.Collection<?>) {
+            for (Object r : (java.util.Collection<?>) rolesSesion) listaRoles.add(String.valueOf(r));
+        } else if (rolesSesion instanceof String[]) {
+            for (String r : (String[]) rolesSesion) listaRoles.add(r);
+        } else {
+            for (String r : String.valueOf(rolesSesion).split("[,;]")) listaRoles.add(r);
+        }
+        for (String r : listaRoles) {
+            String rol = r == null ? "" : r.trim();
+            if (rol.equalsIgnoreCase("autor") || rol.equalsIgnoreCase("administrador")) { esAutor = true; }
+        }
+    }
+    // Contadores para los puntos rojos (los calcula InicioServlet; 0 si no llegan).
+    long notifNoLeidas = request.getAttribute("notificacionesNoLeidas") instanceof Number
+            ? ((Number) request.getAttribute("notificacionesNoLeidas")).longValue() : 0L;
+    long mensajesNoLeidos = request.getAttribute("mensajesNoLeidos") instanceof Number
+            ? ((Number) request.getAttribute("mensajesNoLeidos")).longValue() : 0L;
+    String inicial = nombreUsuario.isBlank() ? "S"
+            : nombreUsuario.trim().substring(0, 1).toUpperCase();
+
+    nombreUsuario = nombreUsuario
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#39;");
+    inicial = inicial
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#39;");
+    // Foto y portada: lo que cargó InicioServlet; si no llegó, la sesión.
+    String avatarRuta = request.getAttribute("menuAvatar") != null
+            ? String.valueOf(request.getAttribute("menuAvatar"))
+            : ((sesion != null && sesion.getAttribute("avatarRuta") != null)
+                ? String.valueOf(sesion.getAttribute("avatarRuta")) : null);
+    String portadaRuta = request.getAttribute("menuPortada") != null
+            ? String.valueOf(request.getAttribute("menuPortada")) : null;
+    String sobrenombreMenu = request.getAttribute("menuSobrenombre") != null
+            ? String.valueOf(request.getAttribute("menuSobrenombre"))
+            : ((sesion != null && sesion.getAttribute("nombreUsuario") != null)
+                ? String.valueOf(sesion.getAttribute("nombreUsuario")) : "lector");
+    String usuarioMenu = request.getAttribute("menuUsuario") != null
+            ? String.valueOf(request.getAttribute("menuUsuario")) : "";
+    String avatarHtml = (avatarRuta == null) ? inicial
+            : "<img src=\"" + contexto + "/media/"
+              + avatarRuta.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
+              + "\" alt=\"\" style=\"width:100%;height:100%;border-radius:50%;object-fit:cover\">";
+%>
