@@ -32,7 +32,10 @@ public class CuentaServlet extends HttpServlet {
             request.setAttribute("monedas", billeteraDAO.obtenerSaldo(id));
             // Encabezado compartido (foto, sobrenombre, puntos rojos) y datos del perfil.
             EncabezadoUtil.cargar(request, id);
-            request.setAttribute("enlaces", new UsuarioDAO().obtenerEnlaces(id));
+            UsuarioDAO usuarioDAO = new UsuarioDAO();
+            request.setAttribute("enlaces", usuarioDAO.obtenerEnlaces(id));
+            request.setAttribute("estadisticas", usuarioDAO.obtenerEstadisticasPerfil(id));
+            
         } catch (SQLException e) {
             throw new ServletException("Error al cargar el saldo.", e);
         }
