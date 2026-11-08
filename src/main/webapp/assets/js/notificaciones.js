@@ -68,9 +68,12 @@
 
   pestanas.forEach(function (p) {
     var c = p.getAttribute('data-categoria');
-    p.querySelector('.nt-n').textContent = tarjetas.filter(function (t) {
+    var sinLeer = tarjetas.filter(function (t) {
       return enCategoria(t, c) && t.getAttribute('data-leida') !== 'true';
     }).length;
+    var globo = p.querySelector('.nt-n');
+    globo.textContent = sinLeer;
+    globo.hidden = sinLeer === 0;            // sin globo rojo si no hay nada sin leer
     p.title = 'Sin leer';
     if (c === categoria) marcar(pestanas, p);
     p.addEventListener('click', function () {
