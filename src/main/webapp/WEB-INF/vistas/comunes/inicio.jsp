@@ -127,14 +127,9 @@
           <small>Datos de tu cuenta y de acceso.</small>
         </a>
 <% if (esAutor) { %>
-        <a class="qcard" href="<%= contexto %>/autor/panel">
-          <span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></span>
-          <b>Panel de autor</b>
-          <small>Tus obras, avance, lecturas y valoraciones.</small>
-        </a>
         <a class="qcard" href="<%= contexto %>/autor/obra/nueva">
           <span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>
-          <b>Nueva obra</b>
+          <b>Crear obra</b>
           <small>Crea una historia y empieza a publicar capítulos.</small>
         </a>
 <% } %>
@@ -185,8 +180,8 @@
       <h2>Mis obras</h2>
       <p class="sec-lead">Las historias que escribes y publicas en SAFIR.</p>
       <div class="actions-row">
-        <a class="btn" href="<%= contexto %>/autor/panel">Ir al panel de autor</a>
-        <a class="btn outline" href="<%= contexto %>/autor/obra/nueva">Nueva obra</a>
+        <a class="btn" href="<%= contexto %>/autor/obra/nueva">Crear obra</a>
+        <a class="btn outline" href="<%= contexto %>/auth/cuenta#mis-obras">Ver mis obras</a>
       </div>
     </div>
   </section>
