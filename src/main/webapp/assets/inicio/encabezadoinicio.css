@@ -553,11 +553,12 @@
 
   /* ===== TAREA 3: desglose "Catálogo" en la barra ===== */
   .cat-wrap { position: relative; display: flex; align-items: center; }
+  /* Igual que los enlaces "Mi biblioteca" / "Crear obra": mismo color, tamaño y subrayado al pasar el cursor */
   .cat-btn {
-    display: inline-flex; align-items: center; gap: .35rem; padding: 0; border: 0; background: transparent;
-    color: #E9E7FF; font: inherit; font-size: .98rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: .35rem; padding: 0; margin: 0; border: 0; background: transparent;
+    color: #E9E7FF; font: inherit; font-size: .98rem; line-height: inherit; cursor: pointer;
   }
-  .cat-btn:hover, .cat-btn[aria-expanded="true"] { color: #fff; }
+  .cat-btn:hover, .cat-btn[aria-expanded="true"] { color: #fff; text-decoration: underline; text-underline-offset: 6px; }
   .cat-btn .caret { width: 12px; height: 12px; flex: none; transition: transform .2s; }
   .cat-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
   .cat-wrap .menu { left: 0; right: auto; min-width: 230px; max-height: 70vh; overflow-y: auto; }
@@ -565,7 +566,6 @@
   nav .menu a:hover, nav .menu a:focus-visible { text-decoration: none; }
   nav .menu a small { color: var(--muted); font-variant-numeric: tabular-nums; }
   nav .menu a.cat-todo { color: var(--title); font-weight: 600; }
-
 
   /* ===== TAREA 5: contador y desglose de mensajes / notificaciones ===== */
   .aviso-wrap { position: relative; display: flex; }
