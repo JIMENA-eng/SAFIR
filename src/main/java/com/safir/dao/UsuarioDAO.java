@@ -1,6 +1,7 @@
 package com.safir.dao;
 
 import com.safir.config.ConexionBD;
+import com.safir.modelo.ResultadoLogin;
 import com.safir.seguridad.PasswordUtil;
 import com.safir.seguridad.ValidadorRegistro;
 
@@ -146,8 +147,24 @@ public class UsuarioDAO {
         }
     }
 
-    /** Inicia sesión con correo O teléfono ("identificador") y contraseña. */
-    public Map<String, Object> iniciarSesion(String identificador, String clave)
+    /** Intentos fallidos seguidos antes de bloquear la cuenta. */
+    public static final int MAX_INTENTOS_LOGIN = 3;
+
+    /** Tiempo de espera del bloqueo, en segundos. */
+    public static final int SEGUNDOS_BLOQUEO_LOGIN = 59;
+
+    /**
+     * Inicia sesión con correo O teléfono ("identificador") y contraseña.
+     *
+     * Bloqueo por intentos fallidos:
+     *  - Cada contraseña incorrecta suma 1 a usuario.intentos_fallidos.
+     *  - Al llegar a MAX_INTENTOS_LOGIN se fija usuario.bloqueado_hasta
+     *    = ahora + SEGUNDOS_BLOQUEO_LOGIN y el contador vuelve a 0.
+     *  - Mientras dure el bloqueo no se revisa la contraseña (ni siquiera
+     *    la correcta entra) y no se suman más intentos.
+     *  - Un inicio de sesión correcto limpia el contador y el bloqueo.
+     */
+    public ResultadoLogin iniciarSesion(String identificador, String clave)
             throws SQLException {
 
         boolean porCorreo = ValidadorRegistro.esCorreo(identificador);
@@ -156,12 +173,14 @@ public class UsuarioDAO {
                 : ValidadorRegistro.normalizarTelefono(identificador);
 
         if (valor == null) {
-            return null;
+            return ResultadoLogin.invalido();
         }
 
         String sql =
                 "SELECT u.id, u.nombre_publico, u.contrasena_hash, " +
                 "u.estado_cuenta, p.avatar_ruta, " +
+                "GREATEST(0, CEIL(EXTRACT(EPOCH FROM " +
+                "(u.bloqueado_hasta - CURRENT_TIMESTAMP))))::int AS segundos_bloqueo, " +
                 "COALESCE(STRING_AGG(r.nombre, ', '), '') AS roles " +
                 "FROM usuario u " +
                 "LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id " +
@@ -169,8 +188,8 @@ public class UsuarioDAO {
                 "LEFT JOIN perfil_usuario p ON p.usuario_id = u.id " +
                 "WHERE " + (porCorreo ? "LOWER(u.correo) = LOWER(?) "
                                       : "u.telefono = ? ") +
-                "GROUP BY u.id, u.nombre_publico, " +
-                "u.contrasena_hash, u.estado_cuenta, p.avatar_ruta";
+                "GROUP BY u.id, u.nombre_publico, u.contrasena_hash, " +
+                "u.estado_cuenta, u.bloqueado_hasta, p.avatar_ruta";
 
         try (Connection conexion = ConexionBD.conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -180,47 +199,107 @@ public class UsuarioDAO {
             try (ResultSet rs = ps.executeQuery()) {
 
                 if (!rs.next()) {
-                    return null;
+                    return ResultadoLogin.invalido();
                 }
 
+                long usuarioId = rs.getLong("id");
                 String hash = rs.getString("contrasena_hash");
                 String estado = rs.getString("estado_cuenta");
 
                 // Verificar que la cuenta esté activa.
                 if (!"activa".equalsIgnoreCase(estado)) {
-                    return null;
+                    return ResultadoLogin.invalido();
                 }
 
-                // Verificar la contraseña.
+                // 1) ¿Está bloqueada? Se corta antes de revisar la contraseña.
+                int segundosBloqueo = rs.getInt("segundos_bloqueo");
+                if (segundosBloqueo > 0) {
+                    return ResultadoLogin.bloqueado(segundosBloqueo);
+                }
+
+                // 2) Contraseña incorrecta: suma el intento (y bloquea si toca).
                 if (hash == null || !PasswordUtil.verificar(clave, hash)) {
-                    return null;
+                    return registrarIntentoFallido(conexion, usuarioId);
                 }
 
-                long usuarioId = rs.getLong("id");
-                String nombre = rs.getString("nombre_publico");
-                String roles = rs.getString("roles");
+                // 3) Correcta: limpia intentos/bloqueo y actualiza el último acceso.
+                registrarAccesoExitoso(conexion, usuarioId);
 
-                // Actualizar la fecha del último acceso.
-                actualizarUltimoAcceso(conexion, usuarioId);
-
-                // Devolver los datos del usuario.
                 Map<String, Object> usuario = new HashMap<>();
                 usuario.put("id", usuarioId);
-                usuario.put("nombre", nombre);
-                usuario.put("roles", roles);
+                usuario.put("nombre", rs.getString("nombre_publico"));
+                usuario.put("roles", rs.getString("roles"));
                 usuario.put("avatarRuta", rs.getString("avatar_ruta"));
 
-                return usuario;
+                return ResultadoLogin.exito(usuario);
             }
         }
     }
 
-    private void actualizarUltimoAcceso(
+    /**
+     * Suma un intento fallido en una sola sentencia (atómica frente a
+     * peticiones simultáneas). Si con este intento se llega al máximo,
+     * deja la cuenta bloqueada y reinicia el contador.
+     */
+    private ResultadoLogin registrarIntentoFallido(
+            Connection conexion, long usuarioId) throws SQLException {
+
+        String sql =
+                "UPDATE usuario SET " +
+                "  intentos_fallidos = CASE WHEN intentos_fallidos + 1 >= ? " +
+                "                           THEN 0 ELSE intentos_fallidos + 1 END, " +
+                "  bloqueado_hasta   = CASE WHEN intentos_fallidos + 1 >= ? " +
+                "                           THEN CURRENT_TIMESTAMP + (? * INTERVAL '1 second') " +
+                "                           ELSE NULL END " +
+                "WHERE id = ? " +
+                "  AND (bloqueado_hasta IS NULL OR bloqueado_hasta <= CURRENT_TIMESTAMP) " +
+                "RETURNING intentos_fallidos, (bloqueado_hasta IS NOT NULL) AS bloqueado";
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, MAX_INTENTOS_LOGIN);
+            ps.setInt(2, MAX_INTENTOS_LOGIN);
+            ps.setInt(3, SEGUNDOS_BLOQUEO_LOGIN);
+            ps.setLong(4, usuarioId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    // Otra petición simultánea la bloqueó justo antes.
+                    return ResultadoLogin.bloqueado(segundosRestantesBloqueo(conexion, usuarioId));
+                }
+                if (rs.getBoolean("bloqueado")) {
+                    return ResultadoLogin.bloqueado(SEGUNDOS_BLOQUEO_LOGIN);
+                }
+                int usados = rs.getInt("intentos_fallidos");
+                return ResultadoLogin.invalido(MAX_INTENTOS_LOGIN - usados);
+            }
+        }
+    }
+
+    private int segundosRestantesBloqueo(Connection conexion, long usuarioId)
+            throws SQLException {
+
+        String sql =
+                "SELECT GREATEST(0, CEIL(EXTRACT(EPOCH FROM " +
+                "(bloqueado_hasta - CURRENT_TIMESTAMP))))::int " +
+                "FROM usuario WHERE id = ?";
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setLong(1, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : SEGUNDOS_BLOQUEO_LOGIN;
+            }
+        }
+    }
+
+    /** Login correcto: reinicia el contador, quita el bloqueo y marca el último acceso. */
+    private void registrarAccesoExitoso(
             Connection conexion, long usuarioId) throws SQLException {
 
         String sql =
                 "UPDATE usuario " +
-                "SET ultimo_acceso = CURRENT_TIMESTAMP " +
+                "SET ultimo_acceso = CURRENT_TIMESTAMP, " +
+                "    intentos_fallidos = 0, " +
+                "    bloqueado_hasta = NULL " +
                 "WHERE id = ?";
 
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {

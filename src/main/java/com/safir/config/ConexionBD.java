@@ -10,7 +10,7 @@ public class ConexionBD {
             "jdbc:postgresql://localhost:5432/safir";
 
     private static final String USUARIO = "postgres";
-    private static final String CLAVE = "admin123";
+    private static final String CLAVE = "admin";
 
     public static Connection conectar() throws SQLException {
         try {

@@ -1,6 +1,7 @@
 package com.safir.controlador;
 
 import com.safir.dao.UsuarioDAO;
+import com.safir.modelo.ResultadoLogin;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,6 +21,9 @@ import java.util.Map;
  *
  * Se mantiene también /auth/login porque las vistas JSP existentes
  * apuntan a esa ruta; /login es la que usan filtros y otros servlets.
+ *
+ * TAREA 1 (LOGIN-BLOQUEO): tras 3 contraseñas incorrectas seguidas la
+ * cuenta queda bloqueada 59 segundos (ver UsuarioDAO.iniciarSesion).
  */
 @WebServlet({"/login", "/auth/login"})
 public class LoginServlet extends HttpServlet {
@@ -27,6 +31,8 @@ public class LoginServlet extends HttpServlet {
     private static final String VISTA_LOGIN =
             "/WEB-INF/vistas/autenticacion/login.jsp";
 
+    /** 429 Too Many Requests: respuesta estándar para un bloqueo por intentos. */
+    private static final int SC_DEMASIADOS_INTENTOS = 429;
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
@@ -59,10 +65,10 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        Map<String, Object> usuario;
+        ResultadoLogin resultado;
 
         try {
-            usuario = usuarioDAO.iniciarSesion(identificador, clave);
+            resultado = usuarioDAO.iniciarSesion(identificador, clave);
         } catch (SQLException e) {
             log("Error al iniciar sesión", e);
             mostrarError(request, response,
@@ -70,15 +76,34 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        if (usuario == null) {
-            mostrarError(request, response,
-                    "Correo/teléfono o contraseña incorrectos, o cuenta no disponible.");
-            return;
+        switch (resultado.getEstado()) {
+
+            case BLOQUEADO:
+                mostrarBloqueo(request, response, resultado.getSegundosBloqueo());
+                return;
+
+            case CREDENCIALES_INVALIDAS:
+                mostrarError(request, response,
+                        mensajeCredencialesInvalidas(resultado.getIntentosRestantes()));
+                return;
+
+            case EXITO:
+            default:
+                iniciarSesion(request, resultado.getUsuario());
+                response.sendRedirect(request.getContextPath() + "/auth/inicio");
         }
+    }
 
-        iniciarSesion(request, usuario);
-
-        response.sendRedirect(request.getContextPath() + "/auth/inicio");
+    private String mensajeCredencialesInvalidas(int intentosRestantes) {
+        String base = "Correo/teléfono o contraseña incorrectos, o cuenta no disponible.";
+        if (intentosRestantes == 1) {
+            return base + " Te queda 1 intento antes de un bloqueo de "
+                    + UsuarioDAO.SEGUNDOS_BLOQUEO_LOGIN + " segundos.";
+        }
+        if (intentosRestantes > 1) {
+            return base + " Te quedan " + intentosRestantes + " intentos.";
+        }
+        return base;
     }
 
     /** Descarta cualquier sesión previa y crea una nueva (evita fijación de sesión). */
@@ -97,6 +122,21 @@ public class LoginServlet extends HttpServlet {
         sesion.setAttribute("nombreUsuario", usuario.get("nombre"));
         sesion.setAttribute("roles", usuario.get("roles"));
         sesion.setAttribute("avatarRuta", usuario.get("avatarRuta"));
+    }
+
+    /** Muestra el login con la cuenta bloqueada y la cuenta regresiva. */
+    private void mostrarBloqueo(HttpServletRequest request,
+                                HttpServletResponse response,
+                                int segundos)
+            throws ServletException, IOException {
+
+        response.setStatus(SC_DEMASIADOS_INTENTOS);
+        response.setHeader("Retry-After", String.valueOf(segundos));
+        request.setAttribute("bloqueoSegundos", segundos);
+        request.setAttribute("error",
+                "Demasiados intentos fallidos. Espera " + segundos
+                + " segundos para volver a intentarlo.");
+        request.getRequestDispatcher(VISTA_LOGIN).forward(request, response);
     }
 
     private void mostrarError(HttpServletRequest request,
