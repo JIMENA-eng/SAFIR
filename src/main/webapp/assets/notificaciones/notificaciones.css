@@ -73,3 +73,12 @@
   .nt-acciones { grid-column: 1 / -1; justify-self: end; }
 }
 @media (prefers-reduced-motion: reduce) { .nt-main * { transition: none !important; } }
+
+/* ===== TAREA 5: pestañas Mensajes / Notificaciones y resaltado ===== */
+.nt-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1rem; padding-bottom: .9rem; border-bottom: 1px solid var(--line); }
+.nt-tab { font: inherit; font-size: .95rem; font-weight: 600; cursor: pointer; padding: .5rem 1rem; border-radius: 12px; border: 0; background: transparent; color: var(--muted); transition: background .15s, color .15s; }
+.nt-tab:hover { background: var(--soft); color: var(--title); }
+.nt-tab.activo { background: var(--soft); color: var(--title); }
+.nt-tab .nt-n { display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; padding: 0 .35rem; margin-left: .25rem; border-radius: 999px; background: var(--nt-nuevo); color: var(--nt-nuevo-texto); font-size: .72rem; }
+.nt-card { scroll-margin-top: 110px; }
+.nt-card.destacada { outline: 2.5px solid var(--lav); outline-offset: 3px; transition: outline-color .4s; }

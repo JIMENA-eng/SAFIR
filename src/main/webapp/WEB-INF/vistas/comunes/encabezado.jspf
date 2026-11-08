@@ -64,8 +64,23 @@
         <%-- TAREA 4: la lista de idiomas la arma /assets/js/idioma.js (lo inyecta IdiomaFilter) --%>
         <div class="menu" id="langMenu" hidden></div>
       </div>
-      <a class="icon-btn" href="<%= contexto %>/mensajes" data-pendiente aria-label="Mensajes<%= mensajesNoLeidos > 0 ? " (hay mensajes nuevos)" : "" %>" title="Mensajes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6.5L20.5 7"/></svg><span class="dot" <%= mensajesNoLeidos > 0 ? "" : "hidden" %>></span></a>
-      <a class="icon-btn" href="<%= contexto %>/notificaciones" aria-label="Notificaciones<%= notifNoLeidas > 0 ? " (hay notificaciones nuevas)" : "" %>" title="Notificaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="dot" <%= notifNoLeidas > 0 ? "" : "hidden" %>></span></a>
+      <%-- TAREA 5: contador de no leidos + desglose al pasar el cursor (assets/js/avisos.js) --%>
+      <div class="aviso-wrap" data-aviso="mensajes" data-resumen-url="<%= contexto %>/notificaciones/resumen">
+        <a class="icon-btn" href="<%= contexto %>/notificaciones?ver=mensajes" aria-label="Mensajes<%= mensajesNoLeidos > 0 ? " (" + mensajesNoLeidos + " sin leer)" : "" %>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6.5L20.5 7"/></svg><span class="badge" data-badge <%= mensajesNoLeidos > 0 ? "" : "hidden" %>><%= mensajesNoLeidos > 99 ? "99+" : String.valueOf(mensajesNoLeidos) %></span></a>
+        <div class="aviso-pop" role="region" aria-label="Mensajes recientes" hidden>
+          <div class="aviso-cab"><b>Mensajes</b><span data-resumen></span></div>
+          <ul class="aviso-lista" data-lista><li class="aviso-vacio">Cargando&#8230;</li></ul>
+          <a class="aviso-todas" href="<%= contexto %>/notificaciones?ver=mensajes">Ver todos los mensajes</a>
+        </div>
+      </div>
+      <div class="aviso-wrap" data-aviso="actividad" data-resumen-url="<%= contexto %>/notificaciones/resumen">
+        <a class="icon-btn" href="<%= contexto %>/notificaciones?ver=actividad" aria-label="Notificaciones<%= notifNoLeidas > 0 ? " (" + notifNoLeidas + " sin leer)" : "" %>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="badge" data-badge <%= notifNoLeidas > 0 ? "" : "hidden" %>><%= notifNoLeidas > 99 ? "99+" : String.valueOf(notifNoLeidas) %></span></a>
+        <div class="aviso-pop" role="region" aria-label="Notificaciones recientes" hidden>
+          <div class="aviso-cab"><b>Notificaciones</b><span data-resumen></span></div>
+          <ul class="aviso-lista" data-lista><li class="aviso-vacio">Cargando&#8230;</li></ul>
+          <a class="aviso-todas" href="<%= contexto %>/notificaciones?ver=actividad">Ver todas las notificaciones</a>
+        </div>
+      </div>
       <div class="menu-wrap">
         <button class="btn small user" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
           <span class="avatar" aria-hidden="true"><%= avatarHtml %></span><b><%= nombreUsuario %></b>
@@ -90,7 +105,7 @@
           <a role="menuitem" href="<%= contexto %>/auth/cuenta">Mi cuenta</a>
           <a role="menuitem" href="<%= contexto %>/biblioteca">Mi biblioteca</a>
           <a role="menuitem" href="<%= contexto %>/notificaciones">Notificaciones</a>
-          <a role="menuitem" href="#" data-pendiente>Mensajes</a>
+          <a role="menuitem" href="<%= contexto %>/notificaciones?ver=mensajes">Mensajes</a>
           <% if (esAutor) { %>
           <div class="sep" role="separator"></div>
           <a role="menuitem" href="<%= contexto %>/auth/cuenta#mis-obras">Mis obras</a>
@@ -105,3 +120,4 @@
     </div>
   </div>
 </header>
+<script src="<%= contexto %>/assets/js/avisos.js" defer></script>

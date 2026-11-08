@@ -56,6 +56,8 @@ public class NotificacionServlet extends HttpServlet {
             EncabezadoUtil.cargar(request, usuarioId);
             request.setAttribute("notificaciones", notificaciones);
             request.setAttribute("pendientes", pendientes);
+            // TAREA 5: pestaña inicial ("mensajes", "actividad" o todas)
+            request.setAttribute("ver", verValido(request.getParameter("ver")));
 
             request.getRequestDispatcher(
                 "/WEB-INF/vistas/notificaciones/notificaciones.jsp"
@@ -117,8 +119,10 @@ public class NotificacionServlet extends HttpServlet {
                 return;
             }
 
+            String ver = verValido(request.getParameter("ver"));
             response.sendRedirect(
                 request.getContextPath() + "/notificaciones"
+                + (ver.isEmpty() ? "" : "?ver=" + ver)
             );
 
         } catch (NumberFormatException e) {
@@ -131,5 +135,13 @@ public class NotificacionServlet extends HttpServlet {
                 "No se pudieron actualizar las notificaciones.", e
             );
         }
+    }
+
+    /** Solo acepta "mensajes" o "actividad"; cualquier otra cosa = todas. */
+    private static String verValido(String ver) {
+        if ("mensajes".equals(ver) || "actividad".equals(ver)) {
+            return ver;
+        }
+        return "";
     }
 }

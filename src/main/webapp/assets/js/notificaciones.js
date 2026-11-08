@@ -24,33 +24,87 @@
     t.title = d.toLocaleString('es-PE');
   });
 
-  // Filtros (todas / sin leer / leídas) sin recargar la página
+  // Filtros: categoría (todo / mensajes / notificaciones) + estado (todas / sin leer / leídas)
   var tarjetas = Array.prototype.slice.call(lista.querySelectorAll('.nt-card'));
   var botones = Array.prototype.slice.call(document.querySelectorAll('.nt-filtro'));
+  var pestanas = Array.prototype.slice.call(document.querySelectorAll('.nt-tab'));
   var vacio = document.getElementById('ntSinResultados');
 
-  function coincide(t, filtro) {
-    if (filtro === 'todas') return true;
+  var ver = lista.getAttribute('data-ver');
+  var categoria = (ver === 'mensajes' || ver === 'actividad') ? ver : 'todas';
+  var estado = 'todas';
+
+  function enCategoria(t, c) {
+    return c === 'todas' || t.getAttribute('data-categoria') === c;
+  }
+  function enEstado(t, e) {
+    if (e === 'todas') return true;
     var leida = t.getAttribute('data-leida') === 'true';
-    return filtro === 'leidas' ? leida : !leida;
+    return e === 'leidas' ? leida : !leida;
+  }
+  function marcar(grupo, activo) {
+    grupo.forEach(function (x) {
+      var si = x === activo;
+      x.classList.toggle('activo', si);
+      x.setAttribute('aria-pressed', si ? 'true' : 'false');
+    });
+  }
+  function aplicar() {
+    var visibles = 0;
+    tarjetas.forEach(function (t) {
+      var ok = enCategoria(t, categoria) && enEstado(t, estado);
+      t.hidden = !ok;
+      if (ok) visibles++;
+    });
+    vacio.hidden = visibles !== 0;
+    // Los contadores de estado dependen de la categoría elegida
+    botones.forEach(function (b) {
+      var f = b.getAttribute('data-filtro');
+      b.querySelector('.nt-n').textContent = tarjetas.filter(function (t) {
+        return enCategoria(t, categoria) && enEstado(t, f);
+      }).length;
+    });
   }
 
-  botones.forEach(function (b) {
-    var filtro = b.getAttribute('data-filtro');
-    b.querySelector('.nt-n').textContent = tarjetas.filter(function (t) { return coincide(t, filtro); }).length;
-    b.addEventListener('click', function () {
-      botones.forEach(function (x) {
-        var activo = x === b;
-        x.classList.toggle('activo', activo);
-        x.setAttribute('aria-pressed', activo ? 'true' : 'false');
-      });
-      var visibles = 0;
-      tarjetas.forEach(function (t) {
-        var ok = coincide(t, filtro);
-        t.hidden = !ok;
-        if (ok) visibles++;
-      });
-      vacio.hidden = visibles !== 0;
+  pestanas.forEach(function (p) {
+    var c = p.getAttribute('data-categoria');
+    p.querySelector('.nt-n').textContent = tarjetas.filter(function (t) {
+      return enCategoria(t, c) && t.getAttribute('data-leida') !== 'true';
+    }).length;
+    p.title = 'Sin leer';
+    if (c === categoria) marcar(pestanas, p);
+    p.addEventListener('click', function () {
+      categoria = c;
+      marcar(pestanas, p);
+      if (history.replaceState) {
+        history.replaceState(null, '', c === 'todas' ? location.pathname : location.pathname + '?ver=' + c);
+      }
+      aplicar();
     });
   });
+
+  botones.forEach(function (b) {
+    b.addEventListener('click', function () {
+      estado = b.getAttribute('data-filtro');
+      marcar(botones, b);
+      aplicar();
+    });
+  });
+
+  aplicar();
+
+  // Si se llegó desde el desglose del encabezado (#notif-ID), resaltar esa notificación
+  if (location.hash && /^#notif-\d+$/.test(location.hash)) {
+    var destino = document.getElementById(location.hash.slice(1));
+    if (destino) {
+      if (destino.hidden) {               // por si el filtro la ocultaba
+        categoria = 'todas'; estado = 'todas';
+        marcar(pestanas, pestanas[0]); marcar(botones, botones[0]);
+        aplicar();
+      }
+      destino.classList.add('destacada');
+      destino.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setTimeout(function () { destino.classList.remove('destacada'); }, 2600);
+    }
+  }
 })();
