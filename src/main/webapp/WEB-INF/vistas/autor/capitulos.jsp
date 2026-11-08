@@ -64,6 +64,10 @@
     <a class="btn cl-nuevo" href="<%= contexto %>/autor/capitulo/nuevo?obraId=${obraId}">+ Nuevo capítulo</a>
   </header>
 
+  <c:if test="${param.importError == '1'}">
+    <p class="cl-nota" role="alert">La obra se creó, pero no se pudieron guardar los capítulos del archivo. Vuelve a intentarlo escribiéndolos con «+ Nuevo capítulo».</p>
+  </c:if>
+
   <c:if test="${total > 0 and nPublicados == 0}">
     <p class="cl-nota">Tu obra sigue en borrador. Se publicará automáticamente cuando publiques su primer capítulo.</p>
   </c:if>
@@ -116,11 +120,12 @@
 
 </main>
 
-<%-- Aviso flotante: aparece al volver de guardar o publicar y se oculta solo --%>
-<c:if test="${param.guardado == '1' or param.publicado == '1'}">
+<%-- Aviso flotante: aparece al volver de guardar, publicar o importar y se oculta solo --%>
+<c:if test="${param.guardado == '1' or param.publicado == '1' or not empty param.importados}">
   <div class="cl-toast" id="avisoGuardado" role="status" aria-live="polite">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
     <span><c:choose>
+      <c:when test="${not empty param.importados}">Se importaron <c:out value="${param.importados}"/> capítulos como borradores. Revísalos y publícalos en orden.</c:when>
       <c:when test="${param.obraPublicada == '1'}">Capítulo publicado. ¡Tu obra ya está publicada y aparece en el catálogo!</c:when>
       <c:when test="${param.publicado == '1'}">El capítulo se publicó correctamente.</c:when><c:otherwise>El borrador se guardó correctamente.</c:otherwise></c:choose></span>
   </div>

@@ -303,6 +303,57 @@ public class GestionCapituloDAO {
         }
     }
 
+    /**
+     * Inserta varios capítulos como borradores de una misma obra, en una sola
+     * transacción: o se guardan todos o ninguno. Conservan el orden recibido
+     * (el listado ordena por fecha de creación y luego por id).
+     * El número se asigna al publicar, igual que con los capítulos escritos
+     * a mano.
+     */
+    public int importarBorradores(
+            long autorId,
+            long obraId,
+            List<Capitulo> capitulos) throws SQLException {
+
+        if (capitulos == null || capitulos.isEmpty()) {
+            return 0;
+        }
+
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+
+            try {
+                comprobarPropiedad(con, obraId, autorId);
+
+                String sql = """
+                    INSERT INTO capitulo
+                        (obra_id, titulo, contenido, estado, palabras)
+                    VALUES (?, ?, ?, 'borrador', ?)
+                    """;
+
+                try (PreparedStatement ps = con.prepareStatement(sql)) {
+                    for (Capitulo c : capitulos) {
+                        ps.setLong(1, obraId);
+                        ps.setString(2, c.getTitulo());
+                        ps.setString(3, c.getContenido());
+                        ps.setInt(4, contarPalabras(c.getContenido()));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+
+                con.commit();
+                return capitulos.size();
+
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        }
+    }
+
     private void comprobarPropiedad(
             Connection con, long obraId, long autorId)
             throws SQLException {

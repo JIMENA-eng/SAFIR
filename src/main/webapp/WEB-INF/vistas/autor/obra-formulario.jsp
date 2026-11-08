@@ -171,6 +171,28 @@
         </label>
       </div>
 
+      <!-- 5. Capítulos desde un archivo (solo al crear) -->
+      <c:if test="${not modoEdicion}">
+      <div class="of-card">
+        <h2><span class="of-num">5</span> Capítulos desde un archivo <small class="of-opcional">Opcional</small></h2>
+        <label class="of-archivo" for="capitulosInput">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
+          <span class="of-archivo-texto">
+            <b id="capitulosNombre">Subir PDF, DOCX o TXT</b>
+            <small id="capitulosAyuda">Hasta 20 MB. Los capítulos se detectan solos.</small>
+          </span>
+          <button type="button" class="of-archivo-quitar" id="capitulosQuitar" hidden>Quitar</button>
+        </label>
+        <input type="file" name="capitulosArchivo" id="capitulosInput" class="of-sr"
+               accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        <p class="of-formato">
+          Cada capítulo debe empezar con una línea como <code>Capítulo 1</code> o
+          <code>Capítulo 2: El regreso</code>. Se guardan como borradores, en el orden del archivo,
+          y los verás en la lista de capítulos al crear la obra.
+        </p>
+      </div>
+      </c:if>
+
       <div class="of-acciones">
         <button type="submit" class="btn" id="btnGuardar">
           <c:choose><c:when test="${modoEdicion}">Guardar cambios</c:when><c:otherwise>Crear obra</c:otherwise></c:choose>
@@ -237,6 +259,10 @@
   var pvDesc = document.getElementById('pvDesc');
   var pvMonedas = document.getElementById('pvMonedas');
   var monedas = form.querySelector('input[name="bloqueoActivo"]');
+  var inCapitulos = document.getElementById('capitulosInput');
+  var capNombre = document.getElementById('capitulosNombre');
+  var capAyuda = document.getElementById('capitulosAyuda');
+  var capQuitar = document.getElementById('capitulosQuitar');
 
   function marcado(nombre) { return form.querySelector('input[name="' + nombre + '"]:checked'); }
   function textoDe(input) {
@@ -287,6 +313,38 @@
     actualizar();
   });
 
+  // Archivo de capítulos (solo existe al crear): valida tipo y tamaño en el navegador.
+  // El servidor repite la validación al leer el contenido.
+  function limpiarCapitulos() {
+    inCapitulos.value = '';
+    capNombre.textContent = 'Subir PDF, DOCX o TXT';
+    capAyuda.textContent = 'Hasta 20 MB. Los capítulos se detectan solos.';
+    capQuitar.hidden = true;
+  }
+  if (inCapitulos) {
+    inCapitulos.addEventListener('change', function () {
+      var f = inCapitulos.files && inCapitulos.files[0];
+      if (!f) { limpiarCapitulos(); return; }
+      if (!/\.(pdf|docx|txt)$/i.test(f.name)) {
+        alert('Formato no permitido. Sube un PDF, DOCX o TXT.');
+        limpiarCapitulos(); return;
+      }
+      if (f.size > 20 * 1024 * 1024) {
+        alert('El archivo supera el máximo de 20 MB.');
+        limpiarCapitulos(); return;
+      }
+      capNombre.textContent = f.name;
+      capAyuda.textContent = (f.size / 1024 / 1024 >= 1
+        ? (f.size / 1024 / 1024).toFixed(1) + ' MB'
+        : Math.max(1, Math.round(f.size / 1024)) + ' KB') + ' · listo para importar';
+      capQuitar.hidden = false;
+    });
+    capQuitar.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      limpiarCapitulos();
+    });
+  }
+
   form.addEventListener('input', actualizar);
   form.addEventListener('change', actualizar);
   actualizar();
@@ -294,7 +352,10 @@
   // Evita enviar dos veces el formulario
   form.addEventListener('submit', function () {
     var b = document.getElementById('btnGuardar');
-    if (form.checkValidity()) { b.disabled = true; b.style.opacity = '.7'; }
+    if (form.checkValidity()) {
+      b.disabled = true; b.style.opacity = '.7';
+      if (inCapitulos && inCapitulos.files && inCapitulos.files.length) { b.textContent = 'Importando capítulos…'; }
+    }
   });
 })();
 </script>

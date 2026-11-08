@@ -1,8 +1,11 @@
 package com.safir.controlador;
 
+import com.safir.dao.GestionCapituloDAO;
 import com.safir.dao.ObraEdicionDAO;
+import com.safir.modelo.Capitulo;
 import com.safir.util.EncabezadoUtil;
 import com.safir.util.ImagenUtil;
+import com.safir.util.ImportadorCapitulos;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
@@ -22,10 +25,12 @@ import java.util.Map;
     "/autor/obra/nueva",
     "/autor/obra/editar"
 })
-@MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 8 * 1024 * 1024)
+// La portada se limita a 5 MB en ImagenUtil; el archivo de capítulos admite hasta 20 MB.
+@MultipartConfig(maxFileSize = 20 * 1024 * 1024, maxRequestSize = 26 * 1024 * 1024)
 public class ObraEdicionServlet extends HttpServlet {
 
     private final ObraEdicionDAO dao = new ObraEdicionDAO();
+    private final GestionCapituloDAO capituloDao = new GestionCapituloDAO();
 
     private Long obtenerUsuarioId(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
@@ -189,13 +194,16 @@ public class ObraEdicionServlet extends HttpServlet {
             return;
         }
 
-        // La portada se lee primero: con multipart, si supera el límite no se leen los demás campos.
+        // Los archivos se leen primero: con multipart, si alguno supera el límite no se leen los demás campos.
         Part portada = null;
-        String errorPortada = null;
+        Part archivoCapitulos = null;
+        String errorArchivos = null;
         try {
             portada = request.getPart("portada");
+            archivoCapitulos = request.getPart("capitulosArchivo");
         } catch (IllegalStateException e) {
-            errorPortada = "La portada supera el máximo de 5 MB.";
+            errorArchivos = "Un archivo supera el tamaño permitido "
+                    + "(portada: 5 MB, capítulos: 20 MB).";
         }
 
         String titulo = request.getParameter("titulo");
@@ -212,8 +220,8 @@ public class ObraEdicionServlet extends HttpServlet {
         String error = null;
         int generoId = -1;
 
-        if (errorPortada != null) {
-            error = errorPortada;
+        if (errorArchivos != null) {
+            error = errorArchivos;
         } else if (titulo.isBlank()) {
             error = "El título es obligatorio.";
         } else if (titulo.length() > 100) {
@@ -245,6 +253,20 @@ public class ObraEdicionServlet extends HttpServlet {
                 ImagenUtil.validar(portada, ImagenUtil.MAX_PORTADA);
             } catch (IllegalArgumentException e) {
                 error = e.getMessage();
+            }
+        }
+
+        // Capítulos subidos en un archivo (solo al crear la obra). Se leen antes
+        // de crearla para que un archivo inválido no deje una obra vacía.
+        List<Capitulo> capitulosImportados = List.of();
+        if (error == null && !edicion
+                && ImportadorCapitulos.hayArchivo(archivoCapitulos)) {
+            try {
+                capitulosImportados =
+                        ImportadorCapitulos.leer(archivoCapitulos);
+            } catch (IllegalArgumentException e) {
+                error = e.getMessage()
+                        + " Corrige el archivo o créala sin él.";
             }
         }
 
@@ -318,6 +340,22 @@ public class ObraEdicionServlet extends HttpServlet {
                 dao.actualizarBloqueo(nuevaId, usuarioId, bloqueo);
                 if (portadaNueva != null) {
                     dao.actualizarPortada(nuevaId, usuarioId, portadaNueva);
+                }
+                // Con archivo de capítulos: se guardan como borradores y se
+                // muestra la lista para revisarlos y publicarlos.
+                if (!capitulosImportados.isEmpty()) {
+                    String destino = request.getContextPath()
+                            + "/autor/capitulos?obraId=" + nuevaId;
+                    try {
+                        int total = capituloDao.importarBorradores(
+                                usuarioId, nuevaId, capitulosImportados);
+                        response.sendRedirect(
+                            destino + "&importados=" + total);
+                    } catch (SQLException e) {
+                        // La obra ya existe: el autor puede reintentar desde la lista
+                        response.sendRedirect(destino + "&importError=1");
+                    }
+                    return;
                 }
                 // Obra recién creada: ir directo a escribir su primer capítulo
                 response.sendRedirect(
