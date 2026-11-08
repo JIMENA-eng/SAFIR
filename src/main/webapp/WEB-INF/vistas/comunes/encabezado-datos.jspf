@@ -1,4 +1,4 @@
-<%-- Datos del encabezado (esc(), sesiÃ³n, foto, contadores). Incluir ANTES del <!DOCTYPE>. --%>
+<%-- Datos del encabezado (esc(), sesión, foto, contadores). Incluir ANTES del <!DOCTYPE>. --%>
 <%!
     /** Escapa texto para colocarlo dentro de HTML. */
     private static String esc(String t) {
@@ -14,7 +14,7 @@
     if (sesion != null && sesion.getAttribute("nombreUsuario") != null) {
         nombreUsuario = String.valueOf(sesion.getAttribute("nombreUsuario"));
     }
-    // Roles guardados en sesiÃ³n por LoginServlet (texto "lector, autor", colecciÃ³n o arreglo).
+    // Roles guardados en sesión por LoginServlet (texto "lector, autor", colección o arreglo).
     boolean esAutor = false;
     if (sesion != null && sesion.getAttribute("roles") != null) {
         Object rolesSesion = sesion.getAttribute("roles");
@@ -45,7 +45,7 @@
     inicial = inicial
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             .replace("\"", "&quot;").replace("'", "&#39;");
-    // Foto y portada: lo que cargÃ³ InicioServlet; si no llegÃ³, la sesiÃ³n.
+    // Foto y portada: lo que cargó InicioServlet; si no llegó, la sesión.
     String avatarRuta = request.getAttribute("menuAvatar") != null
             ? String.valueOf(request.getAttribute("menuAvatar"))
             : ((sesion != null && sesion.getAttribute("avatarRuta") != null)
@@ -62,4 +62,7 @@
             : "<img src=\"" + contexto + "/media/"
               + avatarRuta.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
               + "\" alt=\"\" style=\"width:100%;height:100%;border-radius:50%;object-fit:cover\">";
+
+    // TAREA 3: categorías para el desglose "Catálogo" del encabezado (caché de 1 minuto).
+    java.util.List<com.safir.modelo.Genero> generosMenu = com.safir.dao.GeneroDAO.listarParaMenu();
 %>

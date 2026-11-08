@@ -1,5 +1,5 @@
 <%-- Encabezado compartido (inicio y perfil). Requiere encabezado-datos.jspf, encabezadoinicio.css e inicio.js. --%>
-<!-- Símbolo del logo (aproximación vectorial; reemplazar por el archivo oficial) -->
+<!-- S&#237;mbolo del logo (aproximaci&#243;n vectorial; reemplazar por el archivo oficial) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <path id="star" d="M0,-1 Q.12,-.12 1,0 Q.12,.12 0,1 Q-.12,.12 -1,0 Q-.12,-.12 0,-1Z"/>
@@ -36,7 +36,22 @@
       <span>SAFIR</span>
     </a>
     <nav aria-label="Principal">
-      <a href="<%= contexto %>/catalogo">Catálogo</a>
+      <%-- TAREA 3: "Cat&#225;logo" ahora es un desglose con todas las categor&#237;as --%>
+      <div class="cat-wrap">
+        <button class="cat-btn" id="catBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="catMenu">
+          Cat&#225;logo
+          <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
+        </button>
+        <div class="menu" id="catMenu" role="menu" aria-label="Categor&#237;as" hidden>
+          <a role="menuitem" class="cat-todo" href="<%= contexto %>/catalogo">Ver todo el cat&#225;logo</a>
+          <% if (!generosMenu.isEmpty()) { %><div class="sep" role="separator"></div><% } %>
+          <% for (com.safir.modelo.Genero gm : generosMenu) { %>
+          <a role="menuitem" href="<%= contexto %>/catalogo/categoria?id=<%= gm.getId() %>">
+            <span><%= esc(gm.getNombre()) %></span><small><%= gm.getTotalObras() %></small>
+          </a>
+          <% } %>
+        </div>
+      </div>
       <a href="<%= contexto %>/biblioteca">Mi biblioteca</a>
       <% if (esAutor) { %>
       <a href="<%= contexto %>/autor/obra/nueva">Crear obra</a>
@@ -47,7 +62,7 @@
       <div class="lang-wrap">
         <button class="icon-btn" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Idioma" title="Idioma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></button>
         <div class="menu" id="langMenu" role="menu" aria-label="Idioma" hidden>
-          <button type="button" role="menuitemradio" aria-checked="true" data-lang="es">Español</button>
+          <button type="button" role="menuitemradio" aria-checked="true" data-lang="es">Espa&#241;ol</button>
           <button type="button" role="menuitemradio" aria-checked="false" data-lang="en">English</button>
         </div>
       </div>
@@ -58,7 +73,7 @@
           <span class="avatar" aria-hidden="true"><%= avatarHtml %></span><b><%= nombreUsuario %></b>
           <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
         </button>
-        <div class="menu" id="userMenu" role="menu" aria-label="Menú de usuario" hidden>
+        <div class="menu" id="userMenu" role="menu" aria-label="Men&#250; de usuario" hidden>
           <a class="profile-card" role="menuitem" href="<%= contexto %>/perfil#editar-perfil" aria-label="Editar perfil de <%= esc(sobrenombreMenu) %>">
             <span class="pc-cover">
               <% if (portadaRuta != null) { %><img src="<%= contexto %>/media/<%= esc(portadaRuta) %>" alt=""><% } %>
@@ -86,7 +101,7 @@
           <div class="sep" role="separator"></div>
           <a role="menuitem" href="#" data-pendiente>Configuraciones</a>
           <div class="sep" role="separator"></div>
-          <a role="menuitem" class="logout" href="<%= contexto %>/auth/logout">Cerrar sesión</a>
+          <a role="menuitem" class="logout" href="<%= contexto %>/auth/logout">Cerrar sesi&#243;n</a>
         </div>
       </div>
     </div>
