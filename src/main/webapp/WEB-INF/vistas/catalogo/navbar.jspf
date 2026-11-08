@@ -7,7 +7,7 @@
 
     <div class="nav-actions">
         <details class="cat-drop" id="catDrop">
-            <summary class="nav-link">Categor&#237;as</summary>
+            <summary class="nav-link">Cat&#225;logo</summary>
             <nav class="cat-menu" aria-label="Categor&#237;as">
                 <a class="cat-todo" href="${pageContext.request.contextPath}/catalogo"
                    <c:if test="${empty genero}">aria-current="page"</c:if>>
