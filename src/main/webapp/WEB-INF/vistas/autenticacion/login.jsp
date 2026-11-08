@@ -24,6 +24,10 @@
 
    
     String correoPrevio = esc(request.getParameter("identificador"));
+
+    // TAREA 1 (LOGIN-BLOQUEO): segundos que faltan para poder reintentar (0 = sin bloqueo)
+    Object attrBloqueo = request.getAttribute("bloqueoSegundos");
+    int bloqueoSegundos = (attrBloqueo instanceof Integer) ? (Integer) attrBloqueo : 0;
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -122,6 +126,14 @@
     background: var(--btn); color: var(--btn-text); cursor: pointer; transition: transform .15s;
   }
   .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  input:disabled { opacity: .6; cursor: not-allowed; }
+  /* Aviso de bloqueo por intentos fallidos */
+  .bloqueo { display: flex; align-items: center; gap: .9rem; margin-top: 1rem; padding: .9rem 1rem; border-radius: 16px;
+    background: rgba(179,38,30,.10); border: 1px solid rgba(179,38,30,.45); color: var(--title); font-size: .95rem; line-height: 1.45; }
+  .bloqueo .reloj { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    font: 600 1.15rem var(--sans); color: #B3261E; background: rgba(179,38,30,.12); font-variant-numeric: tabular-nums; }
+  :root[data-theme="dark"] .bloqueo .reloj { color: #FF9C94; }
   .m-switch { margin-top: 1.3rem; text-align: center; font-size: .95rem; color: var(--muted); }
   .m-switch a { font-weight: 600; color: var(--link); text-underline-offset: 3px; }
 
@@ -211,7 +223,16 @@
     <p class="aviso-ok" role="status"><b>Contraseña actualizada.</b> Ya puedes iniciar sesión con la nueva.</p>
     <% } %>
 
-    <form id="loginForm" action="<%= contexto %>/auth/login" method="post" novalidate>
+    <% if (bloqueoSegundos > 0) { %>
+    <div class="bloqueo" id="loginBloqueo" role="alert">
+      <span class="reloj" id="bloqueoReloj" aria-hidden="true"><%= bloqueoSegundos %></span>
+      <p><b>Inicio de sesión bloqueado.</b> Fallaste la contraseña 3 veces. Podrás intentarlo de nuevo en
+        <b><span id="bloqueoTexto"><%= bloqueoSegundos %></span> s</b>.</p>
+    </div>
+    <% } %>
+
+    <form id="loginForm" action="<%= contexto %>/auth/login" method="post" novalidate
+          data-bloqueo="<%= bloqueoSegundos %>">
       <label for="loginUser">Correo o número de teléfono</label>
       <input id="loginUser" name="identificador" type="text" maxlength="254" autocomplete="username"
              placeholder="tucorreo@ejemplo.com o 999 888 777" value="<%= correoPrevio %>">
@@ -223,13 +244,13 @@
       </div>
       <a class="olvido" href="<%= contexto %>/auth/recuperar">¿Olvidaste tu contraseña?</a>
 
-      <% if (!error.isEmpty()) { %>
+      <% if (!error.isEmpty() && bloqueoSegundos == 0) { %>
         <p class="form-msg err" id="loginMsg" role="alert"><%= error %></p>
       <% } else { %>
         <p class="form-msg" id="loginMsg" role="status"></p>
       <% } %>
 
-      <button class="btn" type="submit">Iniciar sesión</button>
+      <button class="btn" id="loginBtn" type="submit">Iniciar sesión</button>
     </form>
 
     <%
@@ -280,8 +301,46 @@
     t.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
   });
 
+  // TAREA 1 (LOGIN-BLOQUEO): cuenta regresiva mientras dura el bloqueo.
+  // El servidor es quien realmente bloquea; esto solo evita reenvíos y
+  // le muestra al usuario cuánto falta.
+  var btn = document.getElementById('loginBtn');
+  var restante = parseInt(form.getAttribute('data-bloqueo'), 10) || 0;
+  var bloqueado = restante > 0;
+
+  function setBloqueo(activo) {
+    bloqueado = activo;
+    btn.disabled = activo;
+    pass.disabled = activo;
+    btn.textContent = activo ? 'Espera ' + restante + ' s' : 'Iniciar sesión';
+  }
+
+  if (bloqueado) {
+    var caja = document.getElementById('loginBloqueo');
+    var reloj = document.getElementById('bloqueoReloj');
+    var texto = document.getElementById('bloqueoTexto');
+    setBloqueo(true);
+    var fin = Date.now() + restante * 1000;   // se basa en la hora real, no en contar ticks
+    var timer = setInterval(function () {
+      restante = Math.max(0, Math.ceil((fin - Date.now()) / 1000));
+      if (reloj) reloj.textContent = restante;
+      if (texto) texto.textContent = restante;
+      if (restante <= 0) {
+        clearInterval(timer);
+        if (caja) caja.remove();
+        setBloqueo(false);
+        say('Ya puedes volver a intentarlo.', 'ok');
+        pass.value = '';
+        pass.focus();
+      } else {
+        btn.textContent = 'Espera ' + restante + ' s';
+      }
+    }, 250);
+  }
+
   // Valida y, si todo está bien, envía a /auth/login
   form.addEventListener('submit', function (e) {
+    if (bloqueado) { e.preventDefault(); return; }
     var v = user.value.trim();
     if (v.indexOf('@') >= 0 ? !isEmail(v) : !phoneOk(v)) { e.preventDefault(); return say('Escribe un correo o un número de teléfono válido.', 'err'); }
     if (!pass.value) { e.preventDefault(); return say('Escribe tu contraseña.', 'err'); }
@@ -293,7 +352,7 @@
     if (e.key === 'Escape') window.location.href = document.querySelector('.close').href;
   });
 
-  (user.value ? pass : user).focus();
+  if (!bloqueado) (user.value ? pass : user).focus();
 })();
 </script>
 </body>

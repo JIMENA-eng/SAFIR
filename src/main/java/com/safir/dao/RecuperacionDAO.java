@@ -268,7 +268,9 @@ public class RecuperacionDAO {
 
         String sqlClave =
                 "UPDATE usuario SET contrasena_hash = ?, " +
-                "clave_restablecida_en = CURRENT_TIMESTAMP WHERE id = ?";
+                "clave_restablecida_en = CURRENT_TIMESTAMP, " +
+                "intentos_fallidos = 0, bloqueado_hasta = NULL " +
+                "WHERE id = ?";
 
         String sqlUsar =
                 "UPDATE recuperacion_contrasena SET usado = TRUE " +
