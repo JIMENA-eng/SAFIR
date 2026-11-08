@@ -1,4 +1,12 @@
 <%-- Encabezado compartido (inicio y perfil). Requiere encabezado-datos.jspf, encabezadoinicio.css e inicio.js. --%>
+<%
+    // TAREA 6: buscador centrado en el encabezado.
+    // No se muestra en el inicio (comunes/inicio.jsp), que ya tiene su propio buscador.
+    // Otra vista puede ocultarlo con request.setAttribute("ocultarBuscadorEncabezado", true).
+    String vistaActual = request.getServletPath();
+    boolean mostrarBuscador = !Boolean.TRUE.equals(request.getAttribute("ocultarBuscadorEncabezado"))
+            && (vistaActual == null || !vistaActual.endsWith("/comunes/inicio.jsp"));
+%>
 <!-- S&#237;mbolo del logo (aproximaci&#243;n vectorial; reemplazar por el archivo oficial) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
@@ -30,7 +38,7 @@
 </svg>
 
 <header class="bar">
-  <div class="wrap">
+  <div class="wrap<%= mostrarBuscador ? " con-buscador" : "" %>">
     <a class="brand" href="<%= contexto %>/auth/inicio" aria-label="SAFIR, inicio">
       <svg viewBox="0 0 380 280" role="img" aria-hidden="true"><use href="#plane-white"/></svg>
       <span>SAFIR</span>
@@ -57,6 +65,13 @@
       <a href="<%= contexto %>/autor/obra/nueva">Crear obra</a>
       <% } %>
     </nav>
+    <% if (mostrarBuscador) { %>
+    <%-- TAREA 6: buscador del encabezado (en todas las vistas menos el inicio) --%>
+    <form class="hdr-search" id="hdrSearchForm" role="search" method="get" action="<%= contexto %>/catalogo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="hdrSearchInput" name="q" placeholder="Buscar obras, autores o etiquetas&#8230;" aria-label="Buscar obras" autocomplete="off" maxlength="120">
+    </form>
+    <% } %>
     <button class="theme-toggle" id="themeBtn" type="button" aria-pressed="false">Modo noche</button>
     <div class="header-actions">
       <div class="lang-wrap">

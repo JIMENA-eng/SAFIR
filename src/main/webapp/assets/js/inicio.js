@@ -25,6 +25,23 @@
     });
   }
 
+  // TAREA 6: buscador del encabezado (no existe en el inicio). Tampoco envía búsquedas vacías.
+  var hdrForm = document.getElementById('hdrSearchForm');
+  var hdrInput = document.getElementById('hdrSearchInput');
+  if (hdrForm && hdrInput) {
+    hdrForm.addEventListener('submit', function (e) {
+      if (hdrInput.value.trim() === '') { e.preventDefault(); hdrInput.focus(); }
+    });
+    // Atajo: "/" enfoca el buscador (si no se está escribiendo en otro campo)
+    document.addEventListener('keydown', function (e) {
+      var t = e.target, escribiendo = t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+      if (e.key === '/' && !escribiendo && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        hdrInput.focus();
+      }
+    });
+  }
+
   // Menú de usuario
   var menuBtn = document.getElementById('userMenuBtn');
   var menu = document.getElementById('userMenu');
