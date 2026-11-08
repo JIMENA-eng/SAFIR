@@ -39,7 +39,7 @@
       <a href="<%= contexto %>/catalogo">Catálogo</a>
       <a href="<%= contexto %>/biblioteca">Mi biblioteca</a>
       <% if (esAutor) { %>
-      <a href="<%= contexto %>/autor/panel">Panel de autor</a>
+      <a href="<%= contexto %>/autor/obra/nueva">Crear obra</a>
       <% } %>
     </nav>
     <button class="theme-toggle" id="themeBtn" type="button" aria-pressed="false">Modo noche</button>
@@ -80,8 +80,8 @@
           <a role="menuitem" href="#" data-pendiente>Mensajes</a>
           <% if (esAutor) { %>
           <div class="sep" role="separator"></div>
-          <a role="menuitem" href="<%= contexto %>/autor/panel">Panel de autor</a>
-          <a role="menuitem" href="<%= contexto %>/autor/obra/nueva">Nueva obra</a>
+          <a role="menuitem" href="<%= contexto %>/auth/cuenta#mis-obras">Mis obras</a>
+          <a role="menuitem" href="<%= contexto %>/autor/obra/nueva">Crear obra</a>
           <% } %>
           <div class="sep" role="separator"></div>
           <a role="menuitem" href="#" data-pendiente>Configuraciones</a>
