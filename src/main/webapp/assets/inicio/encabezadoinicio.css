@@ -620,3 +620,34 @@
   .aviso-todas:hover, .aviso-todas:focus-visible { background: var(--soft); outline: none; }
   @media (hover: none) { .aviso-pop { display: none !important; } }   /* en celular el toque va directo a la página */
   @media (prefers-reduced-motion: reduce) { .icon-btn .badge, .aviso-pop { animation: none; } }
+
+  /* ===== TAREA 6: buscador centrado en el encabezado (todas las vistas menos el inicio) ===== */
+  header.bar .wrap.con-buscador { gap: 1.4rem; }
+  header.bar .wrap.con-buscador nav { margin-right: 0; }
+  .hdr-search {
+    position: relative; flex: 1 1 260px; max-width: 440px; margin-inline: auto; display: flex; align-items: center;
+  }
+  .hdr-search svg {
+    position: absolute; left: .95rem; width: 18px; height: 18px; color: #C9C8EC; pointer-events: none;
+  }
+  .hdr-search input {
+    width: 100%; min-width: 0; font: inherit; font-size: .95rem; padding: .62rem 1rem .62rem 2.6rem;
+    border-radius: 999px; border: 1.5px solid rgba(233,231,255,.35); background: rgba(255,255,255,.1); color: #fff;
+    transition: background .2s, border-color .2s, box-shadow .2s;
+  }
+  .hdr-search input::placeholder { color: #C9C8EC; opacity: 1; }
+  .hdr-search input:hover { border-color: rgba(233,231,255,.6); }
+  .hdr-search input:focus {
+    outline: none; background: var(--surface); color: var(--text); border-color: var(--lav);
+    box-shadow: 0 0 0 3px rgba(119,117,214,.35);
+  }
+  .hdr-search input:focus::placeholder { color: #8b8ba3; }
+  .hdr-search:focus-within svg { color: var(--lav); }
+  .hdr-search input::-webkit-search-cancel-button { cursor: pointer; }
+
+  /* Con poco espacio, el buscador baja a su propia fila debajo de la barra */
+  @media (max-width: 1100px) {
+    header.bar .wrap.con-buscador { flex-wrap: wrap; row-gap: .2rem; }
+    header.bar .wrap.con-buscador nav { margin-right: auto; }   /* la 1.ª fila vuelve a repartirse como antes */
+    .hdr-search { order: 10; flex: 1 1 100%; max-width: none; margin: 0 0 .8rem; }
+  }
