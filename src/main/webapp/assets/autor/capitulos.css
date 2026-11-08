@@ -64,3 +64,20 @@
 
 /* Nota: la obra se publica con su primer capítulo */
 .cl-nota { margin: 0 0 1rem; padding: .7rem 1rem; border-radius: 12px; font-size: .92rem; background: rgba(120,100,200,.08); border: 1px solid rgba(120,100,200,.2); }
+
+/* Importar capítulos desde un archivo */
+.cl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cl-importar { display: flex; align-items: center; gap: .9rem; margin: 0 0 1.2rem; padding: .9rem 1.1rem; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 16px; transition: border-color .15s; }
+.cl-importar:hover, .cl-importar:focus-within { border-color: var(--lav); }
+.cl-importar > svg { width: 30px; height: 30px; flex: none; color: var(--lav); }
+.cl-importar-texto { display: grid; gap: .15rem; min-width: 0; flex: 1; }
+.cl-importar-texto b { color: var(--title); font-weight: 600; font-size: .98rem; overflow-wrap: anywhere; }
+.cl-importar-texto small { color: var(--muted); font-size: .85rem; line-height: 1.4; }
+.cl-importar .btn { flex: none; cursor: pointer; }
+.cl-importar [hidden] { display: none; }
+.cl-error { background: #FDECEA; border-color: rgba(179,38,30,.25); color: #B3261E; }
+:root[data-theme="dark"] .cl-error { background: #3a1b1b; border-color: rgba(241,163,157,.3); color: #f1a39d; }
+@media (max-width: 700px) {
+  .cl-importar { flex-wrap: wrap; }
+  .cl-importar-texto { flex-basis: calc(100% - 46px); }
+}

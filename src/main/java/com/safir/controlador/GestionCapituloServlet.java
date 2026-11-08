@@ -4,13 +4,16 @@ import com.safir.dao.GestionCapituloDAO;
 import com.safir.dao.ObraEdicionDAO;
 import com.safir.modelo.Capitulo;
 import com.safir.util.EncabezadoUtil;
+import com.safir.util.ImportadorCapitulos;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,8 +24,11 @@ import java.util.List;
     "/autor/capitulos",
     "/autor/capitulo/nuevo",
     "/autor/capitulo/editar",
-    "/autor/capitulo/publicar"
+    "/autor/capitulo/publicar",
+    "/autor/capitulos/importar"
 })
+// Solo "importar" recibe archivos; el resto de formularios sigue enviándose igual.
+@MultipartConfig(maxFileSize = 20 * 1024 * 1024, maxRequestSize = 21 * 1024 * 1024)
 public class GestionCapituloServlet extends HttpServlet {
 
     private final GestionCapituloDAO dao = new GestionCapituloDAO();
@@ -117,6 +123,96 @@ public class GestionCapituloServlet extends HttpServlet {
         return true;
     }
 
+    /** Carga y muestra la lista de capítulos; errorImportacion puede ser null. */
+    private void mostrarLista(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            long obraId,
+            long autorId,
+            String errorImportacion)
+            throws SQLException, ServletException, IOException {
+
+        if (!dao.perteneceAlAutor(obraId, autorId)) {
+            response.sendError(
+                HttpServletResponse.SC_NOT_FOUND,
+                "La obra no existe o no te pertenece.");
+            return;
+        }
+
+        List<Capitulo> capitulos = dao.listarPorObra(obraId, autorId);
+
+        EncabezadoUtil.cargar(request, autorId);
+        request.setAttribute("obra", obraDao.obtenerPropia(obraId, autorId));
+        request.setAttribute("obraId", obraId);
+        request.setAttribute("capitulos", capitulos);
+        request.setAttribute("errorImportacion", errorImportacion);
+
+        request.getRequestDispatcher(
+            "/WEB-INF/vistas/autor/capitulos.jsp"
+        ).forward(request, response);
+    }
+
+    /**
+     * Agrega, como borradores, los capítulos de un PDF, DOCX o TXT a una obra
+     * que ya existe. El obraId viaja en la URL (no en el cuerpo multipart)
+     * para poder volver a la lista aunque el archivo sea demasiado grande.
+     */
+    private void importarDesdeArchivo(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            long autorId)
+            throws SQLException, ServletException, IOException {
+
+        Long obraId = parametroPositivo(request, "obraId");
+
+        if (obraId == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "El ID de la obra no es válido.");
+            return;
+        }
+
+        if (!dao.perteneceAlAutor(obraId, autorId)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "La obra no existe o no te pertenece.");
+            return;
+        }
+
+        Part archivo = null;
+        String error = null;
+
+        try {
+            archivo = request.getPart("capitulosArchivo");
+        } catch (IllegalStateException e) {
+            error = "El archivo supera el máximo de 20 MB.";
+        }
+
+        List<Capitulo> importados = List.of();
+
+        if (error == null && !ImportadorCapitulos.hayArchivo(archivo)) {
+            error = "Selecciona un archivo PDF, DOCX o TXT.";
+        }
+
+        if (error == null) {
+            try {
+                importados = ImportadorCapitulos.leer(archivo);
+            } catch (IllegalArgumentException e) {
+                error = e.getMessage();
+            }
+        }
+
+        if (error != null) {
+            mostrarLista(request, response, obraId, autorId, error);
+            return;
+        }
+
+        int total = dao.importarBorradores(autorId, obraId, importados);
+
+        response.sendRedirect(
+            request.getContextPath()
+            + "/autor/capitulos?obraId=" + obraId
+            + "&importados=" + total);
+    }
+
     @Override
     protected void doGet(
             HttpServletRequest request,
@@ -141,25 +237,14 @@ public class GestionCapituloServlet extends HttpServlet {
                     return;
                 }
 
-                if (!dao.perteneceAlAutor(obraId, autorId)) {
-                    response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "La obra no existe o no te pertenece.");
-                    return;
-                }
+                mostrarLista(request, response, obraId, autorId, null);
+                return;
+            }
 
-                List<Capitulo> capitulos =
-                        dao.listarPorObra(obraId, autorId);
-
-                EncabezadoUtil.cargar(request, autorId);
-                request.setAttribute("obra", obraDao.obtenerPropia(obraId, autorId));
-                request.setAttribute("obraId", obraId);
-                request.setAttribute("capitulos", capitulos);
-
-                request.getRequestDispatcher(
-                    "/WEB-INF/vistas/autor/capitulos.jsp"
-                ).forward(request, response);
-
+            if ("/autor/capitulos/importar".equals(ruta)) {
+                response.sendError(
+                    HttpServletResponse.SC_METHOD_NOT_ALLOWED,
+                    "La importación debe realizarse mediante POST.");
                 return;
             }
 
@@ -248,6 +333,11 @@ public class GestionCapituloServlet extends HttpServlet {
         String ruta = request.getServletPath();
 
         try {
+            if ("/autor/capitulos/importar".equals(ruta)) {
+                importarDesdeArchivo(request, response, autorId);
+                return;
+            }
+
             if ("/autor/capitulo/publicar".equals(ruta)) {
                 Long capituloId = parametroPositivo(request, "id");
 

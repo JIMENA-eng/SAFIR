@@ -8,4 +8,47 @@
       if (b) { b.disabled = true; b.textContent = 'Publicando…'; }
     });
   });
+
+  // Importar capítulos desde un archivo: valida tipo y tamaño y envía al elegirlo.
+  // El servidor repite la validación al leer el contenido.
+  var form = document.getElementById('importarForm');
+  var input = document.getElementById('importarInput');
+  if (form && input) {
+    var nombre = document.getElementById('importarNombre');
+    var ayuda = document.getElementById('importarAyuda');
+    var elegir = document.getElementById('importarElegir');
+    var enviar = document.getElementById('importarEnviar');
+    var textoInicial = nombre.textContent;
+    var ayudaInicial = ayuda.textContent;
+
+    function reiniciar() {
+      input.value = '';
+      nombre.textContent = textoInicial;
+      ayuda.textContent = ayudaInicial;
+      elegir.hidden = false;
+      enviar.hidden = true;
+    }
+
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      if (!f) { reiniciar(); return; }
+      if (!/\.(pdf|docx|txt)$/i.test(f.name)) {
+        window.alert('Formato no permitido. Sube un PDF, DOCX o TXT.');
+        reiniciar(); return;
+      }
+      if (f.size > 20 * 1024 * 1024) {
+        window.alert('El archivo supera el máximo de 20 MB.');
+        reiniciar(); return;
+      }
+      nombre.textContent = f.name;
+      ayuda.textContent = 'Se agregarán como borradores al final de la lista.';
+      elegir.textContent = 'Cambiar';
+      enviar.hidden = false;
+    });
+
+    form.addEventListener('submit', function () {
+      enviar.disabled = true;
+      enviar.textContent = 'Importando…';
+    });
+  }
 })();

@@ -65,8 +65,26 @@
   </header>
 
   <c:if test="${param.importError == '1'}">
-    <p class="cl-nota" role="alert">La obra se creó, pero no se pudieron guardar los capítulos del archivo. Vuelve a intentarlo escribiéndolos con «+ Nuevo capítulo».</p>
+    <p class="cl-nota" role="alert">La obra se creó, pero no se pudieron guardar los capítulos del archivo. Vuelve a intentarlo con «Importar desde archivo».</p>
   </c:if>
+
+  <c:if test="${not empty errorImportacion}">
+    <p class="cl-nota cl-error" role="alert"><c:out value="${errorImportacion}"/></p>
+  </c:if>
+
+  <!-- Importar capítulos desde un PDF, DOCX o TXT: se agregan como borradores -->
+  <form class="cl-importar" id="importarForm" method="post" enctype="multipart/form-data"
+        action="<%= contexto %>/autor/capitulos/importar?obraId=${obraId}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
+    <div class="cl-importar-texto">
+      <b id="importarNombre">Importar desde archivo</b>
+      <small id="importarAyuda">PDF, DOCX o TXT de hasta 20 MB. Cada capítulo debe empezar con «Capítulo 1», «Capítulo 2: Título»…; se agregan como borradores.</small>
+    </div>
+    <input type="file" name="capitulosArchivo" id="importarInput" class="cl-sr"
+           accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+    <label for="importarInput" class="btn outline small" id="importarElegir">Elegir archivo</label>
+    <button type="submit" class="btn small" id="importarEnviar" hidden>Importar</button>
+  </form>
 
   <c:if test="${total > 0 and nPublicados == 0}">
     <p class="cl-nota">Tu obra sigue en borrador. Se publicará automáticamente cuando publiques su primer capítulo.</p>
