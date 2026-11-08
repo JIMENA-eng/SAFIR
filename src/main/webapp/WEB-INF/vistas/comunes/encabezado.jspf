@@ -61,10 +61,8 @@
     <div class="header-actions">
       <div class="lang-wrap">
         <button class="icon-btn" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Idioma" title="Idioma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></button>
-        <div class="menu" id="langMenu" role="menu" aria-label="Idioma" hidden>
-          <button type="button" role="menuitemradio" aria-checked="true" data-lang="es">Espa&#241;ol</button>
-          <button type="button" role="menuitemradio" aria-checked="false" data-lang="en">English</button>
-        </div>
+        <%-- TAREA 4: la lista de idiomas la arma /assets/js/idioma.js (lo inyecta IdiomaFilter) --%>
+        <div class="menu" id="langMenu" hidden></div>
       </div>
       <%-- TAREA 5: contador de no leidos + desglose al pasar el cursor (assets/js/avisos.js) --%>
       <div class="aviso-wrap" data-aviso="mensajes" data-resumen-url="<%= contexto %>/notificaciones/resumen">

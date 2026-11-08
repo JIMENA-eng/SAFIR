@@ -39,37 +39,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !menu.hidden) { setMenu(false); menuBtn.focus(); }
   });
-  // Menú de idioma (de momento solo guarda la preferencia; falta traducir los textos)
-  var langBtn = document.getElementById('langBtn');
-  var langMenu = document.getElementById('langMenu');
-  function setLangMenu(open) {
-    langMenu.hidden = !open;
-    langBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  function marcarIdioma(l) {
-    Array.prototype.forEach.call(langMenu.querySelectorAll('[data-lang]'), function (b) {
-      b.setAttribute('aria-checked', b.getAttribute('data-lang') === l ? 'true' : 'false');
-    });
-  }
-  var langGuardado = 'es';
-  try { langGuardado = localStorage.getItem('safir-lang') || 'es'; } catch (e) {}
-  marcarIdioma(langGuardado);
-  langBtn.addEventListener('click', function (e) { e.stopPropagation(); setMenu(false); setLangMenu(langMenu.hidden); });
-  Array.prototype.forEach.call(langMenu.querySelectorAll('[data-lang]'), function (b) {
-    b.addEventListener('click', function () {
-      var l = b.getAttribute('data-lang');
-      try { localStorage.setItem('safir-lang', l); } catch (e) {}
-      marcarIdioma(l);
-      setLangMenu(false);
-    });
-  });
-  document.addEventListener('click', function (e) {
-    if (!langMenu.hidden && !langMenu.contains(e.target)) setLangMenu(false);
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !langMenu.hidden) { setLangMenu(false); langBtn.focus(); }
-  });
-  menuBtn.addEventListener('click', function () { setLangMenu(false); });
+  // El menú de idioma lo maneja /assets/js/idioma.js (TAREA 4).
   // Mensajes y notificaciones: los maneja /assets/js/avisos.js (TAREA 5).
 
   // TAREA 3: desglose de categorías del botón "Catálogo"
@@ -84,7 +54,6 @@
     catBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       setMenu(false);
-      setLangMenu(false);
       setCatMenu(catMenu.hidden);
     });
     document.addEventListener('click', function (e) {
@@ -94,32 +63,6 @@
       if (e.key === 'Escape' && !catMenu.hidden) { setCatMenu(false); catBtn.focus(); }
     });
     menuBtn.addEventListener('click', function () { setCatMenu(false); });
-    langBtn.addEventListener('click', function () { setCatMenu(false); });
-  }
-
-  // TAREA 3: desglose de categorías del botón "Catálogo"
-  var catBtn = document.getElementById('catBtn');
-  var catMenu = document.getElementById('catMenu');
-  function setCatMenu(open) {
-    if (!catMenu) return;
-    catMenu.hidden = !open;
-    catBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  if (catBtn && catMenu) {
-    catBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      setMenu(false);
-      setLangMenu(false);
-      setCatMenu(catMenu.hidden);
-    });
-    document.addEventListener('click', function (e) {
-      if (!catMenu.hidden && !catMenu.contains(e.target)) setCatMenu(false);
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !catMenu.hidden) { setCatMenu(false); catBtn.focus(); }
-    });
-    menuBtn.addEventListener('click', function () { setCatMenu(false); });
-    langBtn.addEventListener('click', function () { setCatMenu(false); });
   }
 
   Array.prototype.forEach.call(menu.querySelectorAll('a'), function (a) {
