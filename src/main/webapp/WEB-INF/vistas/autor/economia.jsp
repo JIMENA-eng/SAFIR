@@ -134,7 +134,7 @@
 </c:choose>
 
 <p><a href="${pageContext.request.contextPath}/billetera">Ver mi billetera y movimientos</a></p>
-<p><a href="${pageContext.request.contextPath}/autor/panel">Volver al panel de autor</a></p>
+<p><a href="${pageContext.request.contextPath}/auth/cuenta#mis-obras">Ir a mis obras</a></p>
 
 </body>
 </html>

@@ -97,6 +97,31 @@
     langBtn.addEventListener('click', function () { setCatMenu(false); });
   }
 
+  // TAREA 3: desglose de categorías del botón "Catálogo"
+  var catBtn = document.getElementById('catBtn');
+  var catMenu = document.getElementById('catMenu');
+  function setCatMenu(open) {
+    if (!catMenu) return;
+    catMenu.hidden = !open;
+    catBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (catBtn && catMenu) {
+    catBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setMenu(false);
+      setLangMenu(false);
+      setCatMenu(catMenu.hidden);
+    });
+    document.addEventListener('click', function (e) {
+      if (!catMenu.hidden && !catMenu.contains(e.target)) setCatMenu(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !catMenu.hidden) { setCatMenu(false); catBtn.focus(); }
+    });
+    menuBtn.addEventListener('click', function () { setCatMenu(false); });
+    langBtn.addEventListener('click', function () { setCatMenu(false); });
+  }
+
   Array.prototype.forEach.call(menu.querySelectorAll('a'), function (a) {
     a.addEventListener('click', function (e) {
       if (a.hasAttribute('data-pendiente')) e.preventDefault();
