@@ -57,6 +57,13 @@
     </c:when>
 
     <c:otherwise>
+      <!-- TAREA 5: Mensajes (sobre) / Actividad (campana). ?ver=mensajes|actividad abre la pestaña. -->
+      <div class="nt-tabs" role="group" aria-label="Tipo de aviso">
+        <button type="button" class="nt-tab" data-categoria="todas" aria-pressed="false">Todo <span class="nt-n">0</span></button>
+        <button type="button" class="nt-tab" data-categoria="mensajes" aria-pressed="false">Mensajes <span class="nt-n">0</span></button>
+        <button type="button" class="nt-tab" data-categoria="actividad" aria-pressed="false">Notificaciones <span class="nt-n">0</span></button>
+      </div>
+
       <div class="nt-barra">
         <!-- Filtros (los cuenta y aplica notificaciones.js sin recargar la página) -->
         <div class="nt-filtros" role="group" aria-label="Filtrar notificaciones">
@@ -68,14 +75,15 @@
         <c:if test="${pendientes > 0}">
           <form method="post" action="<%= contexto %>/notificaciones">
             <input type="hidden" name="accion" value="leerTodas">
+            <input type="hidden" name="ver" value="<c:out value='${ver}'/>">
             <button type="submit" class="btn outline small">Marcar todas como leídas</button>
           </form>
         </c:if>
       </div>
 
-      <ul class="nt-lista" id="ntLista">
+      <ul class="nt-lista" id="ntLista" data-ver="<c:out value='${ver}'/>">
         <c:forEach var="n" items="${notificaciones}">
-          <li class="nt-card ${n.leida ? 'leida' : 'nueva'}" data-leida="${n.leida}">
+          <li class="nt-card ${n.leida ? 'leida' : 'nueva'}" id="notif-${n.id}" data-leida="${n.leida}" data-categoria="${n.categoria}">
 
             <span class="nt-icono" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
@@ -83,7 +91,7 @@
 
             <div class="nt-cuerpo">
               <p class="nt-tipo">
-                <span class="nt-tipo-txt"><c:out value="${fn:replace(n.tipo, '_', ' ')}"/></span>
+                <span class="nt-tipo-txt"><c:out value="${n.tipoTexto}"/></span>
                 <c:if test="${not n.leida}"><span class="nt-badge">Nueva</span></c:if>
               </p>
               <p class="nt-mensaje"><c:out value="${n.mensaje}"/></p>
@@ -106,6 +114,7 @@
                 <form method="post" action="<%= contexto %>/notificaciones">
                   <input type="hidden" name="accion" value="leer">
                   <input type="hidden" name="notificacionId" value="${n.id}">
+                  <input type="hidden" name="ver" value="<c:out value='${ver}'/>">
                   <button type="submit" class="nt-icono-btn" title="Marcar como leída" aria-label="Marcar como leída">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
                   </button>

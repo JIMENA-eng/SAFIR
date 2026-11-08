@@ -101,6 +101,9 @@ public class GeneroDAO {
     // ------------------------------------------------------------------
 
     private static final long DURACION_CACHE_MS = 60_000;
+    // Si la BD falla, no se reintenta en cada página (cada intento puede tardar):
+    // se espera unos segundos antes de volver a consultar.
+    private static final long REINTENTO_TRAS_ERROR_MS = 10_000;
     private static volatile List<Genero> cacheMenu = Collections.emptyList();
     private static volatile long cacheMenuHasta = 0;
 
@@ -119,8 +122,15 @@ public class GeneroDAO {
             cacheMenuHasta = ahora + DURACION_CACHE_MS;
             return generos;
         } catch (SQLException e) {
-            // Si falla la BD, el menú muestra solo "Ver todo el catálogo".
+            // Si falla la BD, el menú muestra lo último que se cargó (o solo
+            // "Ver todo el catálogo") y se reintenta en unos segundos.
+            cacheMenuHasta = ahora + REINTENTO_TRAS_ERROR_MS;
             return cacheMenu;
         }
+    }
+
+    /** Fuerza recargar el menú en la próxima visita (útil si se crean o editan categorías). */
+    public static void invalidarCacheMenu() {
+        cacheMenuHasta = 0;
     }
 }

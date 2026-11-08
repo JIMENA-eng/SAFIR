@@ -1,0 +1,86 @@
+<%-- Grilla de tarjetas de obras (compartida por catalogo.jsp y categoria.jsp).
+     Requiere: taglib "c", atributo "obras" y las variables de p&#225;gina
+     "vacioTitulo" y "vacioTexto" (mensaje cuando no hay obras). --%>
+<div class="results">
+
+    <c:choose>
+        <c:when test="${empty obras}">
+            <div class="empty-state">
+                <div class="empty-icon">&#128218;</div>
+                <h3><c:out value="${vacioTitulo}"/></h3>
+                <p><c:out value="${vacioTexto}"/></p>
+            </div>
+        </c:when>
+
+        <c:otherwise>
+            <c:forEach var="obra" items="${obras}">
+                <article class="book-card">
+
+                    <div class="book-cover">
+                        <c:choose>
+                            <c:when test="${not empty obra.portadaRuta}">
+                                <img src="${pageContext.request.contextPath}/media/<c:out value='${obra.portadaRuta}'/>"
+                                     alt="Portada de <c:out value='${obra.titulo}'/>" loading="lazy">
+                            </c:when>
+                            <c:otherwise>&#10022;</c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <div class="book-content">
+
+                        <h3>
+                            <a href="${pageContext.request.contextPath}/obra?id=${obra.id}">
+                                <c:out value="${obra.titulo}"/>
+                            </a>
+                        </h3>
+
+                        <p class="book-author">
+                            Por <c:out value="${obra.autor}"/>
+                        </p>
+
+                        <span class="tag">
+                            <c:out value="${obra.genero}"/>
+                        </span>
+
+                        <span class="tag">
+                            <c:out value="${obra.clasificacion}"/>
+                        </span>
+
+                        <c:if test="${not empty obra.descripcion}">
+                            <p class="description">
+                                <c:out value="${obra.descripcion}"/>
+                            </p>
+                        </c:if>
+
+                        <div class="book-stats">
+                            <div>
+                                &#128214; Cap&#237;tulos:
+                                <c:out value="${obra.capitulosPublicados}"/>
+                            </div>
+
+                            <div>
+                                &#11088; Valoraci&#243;n:
+                                <c:out value="${obra.promedio}"/>
+                                (<c:out value="${obra.totalValoraciones}"/>)
+                            </div>
+
+                            <div>
+                                Estado:
+                                <c:out value="${obra.avance}"/>
+                            </div>
+                        </div>
+
+                        <c:if test="${not empty obra.etiquetas}">
+                            <p class="description">
+                                <strong>Etiquetas:</strong>
+                                <c:out value="${obra.etiquetas}"/>
+                            </p>
+                        </c:if>
+
+                    </div>
+                </article>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+
+</div>

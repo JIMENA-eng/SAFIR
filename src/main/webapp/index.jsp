@@ -14,6 +14,16 @@
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
     }
+
+    // Categorías para el desglose "Catálogo" del encabezado (caché de 1 minuto, nunca lanza error).
+    java.util.List<com.safir.modelo.Genero> generosMenu = com.safir.dao.GeneroDAO.listarParaMenu();
+%>
+<%!
+    /** Escapa texto para colocarlo dentro de HTML. */
+    private static String esc(String t) {
+        return t == null ? "" : t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
+    }
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -110,7 +120,21 @@
     </a>
     <nav aria-label="Principal">
       <a href="#leer">Leer</a>
-      <a href="#catalogo">Catálogo</a>
+      <div class="cat-wrap">
+        <button class="cat-btn" id="catBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="catMenu">
+          Cat&#225;logo
+          <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
+        </button>
+        <div class="menu" id="catMenu" role="menu" aria-label="Categor&#237;as" hidden>
+          <a role="menuitem" class="cat-todo" href="<%= contexto %>/catalogo">Ver todo el cat&#225;logo</a>
+          <% if (!generosMenu.isEmpty()) { %><div class="sep" role="separator"></div><% } %>
+          <% for (com.safir.modelo.Genero gm : generosMenu) { %>
+          <a role="menuitem" href="<%= contexto %>/catalogo/categoria?id=<%= gm.getId() %>">
+            <span><%= esc(gm.getNombre()) %></span><small><%= gm.getTotalObras() %></small>
+          </a>
+          <% } %>
+        </div>
+      </div>
       <a href="#escribir">Publicar</a>
       <a href="#coins">Coins</a>
     </nav>
@@ -428,6 +452,23 @@
       setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
   });
+
+  // Desglose de categorías del botón "Catálogo"
+  var catBtn = document.getElementById('catBtn');
+  var catMenu = document.getElementById('catMenu');
+  if (catBtn && catMenu) {
+    var setCat = function (open) {
+      catMenu.hidden = !open;
+      catBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    catBtn.addEventListener('click', function (e) { e.stopPropagation(); setCat(catMenu.hidden); });
+    document.addEventListener('click', function (e) {
+      if (!catMenu.hidden && !catMenu.contains(e.target)) setCat(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !catMenu.hidden) { setCat(false); catBtn.focus(); }
+    });
+  }
 
   // Tamaño del texto de lectura
   var story = document.getElementById('story');
