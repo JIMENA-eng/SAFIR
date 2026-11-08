@@ -89,4 +89,16 @@ public class Notificacion {
     public boolean isLeida() {
         return leidaEn != null;
     }
+
+    // ---------- TAREA 5 ----------
+
+    /** "mensajes" (sistema, moderación, respuestas) o "actividad" (obras, seguidores, otros). */
+    public String getCategoria() {
+        return com.safir.dao.NotificacionDAO.categoriaDe(tipo);
+    }
+
+    /** Nombre legible del tipo para mostrar al usuario. */
+    public String getTipoTexto() {
+        return com.safir.dao.NotificacionDAO.textoTipo(tipo);
+    }
 }
