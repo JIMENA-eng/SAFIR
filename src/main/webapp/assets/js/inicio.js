@@ -39,9 +39,8 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !menu.hidden) { setMenu(false); menuBtn.focus(); }
   });
-  // El menú de idioma ahora lo maneja /assets/js/idioma.js (TAREA 4).
-  var msgBtn = document.querySelector('.icon-btn[data-pendiente]');
-  if (msgBtn) msgBtn.addEventListener('click', function (e) { e.preventDefault(); });
+  // El menú de idioma lo maneja /assets/js/idioma.js (TAREA 4).
+  // Mensajes y notificaciones: los maneja /assets/js/avisos.js (TAREA 5).
 
   // TAREA 3: desglose de categorías del botón "Catálogo"
   var catBtn = document.getElementById('catBtn');
