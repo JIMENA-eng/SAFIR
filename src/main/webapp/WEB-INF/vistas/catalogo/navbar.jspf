@@ -1,0 +1,45 @@
+<%-- Barra superior del cat&#225;logo con el desglose de categor&#237;as.
+     Requiere: taglib "c" declarado en la p&#225;gina y el atributo "generos".
+     Opcional: atributo "genero" (categor&#237;a actual, se marca en el men&#250;). --%>
+<header class="navbar">
+    <a class="logo" href="${pageContext.request.contextPath}/catalogo"
+       style="text-decoration:none">SAFIR &#10022;</a>
+
+    <div class="nav-actions">
+        <details class="cat-drop" id="catDrop">
+            <summary class="nav-link">Categor&#237;as</summary>
+            <nav class="cat-menu" aria-label="Categor&#237;as">
+                <a class="cat-todo" href="${pageContext.request.contextPath}/catalogo"
+                   <c:if test="${empty genero}">aria-current="page"</c:if>>
+                    Ver todo el cat&#225;logo
+                </a>
+                <hr>
+                <c:forEach var="g" items="${generos}">
+                    <a href="${pageContext.request.contextPath}/catalogo/categoria?id=${g.id}"
+                       <c:if test="${not empty genero and genero.id == g.id}">aria-current="page"</c:if>>
+                        <span><c:out value="${g.nombre}"/></span>
+                        <small><c:out value="${g.totalObras}"/></small>
+                    </a>
+                </c:forEach>
+            </nav>
+        </details>
+
+        <a class="nav-link" href="${pageContext.request.contextPath}/biblioteca">
+            Mi biblioteca
+        </a>
+    </div>
+</header>
+
+<script>
+  // Cierra el desglose al hacer clic fuera o con Escape.
+  (function () {
+    var d = document.getElementById('catDrop');
+    if (!d) return;
+    document.addEventListener('click', function (e) {
+      if (d.open && !d.contains(e.target)) d.open = false;
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && d.open) { d.open = false; d.querySelector('summary').focus(); }
+    });
+  })();
+</script>

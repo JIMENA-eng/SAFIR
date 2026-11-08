@@ -550,3 +550,18 @@
   }
   .pc-edit svg { width: 17px; height: 17px; }
   .menu a.profile-card:hover .pc-edit, .menu a.profile-card:focus-visible .pc-edit { background: var(--btn); color: var(--btn-text); border-color: transparent; }
+
+  /* ===== TAREA 3: desglose "Catálogo" en la barra ===== */
+  .cat-wrap { position: relative; display: flex; align-items: center; }
+  .cat-btn {
+    display: inline-flex; align-items: center; gap: .35rem; padding: 0; border: 0; background: transparent;
+    color: #E9E7FF; font: inherit; font-size: .98rem; cursor: pointer;
+  }
+  .cat-btn:hover, .cat-btn[aria-expanded="true"] { color: #fff; }
+  .cat-btn .caret { width: 12px; height: 12px; flex: none; transition: transform .2s; }
+  .cat-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .cat-wrap .menu { left: 0; right: auto; min-width: 230px; max-height: 70vh; overflow-y: auto; }
+  nav .menu a { display: flex; justify-content: space-between; gap: 1rem; }
+  nav .menu a:hover, nav .menu a:focus-visible { text-decoration: none; }
+  nav .menu a small { color: var(--muted); font-variant-numeric: tabular-nums; }
+  nav .menu a.cat-todo { color: var(--title); font-weight: 600; }

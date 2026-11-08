@@ -1,6 +1,8 @@
 package com.safir.controlador;
 
+import com.safir.dao.GeneroDAO;
 import com.safir.dao.ObraDAO;
+import com.safir.modelo.Genero;
 import com.safir.modelo.Obra;
 
 import jakarta.servlet.ServletException;
@@ -13,10 +15,21 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Catálogo general.
+ *
+ * GET /catalogo          -> desglose de todas las categorías + todas las obras.
+ * GET /catalogo?q=texto  -> igual, pero las obras filtradas por la búsqueda.
+ *
+ * Las obras de UNA categoría se ven en /catalogo/categoria?id=N
+ * (CategoriaServlet). Los enlaces antiguos /catalogo?genero=Nombre se
+ * redirigen ahí para no romperlos.
+ */
 @WebServlet("/catalogo")
 public class CatalogoServlet extends HttpServlet {
 
     private final ObraDAO obraDAO = new ObraDAO();
+    private final GeneroDAO generoDAO = new GeneroDAO();
 
     @Override
     protected void doGet(
@@ -27,15 +40,25 @@ public class CatalogoServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         String busqueda = request.getParameter("q");
-        String genero = request.getParameter("genero");
+        String generoAntiguo = request.getParameter("genero");
 
         try {
-            List<Obra> obras = obraDAO.listarPublicadas(busqueda, genero);
+            // Compatibilidad: /catalogo?genero=Romance -> /catalogo/categoria?id=2
+            if (generoAntiguo != null && !generoAntiguo.isBlank()) {
+                Integer id = generoDAO.buscarIdPorNombre(generoAntiguo);
+                if (id != null) {
+                    response.sendRedirect(request.getContextPath()
+                            + "/catalogo/categoria?id=" + id);
+                    return;
+                }
+            }
 
+            List<Genero> generos = generoDAO.listarConConteo();
+            List<Obra> obras = obraDAO.listarPublicadas(busqueda, "");
+
+            request.setAttribute("generos", generos);
             request.setAttribute("obras", obras);
-            request.setAttribute("busqueda", busqueda == null ? "" : busqueda);
-            request.setAttribute("generoSeleccionado",
-                    genero == null ? "" : genero);
+            request.setAttribute("busqueda", busqueda == null ? "" : busqueda.trim());
 
             request.getRequestDispatcher(
                     "/WEB-INF/vistas/catalogo/catalogo.jsp"
