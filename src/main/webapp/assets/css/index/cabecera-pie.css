@@ -21,3 +21,29 @@ footer { background: var(--bar); color: #C9C8EC; padding: 2rem 0 2.4rem; font-si
 footer .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center; }
 footer .brand span { font-size: 1.15rem; }
 footer .brand svg { width: 40px; height: 30px; }
+
+/* Desglose "Catálogo" de la barra (categorías) */
+header.bar { position: relative; z-index: 50; }
+.cat-wrap { position: relative; display: flex; align-items: center; }
+.cat-btn {
+  display: inline-flex; align-items: center; gap: .35rem; padding: 0; margin: 0; border: 0; background: transparent;
+  color: #E9E7FF; font: inherit; font-size: .98rem; line-height: inherit; cursor: pointer;
+}
+/* Igual que los demás enlaces de la barra: subrayado al pasar el cursor */
+.cat-btn:hover, .cat-btn[aria-expanded="true"] { color: #fff; text-decoration: underline; text-underline-offset: 6px; }
+.cat-btn .caret { width: 12px; height: 12px; flex: none; transition: transform .2s; }
+.cat-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.menu {
+  position: absolute; left: 0; top: calc(100% + .6rem); min-width: 230px; max-height: 70vh; overflow-y: auto;
+  padding: .5rem; background: var(--surface); color: var(--text); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: 0 24px 50px -18px rgba(18,20,46,.5);
+}
+.menu[hidden] { display: none; }
+.menu .sep { height: 1px; background: var(--line); margin: .35rem .2rem; }
+nav .menu a {
+  display: flex; justify-content: space-between; gap: 1rem; padding: .65rem .8rem;
+  border-radius: 10px; color: var(--text); font-size: .98rem; text-decoration: none;
+}
+nav .menu a:hover, nav .menu a:focus-visible { background: var(--soft); color: var(--title); text-decoration: none; }
+nav .menu a small { color: var(--muted); font-variant-numeric: tabular-nums; }
+nav .menu a.cat-todo { color: var(--title); font-weight: 600; }

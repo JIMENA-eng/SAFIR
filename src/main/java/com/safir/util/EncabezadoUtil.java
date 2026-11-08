@@ -16,15 +16,15 @@ public final class EncabezadoUtil {
     private EncabezadoUtil() {}
 
     public static void cargar(HttpServletRequest request, long usuarioId) {
-        long noLeidas = 0;
+        // TAREA 5: el sobre cuenta los mensajes y la campana el resto de avisos.
+        long[] noLeidas = {0, 0};
         try {
-            noLeidas = new NotificacionDAO().contarNoLeidas(usuarioId);
+            noLeidas = new NotificacionDAO().contarNoLeidasPorCategoria(usuarioId);
         } catch (Exception e) {
             request.getServletContext().log("No se pudieron contar las notificaciones", e);
         }
-        request.setAttribute("notificacionesNoLeidas", noLeidas);
-        // TODO: cuando exista el módulo de mensajes, contar aquí los no leídos.
-        request.setAttribute("mensajesNoLeidos", 0L);
+        request.setAttribute("mensajesNoLeidos", noLeidas[0]);
+        request.setAttribute("notificacionesNoLeidas", noLeidas[1]);
 
         try {
             Map<String, String> p = new UsuarioDAO().obtenerPerfilMenu(usuarioId);
