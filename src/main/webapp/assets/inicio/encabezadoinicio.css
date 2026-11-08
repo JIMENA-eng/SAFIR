@@ -651,3 +651,36 @@
     header.bar .wrap.con-buscador nav { margin-right: auto; }   /* la 1.ª fila vuelve a repartirse como antes */
     .hdr-search { order: 10; flex: 1 1 100%; max-width: none; margin: 0 0 .8rem; }
   }
+
+  /* ===== TAREA 7: desglose de sugerencias (obras y autores) bajo el buscador ===== */
+  .sug-panel {
+    position: absolute; left: 0; right: 0; top: calc(100% + .5rem); z-index: 70;
+    max-height: min(70vh, 460px); overflow-y: auto; padding: .4rem;
+    background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: 0 24px 50px -18px rgba(18,20,46,.5); animation: rise .18s cubic-bezier(.2,.8,.2,1);
+  }
+  .sug-panel[hidden] { display: none; }
+  .sug-tit {
+    padding: .55rem .7rem .3rem; font-size: .72rem; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .sug-op {
+    display: flex; align-items: center; gap: .75rem; padding: .5rem .6rem; border-radius: 10px;
+    color: var(--text); text-decoration: none; cursor: pointer;
+  }
+  .sug-op.activa, .sug-op:focus-visible { background: var(--soft); outline: none; }
+  .sug-img {
+    flex: none; width: 34px; height: 46px; border-radius: 6px; overflow: hidden; display: grid; place-items: center;
+    background: linear-gradient(160deg, var(--indigo), var(--lav)); color: #fff; font-weight: 600; font-size: .95rem;
+  }
+  .sug-img.redonda { width: 38px; height: 38px; border-radius: 50%; background: var(--lav-soft); color: var(--indigo); }
+  .sug-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sug-txt { min-width: 0; display: grid; line-height: 1.3; }
+  .sug-txt b { font-weight: 500; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sug-txt small { color: var(--muted); font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sug-txt mark { background: rgba(119,117,214,.25); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .sug-op.todo { margin-top: .3rem; border-top: 1px solid var(--line); border-radius: 0 0 10px 10px; padding-top: .7rem; }
+  .sug-op.todo b { font-weight: 600; color: var(--link); }
+  .sug-lupa { flex: none; width: 34px; text-align: center; font-size: 1.2rem; color: var(--lav); }
+  .sug-vacio { padding: .9rem .7rem .4rem; color: var(--muted); font-size: .9rem; }
+  @media (prefers-reduced-motion: reduce) { .sug-panel { animation: none; } }

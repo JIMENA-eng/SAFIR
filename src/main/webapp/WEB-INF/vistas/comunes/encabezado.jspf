@@ -67,10 +67,12 @@
     </nav>
     <% if (mostrarBuscador) { %>
     <%-- TAREA 6: buscador del encabezado (en todas las vistas menos el inicio) --%>
-    <form class="hdr-search" id="hdrSearchForm" role="search" method="get" action="<%= contexto %>/catalogo">
+    <form class="hdr-search" id="hdrSearchForm" role="search" method="get" action="<%= contexto %>/catalogo" data-contexto="<%= contexto %>" data-sugerencias-url="<%= contexto %>/buscar/sugerencias">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input type="search" id="hdrSearchInput" name="q" placeholder="Buscar obras, autores o etiquetas&#8230;" aria-label="Buscar obras" autocomplete="off" maxlength="120">
     </form>
+    <%-- TAREA 7: sugerencias de obras y autores mientras se escribe --%>
+    <script src="<%= contexto %>/assets/js/buscador.js" defer></script>
     <% } %>
     <button class="theme-toggle" id="themeBtn" type="button" aria-pressed="false">Modo noche</button>
     <div class="header-actions">
