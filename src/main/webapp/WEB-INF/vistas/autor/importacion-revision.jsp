@@ -49,7 +49,7 @@
     <p class="cl-nota cl-rev-aviso" role="status">Solo se detectó un capítulo. Si no se encontró ningún encabezado («Capítulo 1», «Parte 1» o un número romano), todo el texto queda como un único capítulo. Si tu archivo tiene varios, recházalo, escribe cada encabezado en su propia línea y vuelve a subirlo.</p>
   </c:if>
 
-  <p class="cl-nota cl-rev-aviso" role="status">Al confirmar, los capítulos se <b>publican</b> en el orden del archivo y ya no se podrán editar.</p>
+  <p class="cl-nota cl-rev-aviso" role="status">Al confirmar, los capítulos se guardan como <b>borrador</b>: no se publica nada. Después podrás editarlos uno por uno y publicarlos cuando estés listo.</p>
 
   <ol class="cl-rev-lista">
     <c:forEach var="cap" items="${vista}">
@@ -66,7 +66,7 @@
 
   <div class="cl-rev-acciones">
     <form method="post" action="<%= contexto %>/autor/capitulos/importar/confirmar?obraId=${obraId}">
-      <button type="submit" class="btn">Confirmar y publicar capítulos</button>
+      <button type="submit" class="btn">Guardar como borradores</button>
     </form>
     <form method="post" action="<%= contexto %>/autor/capitulos/importar/rechazar?obraId=${obraId}"
           data-confirmar="¿Descartar esta importación? Se borrarán los capítulos detectados y el archivo.">

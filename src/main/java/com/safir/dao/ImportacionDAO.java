@@ -18,10 +18,10 @@ import java.util.Map;
  * las columnas capitulo.importacion_id / orden_importacion.
  *
  * Ciclo: al subir, la importación queda "en_revision" y sus capítulos se
- * guardan como borradores ligados a ella. Confirmar llama a la función
- * publicar_importacion (publica todos en orden y deja la importación
- * "confirmada"); rechazar borra esos borradores y la deja "rechazada" con
- * motivo.
+ * guardan como borradores ligados a ella. Confirmar NO publica: suelta los
+ * borradores de la importación (quedan como borradores normales, editables y
+ * publicables uno por uno) y deja la importación "confirmada"; rechazar borra
+ * esos borradores y la deja "rechazada" con motivo.
  *
  * Los índices únicos de sql/importacion_indices.sql garantizan una sola
  * importación en revisión por obra y un archivo (SHA-256) una vez por obra.
@@ -186,12 +186,14 @@ public class ImportacionDAO {
     }
 
     /**
-     * Publica los capítulos con publicar_importacion (numera a partir del
-     * último capítulo de la obra, en el orden del archivo, y deja la
-     * importación "confirmada"). Como al publicar un capítulo suelto, la
-     * obra pasa a "publicada" si seguía en borrador.
+     * Confirma la importación SIN publicar nada: los capítulos se sueltan de
+     * la importación (importacion_id y orden_importacion en NULL) y quedan
+     * como borradores normales de la obra. Desde la lista de capítulos el
+     * autor los edita uno por uno y los publica cuando esté listo
+     * (GestionCapituloDAO.publicar, que numera al publicar). La obra sigue
+     * en borrador hasta que se publique el primer capítulo.
      *
-     * @return cuántos capítulos se publicaron
+     * @return cuántos capítulos quedaron como borrador
      * @throws IllegalArgumentException si la importación ya no está en revisión
      */
     public int confirmar(long importacionId, long autorId, long obraId)
@@ -204,24 +206,22 @@ public class ImportacionDAO {
                 comprobarEnRevision(con, importacionId, autorId, obraId);
 
                 int total;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT publicar_importacion(?)")) {
+                try (PreparedStatement ps = con.prepareStatement("""
+                        UPDATE capitulo
+                        SET importacion_id = NULL, orden_importacion = NULL
+                        WHERE importacion_id = ? AND estado = 'borrador'
+                        """)) {
                     ps.setLong(1, importacionId);
-
-                    try (ResultSet rs = ps.executeQuery()) {
-                        rs.next();
-                        total = rs.getInt(1);
-                    }
+                    total = ps.executeUpdate();
                 }
 
                 try (PreparedStatement ps = con.prepareStatement("""
-                        UPDATE obra
-                        SET estado = 'publicada',
-                            publicada_en = COALESCE(publicada_en, now())
-                        WHERE id = ? AND autor_id = ? AND estado = 'borrador'
+                        UPDATE importacion_pdf
+                        SET estado = 'confirmada', resuelto_en = now(),
+                            archivo_ruta = NULL
+                        WHERE id = ?
                         """)) {
-                    ps.setLong(1, obraId);
-                    ps.setLong(2, autorId);
+                    ps.setLong(1, importacionId);
                     ps.executeUpdate();
                 }
 

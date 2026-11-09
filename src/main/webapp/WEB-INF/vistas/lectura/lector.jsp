@@ -105,11 +105,17 @@
             return Math.min(100, Math.max(0, p)).toFixed(2);
         }
 
+        // Token CSRF (lo agrega CsrfFilter en el head). Va en el cuerpo porque
+        // sendBeacon no permite cabeceras.
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var csrf = meta ? meta.getAttribute("content") : "";
+
         function datos() {
             return new URLSearchParams({
                 obraId: obraId,
                 capituloId: capituloId,
-                posicion: posicionActual()
+                posicion: posicionActual(),
+                _csrf: csrf
             });
         }
 

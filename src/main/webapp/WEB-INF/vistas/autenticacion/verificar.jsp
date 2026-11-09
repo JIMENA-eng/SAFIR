@@ -73,7 +73,7 @@
     </form>
 
     <p class="m-switch">¿Te equivocaste de dato? <a href="<%= contexto %>/auth/registro">Volver al registro</a></p>
-    <p class="m-legal">Al ingresar el código confirmas que el <%= porTelefono ? "número" : "correo" %> es tuyo y autorizas el uso de tus datos personales según nuestra política de privacidad.</p>
+    <p class="m-legal">Al ingresar el código confirmas que el <%= porTelefono ? "número" : "correo" %> es tuyo y autorizas el uso de tus datos personales según nuestra <a href="<%= contexto %>/privacidad" target="_blank" rel="noopener" style="color:var(--link)">política de privacidad</a>.</p>
   </div>
 </div>
 

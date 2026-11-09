@@ -80,14 +80,14 @@
     </div>
   </c:if>
 
-  <!-- Importar capítulos desde un PDF, DOCX, DOC o TXT: primero se revisan y luego se publican -->
+  <!-- Importar capítulos desde un PDF, DOCX, DOC o TXT: se guardan como borradores y tú los publicas cuando estés listo -->
   <c:if test="${empty importacionPendiente}">
   <form class="cl-importar" id="importarForm" method="post" enctype="multipart/form-data"
         action="<%= contexto %>/autor/capitulos/importar?obraId=${obraId}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
     <div class="cl-importar-texto">
       <b id="importarNombre">Importar desde archivo</b>
-      <small id="importarAyuda">PDF, DOCX, DOC o TXT de hasta 20 MB. Cada capítulo debe empezar con «Capítulo 1», «Parte 1» o un número romano; antes de publicarlos podrás revisar los capítulos detectados.</small>
+      <small id="importarAyuda">PDF, DOCX, DOC o TXT de hasta 20 MB. Cada capítulo debe empezar con «Capítulo 1», «Parte 1» o un número romano; antes de guardarlos podrás revisar los capítulos detectados; nada se publica automáticamente.</small>
     </div>
     <input type="file" name="capitulosArchivo" id="importarInput" class="cl-sr"
            accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain">
@@ -154,7 +154,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
     <span><c:choose>
       <c:when test="${param.importacionRechazada == '1'}">Importación descartada. No se creó ningún capítulo.</c:when>
-      <c:when test="${not empty param.importados}">Se publicaron <c:out value="${param.importados}"/> capítulos, en el orden del archivo.</c:when>
+      <c:when test="${not empty param.importados}">Se guardaron <c:out value="${param.importados}"/> capítulos como borrador. Edítalos y publícalos cuando estés listo.</c:when>
       <c:when test="${param.obraPublicada == '1'}">Capítulo publicado. ¡Tu obra ya está publicada y aparece en el catálogo!</c:when>
       <c:when test="${param.publicado == '1'}">El capítulo se publicó correctamente.</c:when><c:otherwise>El borrador se guardó correctamente.</c:otherwise></c:choose></span>
   </div>

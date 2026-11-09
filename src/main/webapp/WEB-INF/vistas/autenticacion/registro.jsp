@@ -237,7 +237,7 @@
       <% for (String[] rd : redes) { if (com.safir.seguridad.SocialAuth.configurado(rd[0])) { %>
       <a class="btn-social" href="<%= contexto %>/auth/social/<%= rd[0] %>">Continuar con <%= rd[1] %></a>
       <% } } %>
-      <p class="social-legal">Al continuar autorizas el uso de tus datos personales según nuestra política de privacidad.</p>
+      <p class="social-legal">Al continuar autorizas el uso de tus datos personales según nuestra <a href="<%= contexto %>/privacidad" target="_blank" rel="noopener" style="color:var(--link)">política de privacidad</a>.</p>
     </div>
     <% } %>
 

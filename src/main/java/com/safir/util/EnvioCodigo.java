@@ -42,11 +42,23 @@ public final class EnvioCodigo {
         return (v == null || v.isBlank()) ? null : v.trim();
     }
 
+    /**
+     * " (https://tusitio/Safir/privacidad)" si está definida SAFIR_URL_BASE
+     * (dirección pública de la aplicación, con su contexto, sin "/" final);
+     * si no, cadena vacía.
+     */
+    private static String enlacePrivacidad() {
+        String base = config("SAFIR_URL_BASE");
+        if (base == null) return "";
+        while (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+        return " (" + base + "/privacidad)";
+    }
+
     private static void enviarSms(String telefono, String codigo, int minutos) {
         String texto = "SAFIR: tu código es " + codigo + " (vence en " + minutos
                 + " min). Al ingresarlo confirmas que tu número está activo y "
                 + "autorizas el uso de tus datos personales según nuestra "
-                + "política de privacidad.";
+                + "política de privacidad" + enlacePrivacidad() + ".";
         System.out.println("=====================================");
         System.out.println("SMS (solo desarrollo) -> " + telefono);
         System.out.println(texto);
@@ -58,7 +70,7 @@ public final class EnvioCodigo {
         String cuerpo = "Hola,\n\nTu código de verificación es: " + codigo + "\n\n"
                 + "Vence en " + minutos + " minutos. Al ingresarlo confirmas tu "
                 + "correo y autorizas el uso de tus datos personales según "
-                + "nuestra política de privacidad.\n\n"
+                + "nuestra política de privacidad" + enlacePrivacidad() + ".\n\n"
                 + "Si no fuiste tú, ignora este mensaje.\n\nEquipo SAFIR";
 
         String host = config("SAFIR_SMTP_HOST");

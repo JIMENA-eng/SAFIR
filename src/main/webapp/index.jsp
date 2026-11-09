@@ -428,6 +428,7 @@
       <span>SAFIR</span>
     </a>
     <span>Tus historias, en un solo lugar.</span>
+    <a href="<%= contexto %>/privacidad" style="color:inherit">Política de privacidad</a>
   </div>
 </footer>
 
