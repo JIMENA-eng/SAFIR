@@ -66,6 +66,8 @@ public class GestionCapituloDAO {
             FROM capitulo c
             JOIN obra o ON o.id = c.obra_id
             WHERE c.obra_id = ? AND o.autor_id = ?
+              -- Los de una importación en revisión se ven en su pantalla de revisión
+              AND NOT (c.importacion_id IS NOT NULL AND c.estado = 'borrador')
             ORDER BY
                 CASE WHEN c.numero IS NULL THEN 1 ELSE 0 END,
                 c.numero,
@@ -245,6 +247,7 @@ public class GestionCapituloDAO {
                     WHERE id = ?
                       AND obra_id = ?
                       AND estado = 'borrador'
+                      AND importacion_id IS NULL
                       AND length(btrim(titulo)) > 0
                       AND length(btrim(contenido)) > 0
                     """;
@@ -253,7 +256,8 @@ public class GestionCapituloDAO {
                 try (PreparedStatement ps = con.prepareStatement(
                         "SELECT contenido FROM capitulo "
                         + "WHERE id = ? AND obra_id = ? "
-                        + "AND estado = 'borrador'")) {
+                        + "AND estado = 'borrador' "
+                        + "AND importacion_id IS NULL")) {
                     ps.setLong(1, capituloId);
                     ps.setLong(2, obraId);
 
@@ -323,25 +327,7 @@ public class GestionCapituloDAO {
             con.setAutoCommit(false);
 
             try {
-                comprobarPropiedad(con, obraId, autorId);
-
-                String sql = """
-                    INSERT INTO capitulo
-                        (obra_id, titulo, contenido, estado, palabras)
-                    VALUES (?, ?, ?, 'borrador', ?)
-                    """;
-
-                try (PreparedStatement ps = con.prepareStatement(sql)) {
-                    for (Capitulo c : capitulos) {
-                        ps.setLong(1, obraId);
-                        ps.setString(2, c.getTitulo());
-                        ps.setString(3, c.getContenido());
-                        ps.setInt(4, contarPalabras(c.getContenido()));
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-
+                insertarBorradores(con, autorId, obraId, null, capitulos);
                 con.commit();
                 return capitulos.size();
 
@@ -351,6 +337,50 @@ public class GestionCapituloDAO {
             } finally {
                 con.setAutoCommit(true);
             }
+        }
+    }
+
+    /**
+     * Inserta borradores dentro de una transacción ya abierta (no hace commit
+     * ni rollback). Con importacionId, los capítulos quedan ligados a esa
+     * importación (capitulo.importacion_id) y con su orden en el archivo
+     * (capitulo.orden_importacion, desde 1); publicar_importacion los publica
+     * en ese orden.
+     */
+    void insertarBorradores(
+            Connection con,
+            long autorId,
+            long obraId,
+            Long importacionId,
+            List<Capitulo> capitulos) throws SQLException {
+
+        comprobarPropiedad(con, obraId, autorId);
+
+        String sql = """
+            INSERT INTO capitulo
+                (obra_id, importacion_id, orden_importacion,
+                 titulo, contenido, estado, palabras)
+            VALUES (?, ?, ?, ?, ?, 'borrador', ?)
+            """;
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int orden = 1;
+            for (Capitulo c : capitulos) {
+                ps.setLong(1, obraId);
+                if (importacionId == null) {
+                    ps.setNull(2, Types.BIGINT);
+                    ps.setNull(3, Types.INTEGER);
+                } else {
+                    ps.setLong(2, importacionId);
+                    ps.setInt(3, orden);
+                }
+                orden++;
+                ps.setString(4, c.getTitulo());
+                ps.setString(5, c.getContenido());
+                ps.setInt(6, contarPalabras(c.getContenido()));
+                ps.addBatch();
+            }
+            ps.executeBatch();
         }
     }
 

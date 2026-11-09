@@ -178,17 +178,18 @@
         <label class="of-archivo" for="capitulosInput">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
           <span class="of-archivo-texto">
-            <b id="capitulosNombre">Subir PDF, DOCX o TXT</b>
+            <b id="capitulosNombre">Subir PDF, DOCX, DOC o TXT</b>
             <small id="capitulosAyuda">Hasta 20 MB. Los capítulos se detectan solos.</small>
           </span>
           <button type="button" class="of-archivo-quitar" id="capitulosQuitar" hidden>Quitar</button>
         </label>
         <input type="file" name="capitulosArchivo" id="capitulosInput" class="of-sr"
-               accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+               accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain">
         <p class="of-formato">
-          Cada capítulo debe empezar con una línea como <code>Capítulo 1</code> o
-          <code>Capítulo 2: El regreso</code>. Se guardan como borradores, en el orden del archivo,
-          y los verás en la lista de capítulos al crear la obra.
+          Cada capítulo debe empezar con una línea como <code>Capítulo 1</code>,
+          <code>Capítulo 2: El regreso</code> o <code>Parte 1</code>; si no hay ninguna, todo el texto
+          será un único capítulo. Al crear la obra verás los capítulos detectados para confirmarlos
+          antes de que se publiquen.
         </p>
       </div>
       </c:if>
@@ -317,7 +318,7 @@
   // El servidor repite la validación al leer el contenido.
   function limpiarCapitulos() {
     inCapitulos.value = '';
-    capNombre.textContent = 'Subir PDF, DOCX o TXT';
+    capNombre.textContent = 'Subir PDF, DOCX, DOC o TXT';
     capAyuda.textContent = 'Hasta 20 MB. Los capítulos se detectan solos.';
     capQuitar.hidden = true;
   }
@@ -325,8 +326,8 @@
     inCapitulos.addEventListener('change', function () {
       var f = inCapitulos.files && inCapitulos.files[0];
       if (!f) { limpiarCapitulos(); return; }
-      if (!/\.(pdf|docx|txt)$/i.test(f.name)) {
-        alert('Formato no permitido. Sube un PDF, DOCX o TXT.');
+      if (!/\.(pdf|docx|doc|txt)$/i.test(f.name)) {
+        alert('Formato no permitido. Sube un PDF, DOCX, DOC o TXT.');
         limpiarCapitulos(); return;
       }
       if (f.size > 20 * 1024 * 1024) {

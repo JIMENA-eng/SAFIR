@@ -32,8 +32,8 @@
     input.addEventListener('change', function () {
       var f = input.files && input.files[0];
       if (!f) { reiniciar(); return; }
-      if (!/\.(pdf|docx|txt)$/i.test(f.name)) {
-        window.alert('Formato no permitido. Sube un PDF, DOCX o TXT.');
+      if (!/\.(pdf|docx|doc|txt)$/i.test(f.name)) {
+        window.alert('Formato no permitido. Sube un PDF, DOCX, DOC o TXT.');
         reiniciar(); return;
       }
       if (f.size > 20 * 1024 * 1024) {
@@ -41,7 +41,7 @@
         reiniciar(); return;
       }
       nombre.textContent = f.name;
-      ayuda.textContent = 'Se agregarán como borradores al final de la lista.';
+      ayuda.textContent = 'Antes de publicarlos podrás revisar los capítulos detectados.';
       elegir.textContent = 'Cambiar';
       enviar.hidden = false;
     });

@@ -81,3 +81,15 @@
   .cl-importar { flex-wrap: wrap; }
   .cl-importar-texto { flex-basis: calc(100% - 46px); }
 }
+/* Importación en revisión */
+.cl-pendiente { display: flex; align-items: center; justify-content: space-between; gap: .9rem; flex-wrap: wrap; }
+.cl-pendiente .btn { flex: none; }
+.cl-rev-aviso { margin: 0 0 1rem; }
+.cl-rev-lista { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; gap: .6rem; }
+.cl-rev-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .9rem; padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.cl-rev-num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(120,100,200,.12); color: var(--title); font-weight: 600; font-size: .9rem; }
+.cl-rev-titulo { display: block; color: var(--title); font-weight: 600; overflow-wrap: anywhere; }
+.cl-rev-meta { display: block; color: var(--muted); font-size: .82rem; margin-top: .1rem; }
+.cl-rev-extracto { margin-top: .35rem; color: var(--muted); font-size: .88rem; line-height: 1.45; overflow-wrap: anywhere; }
+.cl-rev-acciones { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; }
+.cl-rev-acciones form { margin: 0; }

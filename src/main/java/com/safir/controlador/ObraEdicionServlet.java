@@ -1,11 +1,9 @@
 package com.safir.controlador;
 
-import com.safir.dao.GestionCapituloDAO;
 import com.safir.dao.ObraEdicionDAO;
-import com.safir.modelo.Capitulo;
 import com.safir.util.EncabezadoUtil;
 import com.safir.util.ImagenUtil;
-import com.safir.util.ImportadorCapitulos;
+import com.safir.util.ImportacionServicio;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
@@ -30,7 +28,6 @@ import java.util.Map;
 public class ObraEdicionServlet extends HttpServlet {
 
     private final ObraEdicionDAO dao = new ObraEdicionDAO();
-    private final GestionCapituloDAO capituloDao = new GestionCapituloDAO();
 
     private Long obtenerUsuarioId(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
@@ -258,12 +255,11 @@ public class ObraEdicionServlet extends HttpServlet {
 
         // Capítulos subidos en un archivo (solo al crear la obra). Se leen antes
         // de crearla para que un archivo inválido no deje una obra vacía.
-        List<Capitulo> capitulosImportados = List.of();
+        ImportacionServicio.Preparada importacion = null;
         if (error == null && !edicion
-                && ImportadorCapitulos.hayArchivo(archivoCapitulos)) {
+                && ImportacionServicio.hayArchivo(archivoCapitulos)) {
             try {
-                capitulosImportados =
-                        ImportadorCapitulos.leer(archivoCapitulos);
+                importacion = ImportacionServicio.preparar(archivoCapitulos);
             } catch (IllegalArgumentException e) {
                 error = e.getMessage()
                         + " Corrige el archivo o créala sin él.";
@@ -341,19 +337,20 @@ public class ObraEdicionServlet extends HttpServlet {
                 if (portadaNueva != null) {
                     dao.actualizarPortada(nuevaId, usuarioId, portadaNueva);
                 }
-                // Con archivo de capítulos: se guardan como borradores y se
-                // muestra la lista para revisarlos y publicarlos.
-                if (!capitulosImportados.isEmpty()) {
+                // Con archivo de capítulos: queda "en revisión" y el autor ve los
+                // capítulos detectados para confirmarlos o rechazarlos.
+                if (importacion != null) {
                     String destino = request.getContextPath()
-                            + "/autor/capitulos?obraId=" + nuevaId;
+                            + "/autor/capitulos";
                     try {
-                        int total = capituloDao.importarBorradores(
-                                usuarioId, nuevaId, capitulosImportados);
-                        response.sendRedirect(
-                            destino + "&importados=" + total);
-                    } catch (SQLException e) {
+                        ImportacionServicio.iniciar(
+                                importacion, usuarioId, nuevaId);
+                        response.sendRedirect(destino
+                                + "/importar/revision?obraId=" + nuevaId);
+                    } catch (SQLException | IllegalArgumentException e) {
                         // La obra ya existe: el autor puede reintentar desde la lista
-                        response.sendRedirect(destino + "&importError=1");
+                        response.sendRedirect(
+                            destino + "?obraId=" + nuevaId + "&importError=1");
                     }
                     return;
                 }

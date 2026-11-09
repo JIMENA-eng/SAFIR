@@ -72,19 +72,29 @@
     <p class="cl-nota cl-error" role="alert"><c:out value="${errorImportacion}"/></p>
   </c:if>
 
-  <!-- Importar capítulos desde un PDF, DOCX o TXT: se agregan como borradores -->
+  <c:if test="${not empty importacionPendiente}">
+    <div class="cl-nota cl-pendiente" role="status">
+      <span>Tienes una importación en revisión: <b><c:out value="${not empty importacionPendiente.nombreOriginal ? importacionPendiente.nombreOriginal : 'archivo importado'}"/></b>
+      (${importacionPendiente.totalCapitulos} <c:out value="${importacionPendiente.totalCapitulos == 1 ? 'capítulo' : 'capítulos'}"/>).</span>
+      <a class="btn small" href="<%= contexto %>/autor/capitulos/importar/revision?obraId=${obraId}">Revisar</a>
+    </div>
+  </c:if>
+
+  <!-- Importar capítulos desde un PDF, DOCX, DOC o TXT: primero se revisan y luego se publican -->
+  <c:if test="${empty importacionPendiente}">
   <form class="cl-importar" id="importarForm" method="post" enctype="multipart/form-data"
         action="<%= contexto %>/autor/capitulos/importar?obraId=${obraId}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
     <div class="cl-importar-texto">
       <b id="importarNombre">Importar desde archivo</b>
-      <small id="importarAyuda">PDF, DOCX o TXT de hasta 20 MB. Cada capítulo debe empezar con «Capítulo 1», «Capítulo 2: Título»…; se agregan como borradores.</small>
+      <small id="importarAyuda">PDF, DOCX, DOC o TXT de hasta 20 MB. Cada capítulo debe empezar con «Capítulo 1», «Parte 1» o un número romano; antes de publicarlos podrás revisar los capítulos detectados.</small>
     </div>
     <input type="file" name="capitulosArchivo" id="importarInput" class="cl-sr"
-           accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+           accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain">
     <label for="importarInput" class="btn outline small" id="importarElegir">Elegir archivo</label>
     <button type="submit" class="btn small" id="importarEnviar" hidden>Importar</button>
   </form>
+  </c:if>
 
   <c:if test="${total > 0 and nPublicados == 0}">
     <p class="cl-nota">Tu obra sigue en borrador. Se publicará automáticamente cuando publiques su primer capítulo.</p>
@@ -139,11 +149,12 @@
 </main>
 
 <%-- Aviso flotante: aparece al volver de guardar, publicar o importar y se oculta solo --%>
-<c:if test="${param.guardado == '1' or param.publicado == '1' or not empty param.importados}">
+<c:if test="${param.guardado == '1' or param.publicado == '1' or not empty param.importados or param.importacionRechazada == '1'}">
   <div class="cl-toast" id="avisoGuardado" role="status" aria-live="polite">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
     <span><c:choose>
-      <c:when test="${not empty param.importados}">Se importaron <c:out value="${param.importados}"/> capítulos como borradores. Revísalos y publícalos en orden.</c:when>
+      <c:when test="${param.importacionRechazada == '1'}">Importación descartada. No se creó ningún capítulo.</c:when>
+      <c:when test="${not empty param.importados}">Se publicaron <c:out value="${param.importados}"/> capítulos, en el orden del archivo.</c:when>
       <c:when test="${param.obraPublicada == '1'}">Capítulo publicado. ¡Tu obra ya está publicada y aparece en el catálogo!</c:when>
       <c:when test="${param.publicado == '1'}">El capítulo se publicó correctamente.</c:when><c:otherwise>El borrador se guardó correctamente.</c:otherwise></c:choose></span>
   </div>
