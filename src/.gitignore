@@ -1,8 +1,0 @@
-# Ignorar archivo de conexión a la base de datos
-/src/main/java/com/safir/config/ConexionBD.java
-
-# Archivos compilados
-*.class
-target/
-build/
-dist/

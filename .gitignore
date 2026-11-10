@@ -29,3 +29,6 @@ Thumbs.db
 
 # Archivos subidos por usuarios en pruebas
 uploads/
+
+# Archivos compilados
+*.class
