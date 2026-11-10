@@ -70,13 +70,42 @@ El script SQL y el diagrama entidad-relación están en la rama `base-de-datos`.
 
 1. **Requisitos:** JDK 21, Maven, PostgreSQL y Apache Tomcat 10 o superior.
 2. **Crear la base de datos:** ejecutar el script SQL del modelo de datos en PostgreSQL (crea la base `safir`, las tablas y los datos iniciales).
-3. **Configurar la conexión** en `src/main/java/com/safir/config/ConexionBD.java` con el usuario y la contraseña de tu PostgreSQL.
+3. **Configurar las variables de entorno** (ver la sección [Configuración](#️-configuración)). Como mínimo hay que definir `SAFIR_DB_CLAVE` con la contraseña de tu PostgreSQL. **No escribas contraseñas dentro del código.**
 4. **Compilar:**
    ```bash
    mvn clean package
    ```
 5. **Desplegar** el archivo `target/safir-1.0-SNAPSHOT.war` en Tomcat.
 6. **Abrir** en el navegador: `http://localhost:8080/safir`
+
+---
+
+## ⚙️ Configuración
+
+SAFIR lee sus datos secretos de **variables de entorno**, nunca del código. En el repositorio está la plantilla [`.env.example`](.env.example) con todas las variables y su explicación.
+
+> Java no carga archivos `.env` automáticamente. La plantilla sirve de lista de referencia: cada variable se define en tu sistema o en tu servidor.
+
+| Variable | ¿Obligatoria? | Para qué sirve |
+|---|---|---|
+| `SAFIR_DB_CLAVE` | **Sí** | Contraseña de PostgreSQL |
+| `SAFIR_DB_URL` | No | Dirección de la base (por defecto `localhost:5432/safir`) |
+| `SAFIR_DB_USUARIO` | No | Usuario de PostgreSQL (por defecto `postgres`) |
+| `SAFIR_URL_BASE`, `SAFIR_BASE_URL` | No | Dirección pública de la app |
+| `SAFIR_SMTP_HOST`, `_PORT`, `_USER`, `_PASS`, `_FROM` | No | Envío de correos (sin ellos, el código sale en consola) |
+| `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_BASE_URL` | No | Pagos con PayPal |
+| `SAFIR_YAPE_NUMERO`, `SAFIR_YAPE_TITULAR` | No | Pagos con Yape |
+| `SAFIR_GOOGLE_*`, `SAFIR_FACEBOOK_*`, `SAFIR_X_*` (`_ID` y `_SECRET`) | No | Login social |
+| `SAFIR_UPLOADS`, `SAFIR_IMPORTACIONES` | No | Carpetas de archivos subidos |
+| `SAFIR_PRIVACIDAD_CORREO` | No | Correo de contacto en la política de privacidad |
+
+**Cómo definirlas:**
+
+- **Windows (permanente):** `setx SAFIR_DB_CLAVE "tu-clave"` y luego cerrar y volver a abrir NetBeans o Tomcat.
+- **Linux / Mac:** `export SAFIR_DB_CLAVE="tu-clave"` antes de iniciar Tomcat.
+- **NetBeans:** Proyecto → Propiedades → Run → *VM Options* → `-DSAFIR_DB_CLAVE=tu-clave`.
+
+Cada integrante usa **su propia** clave local. Nunca subas valores reales a Git.
 
 ---
 
