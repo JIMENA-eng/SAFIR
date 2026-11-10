@@ -10,12 +10,17 @@
 <c:set var="editando" value="${not empty capitulo}"/>
 <c:set var="tituloSel" value="${not empty tituloFormulario ? tituloFormulario : capitulo.titulo}"/>
 <c:set var="contenidoSel" value="${not empty contenidoFormulario ? contenidoFormulario : capitulo.contenido}"/>
+<%-- Música: pista (la guardada, al editar), musicaOpcion / musicaYoutubeFormulario /
+     musicaBucleFormulario cuando se vuelve a mostrar tras un error. --%>
+<c:set var="musicaSel" value="${not empty musicaOpcion ? musicaOpcion : (not empty pista ? 'mantener' : 'ninguna')}"/>
+<c:set var="bucleSel" value="${not empty musicaBucleFormulario ? musicaBucleFormulario : (not empty pista and pista.enBucle)}"/>
 <c:choose>
   <c:when test="${editando}">
     <c:url var="urlFormulario" value="/autor/capitulo/editar"><c:param name="id" value="${capitulo.id}"/></c:url>
   </c:when>
   <c:otherwise>
-    <c:url var="urlFormulario" value="/autor/capitulo/nuevo"/>
+    <%-- obraId también en la URL: así llega aunque el audio supere el máximo --%>
+    <c:url var="urlFormulario" value="/autor/capitulo/nuevo"><c:param name="obraId" value="${obraId}"/></c:url>
   </c:otherwise>
 </c:choose>
 <!DOCTYPE html>
@@ -62,7 +67,7 @@
     <p class="ce-aviso" role="alert"><c:out value="${error}"/></p>
   </c:if>
 
-  <form class="ce-form" id="capForm" method="post" action="${urlFormulario}">
+  <form class="ce-form" id="capForm" method="post" action="${urlFormulario}" enctype="multipart/form-data">
     <input type="hidden" name="obraId" value="${obraId}">
 
     <div class="ce-card">
@@ -86,6 +91,68 @@
         <small>Ctrl + S (o ⌘ + S) para guardar el borrador.</small>
       </div>
     </div>
+
+    <%-- Música del capítulo: enlace de YouTube o archivo de audio --%>
+    <section class="ce-card ce-musica" aria-labelledby="musicaTitulo">
+      <div class="ce-musica-cabecera">
+        <h2 id="musicaTitulo">Música del capítulo</h2>
+        <p>Opcional. Tus lectores podrán reproducirla mientras leen este capítulo.</p>
+      </div>
+
+      <c:if test="${not empty pista}">
+        <div class="ce-musica-actual">
+          <span class="ce-musica-etiqueta">Música guardada:</span>
+          <b><c:out value="${pista.titulo}"/></b>
+          <c:choose>
+            <c:when test="${pista.youtube}">
+              <div class="ce-video">
+                <iframe src="https://www.youtube-nocookie.com/embed/${pista.youtubeId}?rel=0"
+                        title="Música del capítulo (YouTube)" loading="lazy"
+                        allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+              </div>
+            </c:when>
+            <c:otherwise>
+              <audio controls preload="none" src="${pageContext.request.contextPath}/media/${pista.archivoRuta}"></audio>
+            </c:otherwise>
+          </c:choose>
+        </div>
+      </c:if>
+
+      <fieldset class="ce-opciones">
+        <legend class="ce-oculto">¿Qué música acompaña al capítulo?</legend>
+        <c:if test="${not empty pista}">
+          <label><input type="radio" name="musicaOpcion" value="mantener" ${musicaSel == 'mantener' ? 'checked' : ''}> Mantener la actual</label>
+        </c:if>
+        <label><input type="radio" name="musicaOpcion" value="ninguna" ${musicaSel == 'ninguna' ? 'checked' : ''}>
+          <c:choose><c:when test="${not empty pista}">Quitar la música</c:when><c:otherwise>Sin música</c:otherwise></c:choose>
+        </label>
+        <label><input type="radio" name="musicaOpcion" value="youtube" ${musicaSel == 'youtube' ? 'checked' : ''}> Enlace de YouTube</label>
+        <label><input type="radio" name="musicaOpcion" value="archivo" ${musicaSel == 'archivo' ? 'checked' : ''}> Subir un audio</label>
+      </fieldset>
+
+      <div class="ce-campo ce-musica-panel" data-panel="youtube" ${musicaSel == 'youtube' ? '' : 'hidden'}>
+        <label for="musicaYoutube">Enlace del video</label>
+        <input type="url" id="musicaYoutube" name="musicaYoutube" maxlength="500" inputmode="url"
+               placeholder="https://www.youtube.com/watch?v=…  o  https://youtu.be/…"
+               value="<c:out value='${musicaYoutubeFormulario}'/>">
+        <small id="ytAyuda">Pega el enlace de un video de YouTube. Se mostrará aquí para que lo pruebes.</small>
+        <div class="ce-video" id="ytVista" hidden></div>
+      </div>
+
+      <div class="ce-campo ce-musica-panel" data-panel="archivo" ${musicaSel == 'archivo' ? '' : 'hidden'}>
+        <label for="musicaArchivo">Archivo de audio</label>
+        <input type="file" id="musicaArchivo" name="musicaArchivo"
+               accept="audio/mpeg,.mp3,audio/mp4,.m4a,audio/aac,.aac,audio/ogg,.ogg,audio/wav,.wav"
+               data-max-bytes="20971520">
+        <small id="audioAyuda">MP3, M4A, AAC, OGG o WAV. Máximo 20 MB.</small>
+        <audio id="audioVista" controls hidden></audio>
+      </div>
+
+      <label class="ce-check" id="bucleFila" ${musicaSel == 'ninguna' ? 'hidden' : ''}>
+        <input type="checkbox" name="musicaBucle" value="1" ${bucleSel ? 'checked' : ''}>
+        Repetir la música en bucle
+      </label>
+    </section>
 
     <div class="ce-acciones">
       <button type="submit" class="btn" id="btnGuardar">Guardar borrador</button>

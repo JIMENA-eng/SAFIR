@@ -26,6 +26,34 @@
     <p><c:out value="${capitulo.palabras}"/> palabras</p>
 </c:if>
 
+<%-- Música que el autor guardó con el capítulo (YouTube o archivo de audio) --%>
+<c:if test="${not empty pista}">
+    <section aria-label="Música del capítulo"
+             style="margin: 1rem 0; padding: .8rem 1rem; border: 1px solid #ddd; border-radius: 12px; max-width: 560px;">
+        <p style="margin: 0 0 .6rem;">
+            🎵 Música del capítulo: <strong><c:out value="${pista.titulo}"/></strong>
+        </p>
+        <c:choose>
+            <c:when test="${pista.youtube}">
+                <%-- loop de YouTube necesita playlist=<mismo id> --%>
+                <div style="position: relative; width: 100%; aspect-ratio: 16 / 9;">
+                    <iframe src="https://www.youtube-nocookie.com/embed/${pista.youtubeId}?rel=0${pista.enBucle ? '&amp;loop=1&amp;playlist='.concat(pista.youtubeId) : ''}"
+                            title="Música del capítulo"
+                            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <audio controls preload="metadata" style="width: 100%;" ${pista.enBucle ? 'loop' : ''}
+                       src="${pageContext.request.contextPath}/media/${pista.archivoRuta}">
+                    Tu navegador no puede reproducir este audio.
+                </audio>
+            </c:otherwise>
+        </c:choose>
+    </section>
+</c:if>
+
 <p>
     <c:if test="${not empty capituloAnterior}">
         <a href="${pageContext.request.contextPath}/lectura?obraId=${obraId}&capituloId=${capituloAnterior.id}">

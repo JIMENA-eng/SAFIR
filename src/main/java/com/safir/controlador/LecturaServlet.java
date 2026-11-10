@@ -1,6 +1,7 @@
 package com.safir.controlador;
 
 import com.safir.dao.CapituloDAO;
+import com.safir.dao.MusicaCapituloDAO;
 import com.safir.modelo.Capitulo;
 
 import jakarta.servlet.ServletException;
@@ -18,6 +19,7 @@ import java.util.List;
 public class LecturaServlet extends HttpServlet {
 
     private final CapituloDAO capituloDAO = new CapituloDAO();
+    private final MusicaCapituloDAO musicaDAO = new MusicaCapituloDAO();
 
     @Override
     protected void doGet(
@@ -132,6 +134,8 @@ public class LecturaServlet extends HttpServlet {
             request.setAttribute("capituloSiguiente", siguiente);
             request.setAttribute("obraId", obraId);
             request.setAttribute("bloqueados", capituloDAO.idsBloqueados(usuarioId, obraId));
+            // Música que el autor guardó junto con el capítulo (puede no haber).
+            request.setAttribute("pista", musicaDAO.obtener(capitulo.getId()));
 
             request.getRequestDispatcher(
                     "/WEB-INF/vistas/lectura/lector.jsp"
