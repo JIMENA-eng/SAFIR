@@ -131,11 +131,11 @@ public class LecturaServlet extends HttpServlet {
             request.setAttribute("capituloAnterior", anterior);
             request.setAttribute("capituloSiguiente", siguiente);
             request.setAttribute("obraId", obraId);
+            request.setAttribute("bloqueados", capituloDAO.idsBloqueados(usuarioId, obraId));
 
             request.getRequestDispatcher(
                     "/WEB-INF/vistas/lectura/lector.jsp"
             ).forward(request, response);
-            request.setAttribute("bloqueados", capituloDAO.idsBloqueados(usuarioId, obraId));
 
         } catch (NumberFormatException e) {
             response.sendError(

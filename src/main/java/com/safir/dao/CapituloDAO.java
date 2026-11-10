@@ -63,7 +63,7 @@ public class CapituloDAO {
               AND p.obra_id = ?
               AND c.obra_id = p.obra_id
               AND c.estado = 'publicado'
-            ORDER BY p.actualizado_en DESC
+            ORDER BY p.ultima_lectura DESC
             LIMIT 1
             """;
 
@@ -213,52 +213,26 @@ public class CapituloDAO {
             double posicion
     ) throws SQLException {
 
-        String actualizar = """
-            UPDATE progreso_lectura
-            SET posicion = ?, actualizado_en = NOW()
-            WHERE usuario_id = ?
-              AND obra_id = ?
-              AND capitulo_id = ?
-            """;
-
-        String insertar = """
+        // progreso_lectura guarda UNA fila por (usuario, obra): ux_progreso_usuario_obra.
+        // Si el lector pasa a otro capítulo, se reemplaza el capítulo de esa misma fila.
+        String sql = """
             INSERT INTO progreso_lectura
-                (usuario_id, obra_id, capitulo_id, posicion, actualizado_en)
+                (usuario_id, obra_id, capitulo_id, posicion, ultima_lectura)
             VALUES (?, ?, ?, ?, NOW())
+            ON CONFLICT (usuario_id, obra_id) DO UPDATE
+            SET capitulo_id    = EXCLUDED.capitulo_id,
+                posicion       = EXCLUDED.posicion,
+                ultima_lectura = NOW()
             """;
 
-        try (Connection cn = ConexionBD.conectar()) {
-            cn.setAutoCommit(false);
+        try (Connection cn = ConexionBD.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            try {
-                int filas;
-
-                try (PreparedStatement ps = cn.prepareStatement(actualizar)) {
-                    ps.setDouble(1, posicion);
-                    ps.setLong(2, usuarioId);
-                    ps.setLong(3, obraId);
-                    ps.setLong(4, capituloId);
-                    filas = ps.executeUpdate();
-                }
-
-                if (filas == 0) {
-                    try (PreparedStatement ps = cn.prepareStatement(insertar)) {
-                        ps.setLong(1, usuarioId);
-                        ps.setLong(2, obraId);
-                        ps.setLong(3, capituloId);
-                        ps.setDouble(4, posicion);
-                        ps.executeUpdate();
-                    }
-                }
-
-                cn.commit();
-
-            } catch (SQLException e) {
-                cn.rollback();
-                throw e;
-            } finally {
-                cn.setAutoCommit(true);
-            }
+            ps.setLong(1, usuarioId);
+            ps.setLong(2, obraId);
+            ps.setLong(3, capituloId);
+            ps.setDouble(4, posicion);
+            ps.executeUpdate();
         }
     }
 
