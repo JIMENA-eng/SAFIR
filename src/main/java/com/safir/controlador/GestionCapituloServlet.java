@@ -1,9 +1,13 @@
 package com.safir.controlador;
 
 import com.safir.dao.GestionCapituloDAO;
+import com.safir.dao.MusicaCapituloDAO;
 import com.safir.dao.ObraEdicionDAO;
 import com.safir.modelo.Capitulo;
+import com.safir.modelo.PistaCapitulo;
+import com.safir.util.AudioUtil;
 import com.safir.util.EncabezadoUtil;
+import com.safir.util.ImagenUtil;
 import com.safir.util.ImportacionServicio;
 
 import jakarta.servlet.ServletException;
@@ -32,12 +36,20 @@ import java.util.Map;
     "/autor/capitulos/importar/confirmar",
     "/autor/capitulos/importar/rechazar"
 })
-// Solo "importar" recibe archivos; el resto de formularios sigue enviándose igual.
-@MultipartConfig(maxFileSize = 20 * 1024 * 1024, maxRequestSize = 21 * 1024 * 1024)
+// Reciben archivos: "importar" (PDF/DOCX/DOC/TXT) y el editor de capítulo (audio).
+// maxRequestSize deja espacio para el texto del capítulo junto al audio de 20 MB.
+@MultipartConfig(maxFileSize = 20 * 1024 * 1024, maxRequestSize = 24 * 1024 * 1024)
 public class GestionCapituloServlet extends HttpServlet {
 
     private final GestionCapituloDAO dao = new GestionCapituloDAO();
     private final ObraEdicionDAO obraDao = new ObraEdicionDAO();
+    private final MusicaCapituloDAO musicaDao = new MusicaCapituloDAO();
+
+    // Valores del grupo de opciones "Música del capítulo" en editor.jsp
+    private static final String OPCION_MANTENER = "mantener";
+    private static final String OPCION_NINGUNA = "ninguna";
+    private static final String OPCION_YOUTUBE = "youtube";
+    private static final String OPCION_ARCHIVO = "archivo";
 
     private Long usuarioId(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
@@ -437,6 +449,10 @@ public class GestionCapituloServlet extends HttpServlet {
             request.setAttribute("obraId", obraId);
             request.setAttribute("capitulo", capitulo);
 
+            if (capitulo != null) {
+                request.setAttribute("pista", musicaDao.obtener(capitulo.getId()));
+            }
+
             request.getRequestDispatcher(
                 "/WEB-INF/vistas/autor/editor.jsp"
             ).forward(request, response);
@@ -534,8 +550,23 @@ public class GestionCapituloServlet extends HttpServlet {
             boolean editar =
                     "/autor/capitulo/editar".equals(ruta);
 
+            // El editor se envía como multipart (puede llevar un audio).
+            // Se lee la parte antes que los campos para detectar si el archivo
+            // superó el tamaño máximo (en ese caso tampoco llegan los textos).
+            Part audio = null;
+            boolean audioMuyGrande = false;
+
+            try {
+                audio = request.getPart("musicaArchivo");
+            } catch (IllegalStateException e) {
+                audioMuyGrande = true;
+            } catch (ServletException e) {
+                audio = null;               // formulario no multipart: sin audio
+            }
+
             Long obraId;
             Long capituloId = null;
+            PistaCapitulo pistaActual = null;
 
             if (editar) {
                 capituloId = parametroPositivo(request, "id");
@@ -565,6 +596,7 @@ public class GestionCapituloServlet extends HttpServlet {
                 }
 
                 obraId = existente.getObraId();
+                pistaActual = musicaDao.obtener(capituloId);
 
             } else {
                 obraId = parametroPositivo(request, "obraId");
@@ -575,6 +607,13 @@ public class GestionCapituloServlet extends HttpServlet {
                         "El ID de la obra no es válido.");
                     return;
                 }
+
+                if (!dao.perteneceAlAutor(obraId, autorId)) {
+                    response.sendError(
+                        HttpServletResponse.SC_NOT_FOUND,
+                        "La obra no existe o no te pertenece.");
+                    return;
+                }
             }
 
             String titulo = request.getParameter("titulo");
@@ -583,27 +622,74 @@ public class GestionCapituloServlet extends HttpServlet {
             titulo = titulo == null ? "" : titulo.trim();
             contenido = contenido == null ? "" : contenido.trim();
 
-            String error = null;
+            // ---- Música del capítulo ----
+            String opcion = request.getParameter("musicaOpcion");
+            String enlace = request.getParameter("musicaYoutube");
+            boolean enBucle = "1".equals(request.getParameter("musicaBucle"));
 
-            if (titulo.isBlank()) {
+            enlace = enlace == null ? "" : enlace.trim();
+
+            if (OPCION_MANTENER.equals(opcion) && pistaActual == null) {
+                opcion = OPCION_NINGUNA;
+            }
+            if (!OPCION_MANTENER.equals(opcion)
+                    && !OPCION_YOUTUBE.equals(opcion)
+                    && !OPCION_ARCHIVO.equals(opcion)) {
+                opcion = OPCION_NINGUNA;
+            }
+
+            String error = null;
+            String youtubeId = null;
+
+            if (audioMuyGrande) {
+                error = "El audio supera el máximo de "
+                        + (AudioUtil.MAX_AUDIO / 1024 / 1024)
+                        + " MB y no se guardó nada. Elige un archivo más pequeño.";
+            } else if (titulo.isBlank()) {
                 error = "El título es obligatorio.";
             } else if (titulo.length() > 150) {
                 error = "El título no puede superar 150 caracteres.";
             } else if (contenido.isBlank()) {
                 error = "El contenido del capítulo es obligatorio.";
+            } else if (OPCION_YOUTUBE.equals(opcion)) {
+                youtubeId = AudioUtil.youtubeId(enlace);
+                if (youtubeId == null) {
+                    error = "El enlace de YouTube no es válido. Copia el enlace del video, "
+                            + "por ejemplo https://www.youtube.com/watch?v=… o https://youtu.be/…";
+                }
+            } else if (OPCION_ARCHIVO.equals(opcion)) {
+                if (!AudioUtil.hayArchivo(audio)) {
+                    error = "Selecciona un archivo de audio (" + AudioUtil.FORMATOS + ").";
+                } else {
+                    try {
+                        AudioUtil.validar(audio);
+                    } catch (IllegalArgumentException e) {
+                        error = e.getMessage();
+                    }
+                }
             }
 
             if (error != null) {
+                // El navegador no puede volver a llenar un campo de archivo.
+                if (OPCION_ARCHIVO.equals(opcion) && AudioUtil.hayArchivo(audio)
+                        && !error.toLowerCase().contains("audio")) {
+                    error += " Vuelve a elegir el archivo de audio.";
+                }
+
                 EncabezadoUtil.cargar(request, autorId);
                 request.setAttribute("error", error);
                 request.setAttribute("obraId", obraId);
                 request.setAttribute("tituloFormulario", titulo);
                 request.setAttribute("contenidoFormulario", contenido);
+                request.setAttribute("musicaOpcion", opcion);
+                request.setAttribute("musicaYoutubeFormulario", enlace);
+                request.setAttribute("musicaBucleFormulario", enBucle);
 
                 if (editar) {
                     Capitulo capitulo =
                             dao.obtenerPropio(capituloId, autorId);
                     request.setAttribute("capitulo", capitulo);
+                    request.setAttribute("pista", pistaActual);
                 }
 
                 request.getRequestDispatcher(
@@ -612,8 +698,42 @@ public class GestionCapituloServlet extends HttpServlet {
                 return;
             }
 
-            dao.guardarBorrador(
-                autorId, obraId, capituloId, titulo, contenido);
+            MusicaCapituloDAO.Cambio musica;
+            String audioGuardado = null;
+
+            if (OPCION_MANTENER.equals(opcion)) {
+                musica = MusicaCapituloDAO.Cambio.mantener(enBucle);
+
+            } else if (OPCION_YOUTUBE.equals(opcion)) {
+                PistaCapitulo nueva = new PistaCapitulo();
+                nueva.setTipo(PistaCapitulo.YOUTUBE);
+                nueva.setTitulo("Video de YouTube");
+                nueva.setUrl(AudioUtil.enlaceYoutube(youtubeId));
+                musica = MusicaCapituloDAO.Cambio.nueva(nueva, enBucle);
+
+            } else if (OPCION_ARCHIVO.equals(opcion)) {
+                audioGuardado = AudioUtil.guardar(audio, autorId);
+
+                PistaCapitulo nueva = new PistaCapitulo();
+                nueva.setTipo(PistaCapitulo.ARCHIVO);
+                nueva.setTitulo(AudioUtil.tituloDesdeArchivo(audio));
+                nueva.setUrl("/media/" + audioGuardado);
+                nueva.setArchivoRuta(audioGuardado);
+                nueva.setTamanoBytes((int) audio.getSize());
+                musica = MusicaCapituloDAO.Cambio.nueva(nueva, enBucle);
+
+            } else {
+                // "ninguna": en un capítulo nuevo no hay nada que quitar.
+                musica = pistaActual == null ? null : MusicaCapituloDAO.Cambio.quitar();
+            }
+
+            try {
+                dao.guardarBorrador(
+                    autorId, obraId, capituloId, titulo, contenido, musica);
+            } catch (SQLException e) {
+                ImagenUtil.borrar(audioGuardado);   // no dejar archivos huérfanos
+                throw e;
+            }
 
             response.sendRedirect(
                 request.getContextPath()

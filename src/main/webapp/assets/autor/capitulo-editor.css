@@ -52,6 +52,41 @@
 .ce-campo input::placeholder, .ce-campo textarea::placeholder { color: var(--muted); opacity: .7; }
 .ce-campo input:focus, .ce-campo textarea:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
 
+/* Música del capítulo */
+.ce-musica { display: grid; gap: 1rem; }
+.ce-musica-cabecera h2 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 1.3rem; color: var(--title); }
+.ce-musica-cabecera p { margin-top: .3rem; color: var(--muted); font-size: .92rem; }
+.ce-musica-actual { display: grid; gap: .5rem; padding: .9rem 1rem; border-radius: 14px; background: var(--soft); }
+.ce-musica-etiqueta { font-size: .82rem; color: var(--muted); }
+.ce-musica-actual b { color: var(--title); font-weight: 600; overflow-wrap: anywhere; }
+.ce-opciones { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; border: 0; }
+.ce-opciones label {
+  display: inline-flex; align-items: center; gap: .45rem; cursor: pointer;
+  padding: .5rem .9rem; border: 1.5px solid var(--line); border-radius: 999px;
+  font-size: .92rem; color: var(--text); background: var(--bg);
+  transition: border-color .15s, background .15s;
+}
+.ce-opciones label:has(input:checked) { border-color: var(--lav); background: var(--soft); color: var(--title); font-weight: 500; }
+.ce-opciones input { accent-color: var(--lav); margin: 0; }
+.ce-campo input[type="url"] {
+  width: 100%; font: inherit; color: var(--text); background: var(--bg);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: .75rem .95rem;
+}
+.ce-campo input[type="url"]:focus { outline: none; border-color: var(--lav); box-shadow: 0 0 0 3px rgba(119,117,214,.28); }
+.ce-campo input[type="file"] {
+  font: inherit; font-size: .92rem; color: var(--text); padding: .6rem;
+  border: 1.5px dashed var(--line); border-radius: 12px; background: var(--bg);
+}
+.ce-campo small.ce-error-texto, .ce-error-texto { color: var(--ce-err); font-weight: 500; }
+.ce-video { position: relative; width: 100%; max-width: 560px; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: #000; }
+.ce-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.ce-musica audio { width: 100%; max-width: 560px; }
+.ce-check { display: inline-flex; align-items: center; gap: .5rem; font-size: .92rem; color: var(--text); cursor: pointer; }
+.ce-check input { accent-color: var(--lav); width: 1.05rem; height: 1.05rem; }
+.ce-musica [hidden] { display: none !important; }
+.ce-musica .ce-campo + .ce-campo { margin-top: 0; }   /* el panel oculto no debe dejar hueco */
+.ce-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 /* Botones */
 .ce-acciones { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
 .ce-acciones .btn { font-weight: 600; }

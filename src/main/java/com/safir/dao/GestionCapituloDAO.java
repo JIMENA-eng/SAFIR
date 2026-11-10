@@ -2,6 +2,7 @@ package com.safir.dao;
 
 import com.safir.config.ConexionBD;
 import com.safir.modelo.Capitulo;
+import com.safir.util.ImagenUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestionCapituloDAO {
+
+    private final MusicaCapituloDAO musicaDao = new MusicaCapituloDAO();
 
     public boolean perteneceAlAutor(long obraId, long autorId)
             throws SQLException {
@@ -125,6 +128,25 @@ public class GestionCapituloDAO {
             String titulo,
             String contenido) throws SQLException {
 
+        return guardarBorrador(autorId, obraId, capituloId, titulo, contenido, null);
+    }
+
+    /**
+     * Guarda el borrador y, en la misma transacción, la música del capítulo
+     * (musica puede ser null: no se toca). Si algo falla no queda nada a medias.
+     * Los archivos de audio que dejan de usarse se borran después del commit.
+     */
+    public long guardarBorrador(
+            long autorId,
+            long obraId,
+            Long capituloId,
+            String titulo,
+            String contenido,
+            MusicaCapituloDAO.Cambio musica) throws SQLException {
+
+        List<String> audiosSinUso = new ArrayList<>();
+        long idGuardado;
+
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
 
@@ -187,8 +209,10 @@ public class GestionCapituloDAO {
                     id = capituloId;
                 }
 
+                audiosSinUso = musicaDao.aplicar(con, id, autorId, musica);
+
                 con.commit();
-                return id;
+                idGuardado = id;
 
             } catch (SQLException e) {
                 con.rollback();
@@ -197,6 +221,12 @@ public class GestionCapituloDAO {
                 con.setAutoCommit(true);
             }
         }
+
+        for (String ruta : audiosSinUso) {
+            ImagenUtil.borrar(ruta);
+        }
+
+        return idGuardado;
     }
 
     public boolean publicar(
